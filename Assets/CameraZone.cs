@@ -26,7 +26,6 @@ public class CameraZone : MonoBehaviour {
 				StartCoroutine (Experiment.Instance.shopLift.ShowPositiveFeedback ());
 			} else if(isFocus) {
 				Experiment.Instance.shopLift.infoGroup.alpha = 0f;
-
 				Debug.Log ("SHOWING NEGATIVE FEEDBACK");
 				StartCoroutine (Experiment.Instance.shopLift.ShowNegativeFeedback ());
 			}

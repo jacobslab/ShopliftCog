@@ -128,7 +128,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         private void Update()
         {
-            RotateView(cam.transform);
+            RotateView();
 
             if (CrossPlatformInputManager.GetButtonDown("Jump") && !m_Jump)
             {
@@ -214,36 +214,29 @@ namespace UnityStandardAssets.Characters.FirstPerson
             
             Vector2 input = new Vector2
                 {
-					x =CrossPlatformInputManager.GetAxis("Mouse Y"),
-                    y = CrossPlatformInputManager.GetAxis("Mouse X")
+                    x = CrossPlatformInputManager.GetAxis("Horizontal"),
+                    y = CrossPlatformInputManager.GetAxis("Vertical")
                 };
-//			Debug.Log (input.ToString ());
-
-//			if(input.x > 0f)
-//			{
-				input.x = 0f;
-//			}
-
 			movementSettings.UpdateDesiredTargetSpeed(input);
             return input;
         }
 
 
-        public void RotateView(Transform camTrans)
+        private void RotateView()
         {
             //avoids the mouse looking if the game is effectively paused
             if (Mathf.Abs(Time.timeScale) < float.Epsilon) return;
 
             // get the rotation before it's changed
-          //  float oldYRotation = transform.eulerAngles.y;
-            
-            mouseLook.LookRotation (transform, camTrans);
+            float oldYRotation = transform.eulerAngles.y;
+
+            mouseLook.LookRotation (transform, cam.transform);
 
             if (m_IsGrounded || advancedSettings.airControl)
             {
                 // Rotate the rigidbody velocity to match the new direction that the character is looking
-              //  Quaternion velRotation = Quaternion.AngleAxis(transform.eulerAngles.y - oldYRotation, Vector3.up);
-              //  m_RigidBody.velocity = velRotation*m_RigidBody.velocity;
+                Quaternion velRotation = Quaternion.AngleAxis(transform.eulerAngles.y - oldYRotation, Vector3.up);
+                m_RigidBody.velocity = velRotation*m_RigidBody.velocity;
             }
         }
 
