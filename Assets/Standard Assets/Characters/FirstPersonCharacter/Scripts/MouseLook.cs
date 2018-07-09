@@ -17,8 +17,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public bool lockCursor = true;
 
 
-        private Quaternion m_CharacterTargetRot;
-        private Quaternion m_CameraTargetRot;
+        public Quaternion m_CharacterTargetRot;
+        public Quaternion m_CameraTargetRot;
         private bool m_cursorIsLocked = true;
 
         public void Init(Transform character, Transform camera)
@@ -27,12 +27,26 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_CameraTargetRot = camera.localRotation;
         }
 
+        public void ForceLook(Transform character, Vector3 target)
+        {
+          
+
+            if (smooth)
+            {
+                character.localRotation = Quaternion.Slerp(character.localRotation, Quaternion.Euler(target),
+                    smoothTime * Time.deltaTime);
+            }
+
+            UpdateCursorLock();
+        }
+
 
         public void LookRotation(Transform character, Transform camera)
         {
+           //Debug.Log(character.transform.eulerAngles.ToString());
             float yRot = CrossPlatformInputManager.GetAxis("Mouse X") * XSensitivity;
             float xRot = CrossPlatformInputManager.GetAxis("Mouse Y") * YSensitivity;
-
+            
             m_CharacterTargetRot *= Quaternion.Euler (0f, yRot, 0f);
             m_CameraTargetRot *= Quaternion.Euler (-xRot, 0f, 0f);
 
