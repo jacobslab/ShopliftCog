@@ -9,17 +9,33 @@ public class ShoplifterScript : MonoBehaviour {
     public GameObject camVehicle;
     public GameObject animBody;
     private MouseLook mouseLook;
+
+	//PHASE 1
     public GameObject phase1Start;
     public GameObject phase1End;
-
-	public GameObject phase2Start;
-    public GameObject phase2End;
 	public GameObject phase1LeftDoor;
 	public GameObject phase1RightDoor;
-	public GameObject phase2LeftDoorStart;
-	public GameObject phase2RightDoorStart;
-	public GameObject phase2RightRegister;
-	public GameObject phase2LeftRegister;
+
+
+	//PHASE 2 LEFT
+	public GameObject phase2Start_L;
+	public GameObject phase2End_L;
+	public GameObject phase2RightRegister_L;
+	public GameObject phase2LeftRegister_L;
+
+
+	//PHASE 2 RIGHT
+	public GameObject phase2Start_R;
+	public GameObject phase2End_R;
+	public GameObject phase2RightRegister_R;
+	public GameObject phase2LeftRegister_R;
+
+
+	private GameObject phase2Start;
+	private GameObject phase2End;
+	private GameObject phase2RightRegister;
+	private GameObject phase2LeftRegister;
+
     public GameObject leftDoorPos;
     public GameObject rightDoorPos;
     public float phase1Factor = 5f;
@@ -29,6 +45,9 @@ public class ShoplifterScript : MonoBehaviour {
 
     public GameObject toyRoom;
     public GameObject hardwareRoom;
+
+	public List<GameObject> environments;
+
 
     private GameObject leftRoom;
     private GameObject rightRoom;
@@ -326,10 +345,10 @@ public class ShoplifterScript : MonoBehaviour {
 
 			Experiment.Instance.shopLiftLog.LogMoveEvent (2, true);
 			yield return StartCoroutine(MovePlayerTo(camVehicle.transform.position,phase1RightDoor.transform.position,2f));
-			yield return StartCoroutine(MovePlayerTo(phase1RightDoor.transform.position,phase2RightDoorStart.transform.position,2f));
+			yield return StartCoroutine(MovePlayerTo(phase1RightDoor.transform.position,phase2Start.transform.position,2f));
 			plantAudio.Stop ();
 			choiceAudio.Play ();
-			yield return StartCoroutine (MovePlayerTo (phase2RightDoorStart.transform.position, phase2Start.transform.position, 2f));
+//			yield return StartCoroutine (MovePlayerTo (phase2RightDoorStart.transform.position, phase2Start.transform.position, 2f));
 //			cartAnim.Play("RightDoorMove");
 
 
@@ -345,11 +364,10 @@ public class ShoplifterScript : MonoBehaviour {
 			camVehicle.GetComponent<RigidbodyFirstPersonController>().enabled=false;
 			Experiment.Instance.shopLiftLog.LogMoveEvent (2, true);
 			yield return StartCoroutine(MovePlayerTo(camVehicle.transform.position,phase1LeftDoor.transform.position,2f));
-			yield return StartCoroutine(MovePlayerTo(phase1LeftDoor.transform.position,phase2LeftDoorStart.transform.position,2f));
-
+			yield return StartCoroutine(MovePlayerTo(phase1LeftDoor.transform.position,phase2Start.transform.position,2f));
 			plantAudio.Stop ();
 			choiceAudio.Play ();
-			yield return StartCoroutine (MovePlayerTo (phase2LeftDoorStart.transform.position, phase2Start.transform.position, 2f));
+//			yield return StartCoroutine (MovePlayerTo (phase2LeftDoorStart.transform.position, phase2Start.transform.position, 2f));
 //			cartAnim.Play("LeftDoorMove");
 		}
 		yield return null;
@@ -423,6 +441,12 @@ public class ShoplifterScript : MonoBehaviour {
 		yield return null;
 	}
 
+	IEnumerator PickEnvironment()
+	{
+		environments [0].SetActive (true); //just turn space station on for now
+		yield return null;
+	}
+
     IEnumerator RunTask()
     {
 		stageIndex = 1;
@@ -435,8 +459,9 @@ public class ShoplifterScript : MonoBehaviour {
 		}
 		instructionGroup.alpha = 0f;
 
+		yield return StartCoroutine (PickEnvironment ());
 
-		yield return StartCoroutine (RunCamTrainingPhase ());
+//		yield return StartCoroutine (RunCamTrainingPhase ());
 
 		ChangeCameraZoneVisibility (true);
         yield return StartCoroutine(PickFourRegisterValues());
