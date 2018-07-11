@@ -43,11 +43,9 @@ public class ShoplifterScript : MonoBehaviour {
     private int playerChoice = -1; //0 for left and 1 for right
     public int[] registerVals; // 0-1 is L-R for toy , 2-3 is L-R for hardware
 
-    public GameObject toyRoom;
-    public GameObject hardwareRoom;
 
 	public List<GameObject> environments;
-
+	private EnvironmentManager envManager;
 
     private GameObject leftRoom;
     private GameObject rightRoom;
@@ -78,6 +76,21 @@ public class ShoplifterScript : MonoBehaviour {
 	public CanvasGroup negativeFeedbackGroup;
 
 
+	private GameObject roomOne;
+	private GameObject roomTwo;
+
+	private AudioSource baseAudio;
+	private AudioSource roomOneAudio;
+	private AudioSource roomTwoAudio;
+	private AudioSource choiceAudio;
+	private AudioSource leftAudio;
+	private AudioSource rightAudio;
+
+	private Color leftRoomColor;
+	private Color rightRoomColor;
+	private Color roomOneColor;
+	private Color roomTwoColor;
+
 	private List<int> registerLeft;
 	private int stageIndex  = 0;
 
@@ -87,21 +100,6 @@ public class ShoplifterScript : MonoBehaviour {
 	public GameObject[] phase2CamZones;
 	public Transform[] phase2CamLimits;
 
-	//audio
-	public AudioSource plantAudio;
-	public AudioSource toyAudio;
-	public AudioSource hardwareAudio;
-	private AudioSource choiceAudio;
-	private AudioSource leftAudio;
-	private AudioSource rightAudio;
-
-	//color
-	public GameObject[] phase2Walls;
-	private Color leftRoomColor;
-	private Color rightRoomColor;
-	public Color plantColor;
-	public Color hardwareColor;
-	public Color toyColor;
 
     public GameObject dummyObj;
 
@@ -115,8 +113,6 @@ public class ShoplifterScript : MonoBehaviour {
         intertrialGroup.alpha = 0f;
         registerVals = new int[4];
 //        cartAnim.enabled = true;
-        AssignRooms();
-
         camVehicle.SetActive(true);
 //        animBody.SetActive(false);
 
@@ -189,25 +185,29 @@ public class ShoplifterScript : MonoBehaviour {
     {
         if (Random.value < 0.5f)
         {
-            leftRoom = toyRoom;
-			leftAudio = toyAudio;
-			leftRoomColor = toyColor;
-            rightRoom = hardwareRoom;
-			rightAudio = hardwareAudio;
-			rightRoomColor = hardwareColor;
+            leftRoom = roomOne;
+			leftAudio = roomOneAudio;
+			leftRoomColor = roomOneColor;
+			rightRoom = roomTwo;
+			rightAudio = roomTwoAudio;
+			rightRoomColor = roomTwoColor;
 			Experiment.Instance.shopLiftLog.LogRooms ("TOY","HARDWARE");
         }
         else
         {
-            leftRoom = hardwareRoom;
-			leftAudio = hardwareAudio;
-			leftRoomColor = hardwareColor;
-            rightRoom = toyRoom;
-			rightAudio = toyAudio;
-			rightRoomColor = toyColor;
+            leftRoom = roomTwo;
+			leftAudio = roomTwoAudio;
+			leftRoomColor = roomTwoColor;
+            rightRoom = roomOne;
+			rightAudio = roomOneAudio;
+			rightRoomColor = roomOneColor;
 
 			Experiment.Instance.shopLiftLog.LogRooms ("HARDWARE","TOY");
         }
+
+		leftRoom.transform.localPosition = envManager.leftRoomTransform.localPosition;
+		rightRoom.transform.localPosition = envManager.rightRoomTransform.localPosition;
+		Debug.Log ("set " + leftRoom.gameObject.name + " as left and " + rightRoom.gameObject.name + " as right");
     }
 
 	void ChangeCameraZoneVisibility(bool isVisible)
@@ -220,35 +220,35 @@ public class ShoplifterScript : MonoBehaviour {
 
 	void ChangeColors(Color newColor)
 	{
-		for (int i = 0; i < phase2Walls.Length; i++) {
-			Debug.Log ("new color is:  " + newColor.ToString ());
-			phase2Walls [i].GetComponent<Renderer> ().material.color = newColor;
-		}
+//		for (int i = 0; i < phase2Walls.Length; i++) {
+//			Debug.Log ("new color is:  " + newColor.ToString ());
+//			phase2Walls [i].GetComponent<Renderer> ().material.color = newColor;
+//		}
 	}
 
     //for remapping
     void ReassignRooms()
     {
 		Experiment.Instance.shopLiftLog.LogReassignEvent ();
-        if(leftRoom==toyRoom)
+		if(leftRoom==roomTwo)
         {
-            leftRoom = hardwareRoom;
-			leftRoomColor = hardwareColor;
-			leftAudio = hardwareAudio;
-            rightRoom = toyRoom;
-			rightRoomColor = toyColor;
-			rightAudio = toyAudio;
+			leftRoom = roomOne;
+			leftAudio = roomOneAudio;
+			leftRoomColor = roomOneColor;
+			rightRoom = roomTwo;
+			rightAudio = roomTwoAudio;
+			rightRoomColor = roomTwoColor;
 			Experiment.Instance.shopLiftLog.LogRooms ("HARDWARE","TOY");
 
         }
         else
         {
-            leftRoom = toyRoom;
-			leftRoomColor = toyColor;
-			leftAudio = toyAudio;
-            rightRoom = hardwareRoom;
-			rightRoomColor = hardwareColor;
-			rightAudio = hardwareAudio;
+			leftRoom = roomTwo;
+			leftAudio = roomTwoAudio;
+			leftRoomColor = roomTwoColor;
+			rightRoom = roomOne;
+			rightAudio = roomOneAudio;
+			rightRoomColor = roomOneColor;
 
 			Experiment.Instance.shopLiftLog.LogRooms ("TOY","HARDWARE");
         }
@@ -303,7 +303,7 @@ public class ShoplifterScript : MonoBehaviour {
 	IEnumerator RunPhaseOne()
 	{
 		Debug.Log ("running phase one");
-		plantAudio.Play ();
+		baseAudio.Play ();
 //		animBody.GetComponent<Rigidbody> ().isKinematic = false;
 		if (numTrials >= 1)
 			ChangeCameraZoneVisibility (false);
@@ -326,7 +326,7 @@ public class ShoplifterScript : MonoBehaviour {
 		camVehicle.GetComponent<RigidbodyFirstPersonController>().enabled=true;
 		Experiment.Instance.shopLiftLog.LogDecisionEvent (true);
 		fakeRoadblockP1.SetActive (true);
-		yield return StartCoroutine(WaitForPlayerDecision());
+		yield return StartCoroutine(WaitForPlayerDecision(phase1LeftDoor.transform.position,phase1RightDoor.transform.position));
 		fakeRoadblockP1.SetActive (false);
 //		ToggleMouseLook(false);
 
@@ -341,12 +341,19 @@ public class ShoplifterScript : MonoBehaviour {
 			choiceAudio = rightAudio;
 			ChangeColors (rightRoomColor);
 
+			phase2Start = envManager.phase2Start_R;
+			phase2End = envManager.phase2End_R;
+			phase2LeftRegister = envManager.phase2LeftRegister_R;
+			phase2RightRegister = envManager.phase2RightRegister_R;
+
+
+
 			camVehicle.GetComponent<RigidbodyFirstPersonController>().enabled=false;
 
 			Experiment.Instance.shopLiftLog.LogMoveEvent (2, true);
 			yield return StartCoroutine(MovePlayerTo(camVehicle.transform.position,phase1RightDoor.transform.position,2f));
 			yield return StartCoroutine(MovePlayerTo(phase1RightDoor.transform.position,phase2Start.transform.position,2f));
-			plantAudio.Stop ();
+			baseAudio.Stop ();
 			choiceAudio.Play ();
 //			yield return StartCoroutine (MovePlayerTo (phase2RightDoorStart.transform.position, phase2Start.transform.position, 2f));
 //			cartAnim.Play("RightDoorMove");
@@ -361,11 +368,16 @@ public class ShoplifterScript : MonoBehaviour {
 			choiceAudio = leftAudio;
 			ChangeColors (leftRoomColor);
 
+			phase2Start = envManager.phase2Start_L;
+			phase2End = envManager.phase2End_L;
+			phase2LeftRegister = envManager.phase2LeftRegister_L;
+			phase2RightRegister = envManager.phase2RightRegister_L;
+
 			camVehicle.GetComponent<RigidbodyFirstPersonController>().enabled=false;
 			Experiment.Instance.shopLiftLog.LogMoveEvent (2, true);
 			yield return StartCoroutine(MovePlayerTo(camVehicle.transform.position,phase1LeftDoor.transform.position,2f));
 			yield return StartCoroutine(MovePlayerTo(phase1LeftDoor.transform.position,phase2Start.transform.position,2f));
-			plantAudio.Stop ();
+			baseAudio.Stop ();
 			choiceAudio.Play ();
 //			yield return StartCoroutine (MovePlayerTo (phase2LeftDoorStart.transform.position, phase2Start.transform.position, 2f));
 //			cartAnim.Play("LeftDoorMove");
@@ -411,7 +423,7 @@ public class ShoplifterScript : MonoBehaviour {
 
 		camVehicle.GetComponent<RigidbodyFirstPersonController>().enabled=true;
 		fakeRoadblockP2.SetActive (true);
-		yield return StartCoroutine(WaitForPlayerDecision());
+		yield return StartCoroutine(WaitForPlayerDecision(phase2LeftRegister.transform.position,phase2RightRegister.transform.position));
 		fakeRoadblockP2.SetActive (false);
 //		ToggleMouseLook(false);
 		Debug.Log("PLAYER CHOICE: " + playerChoice.ToString());
@@ -444,13 +456,25 @@ public class ShoplifterScript : MonoBehaviour {
 	IEnumerator PickEnvironment()
 	{
 		environments [0].SetActive (true); //just turn space station on for now
+		envManager =  environments[0].GetComponent<SpaceStationManager>();
+		phase1Start =envManager.phase1Start;
+		phase1End = envManager.phase1End;
+		phase1LeftDoor = envManager.phase1LeftDoor;
+		phase1RightDoor = envManager.phase1RightDoor;
+		roomOne = envManager.roomOne;
+		roomOneAudio = envManager.roomOneAudio;
+		roomTwo = envManager.roomTwo;
+		roomTwoAudio = envManager.roomTwoAudio;
+		baseAudio = envManager.baseAudio;
+	
+		AssignRooms ();
 		yield return null;
 	}
 
     IEnumerator RunTask()
     {
 		stageIndex = 1;
-//		Experiment.Instance.trialLog.LogTrialNavigation (true);
+		//Experiment.Instance.trialLog.LogTrialNavigation (true);
         Debug.Log("running task");
 		instructionGroup.alpha = 1f;
 		while(!Input.GetButtonDown("Action Button"))
@@ -518,10 +542,10 @@ public class ShoplifterScript : MonoBehaviour {
 
 	void TurnOffRooms()
 	{
-		hardwareRoom.SetActive (false);
-		toyRoom.SetActive (false);
-		toyAudio.Stop ();
-		hardwareAudio.Stop ();
+		roomTwo.SetActive (false);
+		roomOne.SetActive (false);
+		roomOneAudio.Stop ();
+		roomTwoAudio.Stop ();
 
 	}
 
@@ -608,19 +632,19 @@ public class ShoplifterScript : MonoBehaviour {
 //        cartAnim.enabled = !shouldActivate;
     }
 
-	IEnumerator WaitForPlayerDecision()
+	IEnumerator WaitForPlayerDecision(Vector3 leftPoint, Vector3 rightPoint)
 	{
-		while (!Input.GetButtonDown("Action Button") || Mathf.Abs(camVehicle.transform.localPosition.z) == 11f) {
+		while (!Input.GetButtonDown("Action Button") || (Vector3.Distance(camVehicle.transform.position,rightPoint)  == Vector3.Distance(camVehicle.transform.position,leftPoint))) {
 //			Debug.Log (Mathf.Abs(camVehicle.transform.localPosition.z).ToString());
 			yield return 0;
 		}
 		//right
-		if (Mathf.Abs(camVehicle.transform.localPosition.z) > 11f) {
+		if (Vector3.Distance(camVehicle.transform.position,rightPoint) < Vector3.Distance(camVehicle.transform.position,leftPoint)) {
 			playerChoice = 1;
 			
 		} 
 		//left
-		else if (Mathf.Abs(camVehicle.transform.localPosition.z) <  11f) {
+		else {
 			playerChoice = 0;
 			
 		}
