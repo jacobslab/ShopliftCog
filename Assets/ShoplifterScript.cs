@@ -10,25 +10,33 @@ public class ShoplifterScript : MonoBehaviour {
     public GameObject animBody;
     private MouseLook mouseLook;
 
+	private float currentSpeed;
+
+	public float minSpeed = 10f;
+	public float maxSpeed  = 30f;
+
 	//PHASE 1
-    public GameObject phase1Start;
-    public GameObject phase1End;
-	public GameObject phase1LeftDoor;
-	public GameObject phase1RightDoor;
+	private GameObject phase1Start;
+	private GameObject phase1End;
+	private GameObject phase1LeftDoor;
+	private GameObject phase1RightDoor;
 
 
 	//PHASE 2 LEFT
-	public GameObject phase2Start_L;
-	public GameObject phase2End_L;
-	public GameObject phase2RightRegister_L;
-	public GameObject phase2LeftRegister_L;
+	private GameObject phase2Start_L;
+	private GameObject phase2End_L;
+	private GameObject phase2RightRegister_L;
+	private GameObject phase2LeftRegister_L;
 
+	public GameObject[] phase1SpeedChangeZones;
+	public GameObject[] phase2SpeedChangeZones_L;
+	public GameObject[] phase2SpeedChangeZones_R;
 
 	//PHASE 2 RIGHT
-	public GameObject phase2Start_R;
-	public GameObject phase2End_R;
-	public GameObject phase2RightRegister_R;
-	public GameObject phase2LeftRegister_R;
+	private GameObject phase2Start_R;
+	private GameObject phase2End_R;
+	private GameObject phase2RightRegister_R;
+	private GameObject phase2LeftRegister_R;
 
 
 	private GameObject phase2Start;
@@ -95,10 +103,9 @@ public class ShoplifterScript : MonoBehaviour {
 	private int stageIndex  = 0;
 
 	//camera zone
-	public GameObject[] phase1CamZones;
-	public Transform[] phase1CamLimits;
-	public GameObject[] phase2CamZones;
-	public Transform[] phase2CamLimits;
+	private GameObject phase1CamZone;
+	private GameObject phase2CamZone_L;
+	private GameObject phase2CamZone_R;
 
 
     public GameObject dummyObj;
@@ -121,8 +128,8 @@ public class ShoplifterScript : MonoBehaviour {
         //camVehicle.transform.position = phase1Start.transform.position;
 //        mouseLook = camVehicle.GetComponent<RigidbodyFirstPersonController>().mouseLook;
         camTrans = camVehicle.GetComponent<RigidbodyFirstPersonController>().cam.transform;
-
-		RandomizeCameraZones ();
+		RandomizeSpeed ();
+//		RandomizeCameraZones ();
         
 //		mouseLook.XSensitivity = 0f;
 
@@ -150,34 +157,61 @@ public class ShoplifterScript : MonoBehaviour {
 
     }
 
+	void RandomizeSpeedChangeZones()
+	{
+		Debug.Log ("randomized speed change zones");
+		phase1SpeedChangeZones [0].transform.position = new Vector3(phase1Start.transform.position.x,phase1SpeedChangeZones[0].transform.position.y,Random.Range(phase1Start.transform.position.z,Vector3.Lerp (phase1Start.transform.position, phase1End.transform.position, 0.5f).z));
+		phase1SpeedChangeZones [1].transform.position = new Vector3(phase1Start.transform.position.x,phase1SpeedChangeZones[1].transform.position.y,Random.Range(Vector3.Lerp (phase1Start.transform.position, phase1End.transform.position, 0.5f).z,phase1End.transform.position.z));
+
+		phase2SpeedChangeZones_L[0].transform.position = new Vector3(envManager.phase2Start_L.transform.position.x,phase2SpeedChangeZones_L[0].transform.position.y,Random.Range(envManager.phase2Start_L.transform.position.z,Vector3.Lerp (envManager.phase2Start_L.transform.position, envManager.phase2End_L.transform.position, 0.5f).z));
+		phase2SpeedChangeZones_L[1].transform.position = new Vector3(envManager.phase2Start_L.transform.position.x,phase2SpeedChangeZones_L[0].transform.position.y,Random.Range(Vector3.Lerp (envManager.phase2Start_L.transform.position, envManager.phase2End_L.transform.position, 0.5f).z,envManager.phase2End_L.transform.position.z));
+
+		phase2SpeedChangeZones_R[0].transform.position = new Vector3(envManager.phase2Start_R.transform.position.x,phase2SpeedChangeZones_R[0].transform.position.y,Random.Range(envManager.phase2Start_R.transform.position.z,Vector3.Lerp (envManager.phase2Start_R.transform.position, envManager.phase2End_R.transform.position, 0.5f).z));
+		phase2SpeedChangeZones_R[1].transform.position = new Vector3(envManager.phase2Start_R.transform.position.x,phase2SpeedChangeZones_R[0].transform.position.y,Random.Range(Vector3.Lerp (envManager.phase2Start_R.transform.position, envManager.phase2End_R.transform.position, 0.5f).z,envManager.phase2End_R.transform.position.z));
+
+	}
+
 	void RandomizeCameraZones()
 	{
-		phase1CamZones [0].transform.localPosition = new Vector3 (Random.Range(-40f,-28f), phase1CamZones [0].transform.localPosition.y, phase1CamZones [0].transform.localPosition.z);
-		phase1CamZones [1].transform.localPosition = new Vector3 (Random.Range(-26f,-14f), phase1CamZones [1].transform.localPosition.y, phase1CamZones [1].transform.localPosition.z);
+		Debug.Log ("randomized cam zones");
+		phase1CamZone.transform.localPosition = new Vector3 (phase1Start.transform.localPosition.x, phase1CamZone.transform.localPosition.y, Random.Range(phase1Start.transform.localPosition.z,phase1End.transform.localPosition.z));
 
-
-		phase2CamZones [0].transform.localPosition = new Vector3 (Random.Range(46f,56f), phase2CamZones [0].transform.localPosition.y, phase2CamZones [0].transform.localPosition.z);
-		phase2CamZones [1].transform.localPosition = new Vector3 (Random.Range(58f,68f), phase2CamZones [1].transform.localPosition.y, phase2CamZones [1].transform.localPosition.z);
+		phase2CamZone_L.transform.localPosition = new Vector3 (envManager.phase2Start_L.transform.localPosition.x, phase2CamZone_L.transform.localPosition.y, Random.Range (envManager.phase2Start_L.transform.localPosition.z, envManager.phase2End_L.transform.localPosition.z));
+		phase2CamZone_R.transform.localPosition = new Vector3 (envManager.phase2Start_R.transform.localPosition.x, phase2CamZone_R.transform.localPosition.y, Random.Range (envManager.phase2Start_R.transform.localPosition.z, envManager.phase2End_R.transform.localPosition.z));
 
 	}
 
 	public void ChangeCamZoneFocus(int camIndex)
 	{
-		Debug.Log ("cam index is: " + camIndex.ToString ());
-		if (camIndex <= 1) {
-			phase1CamZones [camIndex].GetComponent<CameraZone> ().isFocus = true;
-			Debug.Log (phase1CamZones [camIndex].gameObject.name + " is the new focus");
-		} else {
-			if (camIndex == 4) {
-				phase1CamZones[0].GetComponent<CameraZone>().isFocus = true;
-
-				Debug.Log (phase1CamZones [0].gameObject.name + " is the new focus");
-			}
-			else
-				phase2CamZones [camIndex - 2].GetComponent<CameraZone> ().isFocus = true;
-
-			Debug.Log (phase2CamZones [camIndex - 2].gameObject.name + " is the new focus");
+		switch (camIndex) {
+		case 0:
+			phase1CamZone.GetComponent<CameraZone> ().isFocus = true;
+			break;
+		case 1:
+			phase2CamZone_L.GetComponent<CameraZone> ().isFocus = true;
+			break;
+		case 2:
+			phase2CamZone_R.GetComponent<CameraZone> ().isFocus = true;
+			break;
+		default:
+			phase1CamZone.GetComponent<CameraZone> ().isFocus = true;
+			break;
 		}
+//		Debug.Log ("cam index is: " + camIndex.ToString ());
+//		if (camIndex <= 1) {
+//			phase1CamZones [camIndex].GetComponent<CameraZone> ().isFocus = true;
+//			Debug.Log (phase1CamZone.gameObject.name + " is the new focus");
+//		} else {
+//			if (camIndex == 4) {
+//				phase1CamZone.GetComponent<CameraZone>().isFocus = true;
+//
+//				Debug.Log (phase1CamZone.gameObject.name + " is the new focus");
+//			}
+//			else
+//				phase2CamZones [camIndex - 2].GetComponent<CameraZone> ().isFocus = true;
+//
+//			Debug.Log (phase2CamZones [camIndex - 2].gameObject.name + " is the new focus");
+//		}
 	}
 
     //for initial random assignment
@@ -210,12 +244,19 @@ public class ShoplifterScript : MonoBehaviour {
 		Debug.Log ("set " + leftRoom.gameObject.name + " as left and " + rightRoom.gameObject.name + " as right");
     }
 
+	void ResetCamZone()
+	{
+
+		phase1CamZone.GetComponent<CameraZone> ().Reset ();
+		phase2CamZone_L.GetComponent<CameraZone> ().Reset ();
+		phase2CamZone_R.GetComponent<CameraZone> ().Reset ();
+	}
+
 	void ChangeCameraZoneVisibility(bool isVisible)
 	{
-		for (int i = 0; i < 2; i++) {
-			phase1CamZones [i].GetComponent<Renderer>().enabled = isVisible;
-			phase2CamZones [i].GetComponent<Renderer> ().enabled = isVisible;
-		}
+			phase1CamZone.GetComponent<Renderer>().enabled = isVisible;
+			phase2CamZone_L.GetComponent<Renderer> ().enabled = isVisible;
+			phase2CamZone_R.GetComponent<Renderer> ().enabled = isVisible;
 	}
 
 	void ChangeColors(Color newColor)
@@ -280,11 +321,13 @@ public class ShoplifterScript : MonoBehaviour {
 			Debug.Log ("about to run phase 2");
 			yield return StartCoroutine (RunPhaseTwo (false,false));
 			TurnOffRooms ();
-			if (numTrials < maxTrials - 1 || registerLeft.Count > 0)
+			if (numTrials < maxTrials - 1)
 				yield return StartCoroutine (ShowEndTrialScreen ());
 			numTraining++;
 			yield return 0;
 		}
+		ResetCamZone ();
+		CameraZone.isTraining = false;
 		yield return null;
 	}
 
@@ -309,13 +352,14 @@ public class ShoplifterScript : MonoBehaviour {
 			ChangeCameraZoneVisibility (false);
 
 //		cartAnim.enabled = true;
+		ChangeCamZoneFocus(0);
 		ToggleMouseLook(false);
-
+		camVehicle.transform.position = phase1Start.transform.position;
 		Experiment.Instance.shopLiftLog.LogMoveEvent (1,true);
 //		cartAnim.Play("Phase1Move");
 //		camVehicle.transform.position = phase1End.transform.position;
 		camVehicle.SetActive(true);
-		yield return StartCoroutine(MovePlayerTo (phase1Start.transform.position, phase1End.transform.position, phase1Factor));
+		yield return StartCoroutine(VelocityPlayerTo (phase1Start.transform.position, phase1End.transform.position, phase1Factor));
 //		camVehicle.GetComponent<RigidbodyFirstPersonController>().mouseLook.m_CharacterTargetRot = Quaternion.Euler(dummyObj.transform.eulerAngles);
 //		yield return new WaitForSeconds(5f);
 
@@ -335,11 +379,15 @@ public class ShoplifterScript : MonoBehaviour {
 		if (playerChoice == 1)
 		{
 
+			ChangeCamZoneFocus(2);
 			Experiment.Instance.shopLiftLog.LogDecision (1,1);
 			rightRoom.SetActive(true);
 			leftRoom.SetActive(false);
 			choiceAudio = rightAudio;
 			ChangeColors (rightRoomColor);
+
+			phase2CamZone_R.SetActive (true);
+			phase2CamZone_L.SetActive (false);
 
 			phase2Start = envManager.phase2Start_R;
 			phase2End = envManager.phase2End_R;
@@ -362,11 +410,15 @@ public class ShoplifterScript : MonoBehaviour {
 		} else if (playerChoice == 0)
 		{
 
+			ChangeCamZoneFocus(1);
 			Experiment.Instance.shopLiftLog.LogDecision (0,1);
 			leftRoom.SetActive(true);
 			rightRoom.SetActive(false);
 			choiceAudio = leftAudio;
 			ChangeColors (leftRoomColor);
+
+			phase2CamZone_R.SetActive (false);
+			phase2CamZone_L.SetActive (true);
 
 			phase2Start = envManager.phase2Start_L;
 			phase2End = envManager.phase2End_L;
@@ -415,22 +467,23 @@ public class ShoplifterScript : MonoBehaviour {
 //			Debug.Log ("moving cartanim");
 			//			cartAnim.Play ("Phase2Move");
 
-			yield return StartCoroutine(MovePlayerTo(phase2Start.transform.position,phase2End.transform.position,5f));
+			yield return StartCoroutine(VelocityPlayerTo(phase2Start.transform.position,phase2End.transform.position,5f));
 //			yield return new WaitForSeconds (5f);
 			Experiment.Instance.shopLiftLog.LogMoveEvent (2, false);
 		}
 //		ToggleMouseLook (true);
 
-		camVehicle.GetComponent<RigidbodyFirstPersonController>().enabled=true;
-		fakeRoadblockP2.SetActive (true);
-		yield return StartCoroutine(WaitForPlayerDecision(phase2LeftRegister.transform.position,phase2RightRegister.transform.position));
-		fakeRoadblockP2.SetActive (false);
-//		ToggleMouseLook(false);
-		Debug.Log("PLAYER CHOICE: " + playerChoice.ToString());
-		Experiment.Instance.shopLiftLog.LogDecisionEvent (false);
 
-		camVehicle.GetComponent<RigidbodyFirstPersonController>().enabled=false;
 		if (hasRewards) {
+			camVehicle.GetComponent<RigidbodyFirstPersonController>().enabled=true;
+			fakeRoadblockP2.SetActive (true);
+			yield return StartCoroutine(WaitForPlayerDecision(phase2LeftRegister.transform.position,phase2RightRegister.transform.position));
+			fakeRoadblockP2.SetActive (false);
+			//		ToggleMouseLook(false);
+			Debug.Log("PLAYER CHOICE: " + playerChoice.ToString());
+			Experiment.Instance.shopLiftLog.LogDecisionEvent (false);
+
+			camVehicle.GetComponent<RigidbodyFirstPersonController>().enabled=false;
 			if (playerChoice == 1) {
 				Experiment.Instance.shopLiftLog.LogDecision (1, 2);
 				yield return StartCoroutine (MovePlayerTo (camVehicle.transform.position, phase2RightRegister.transform.position, 2f));
@@ -466,8 +519,14 @@ public class ShoplifterScript : MonoBehaviour {
 		roomTwo = envManager.roomTwo;
 		roomTwoAudio = envManager.roomTwoAudio;
 		baseAudio = envManager.baseAudio;
+		phase1CamZone = envManager.phase1CamZone;
+		phase2CamZone_L = envManager.phase2CamZone_L;
+		phase2CamZone_R = envManager.phase2CamZone_R;
 	
+		//after env has been selected and all necessary object references set, assign rooms and randomize cam zones
 		AssignRooms ();
+		RandomizeSpeedChangeZones ();
+		RandomizeCameraZones ();
 		yield return null;
 	}
 
@@ -485,7 +544,7 @@ public class ShoplifterScript : MonoBehaviour {
 
 		yield return StartCoroutine (PickEnvironment ());
 
-//		yield return StartCoroutine (RunCamTrainingPhase ());
+		yield return StartCoroutine (RunCamTrainingPhase ());
 
 		ChangeCameraZoneVisibility (true);
         yield return StartCoroutine(PickFourRegisterValues());
@@ -613,6 +672,12 @@ public class ShoplifterScript : MonoBehaviour {
         yield return null;
     }
 
+	public void RandomizeSpeed()
+	{
+		currentSpeed = Random.Range (minSpeed, maxSpeed);
+		Debug.Log ("randomized speed to: " + currentSpeed.ToString ());
+	}
+
     void ToggleMouseLook(bool shouldActivate)
     {
         
@@ -655,20 +720,38 @@ public class ShoplifterScript : MonoBehaviour {
 
 	}
 
-
-
+	//uses timer based lerping to move player
 	IEnumerator MovePlayerTo(Vector3 startPos, Vector3 endPos, float factor)
 	{
 		camVehicle.GetComponent<RigidbodyFirstPersonController> ().enabled = false;
 		float timer = 0f;
 		Debug.Log ("about to move player");
-		while (timer / factor < 1f) {
+		while (timer/factor < 1f) {
 			timer += Time.deltaTime;
-//			Debug.Log ("timer " + timer.ToString ());
 			camVehicle.transform.position = Vector3.Lerp (startPos, endPos, timer / factor);
 			yield return 0;
 		}
+		camVehicle.GetComponent<RigidbodyFirstPersonController> ().enabled = true;
+		yield return null;
+	}
 
+
+	//uses velocity and distance check to move player
+	IEnumerator VelocityPlayerTo(Vector3 startPos, Vector3 endPos, float factor)
+	{
+		camVehicle.GetComponent<RigidbodyFirstPersonController> ().enabled = false;
+		float timer = 0f;
+		Debug.Log ("about to move player");
+		while (Vector3.Distance(camVehicle.transform.position,endPos) > 1.5f) {
+			timer += Time.deltaTime;
+//			Debug.Log ("timer " + timer.ToString ());
+			camVehicle.GetComponent<Rigidbody>().velocity = camVehicle.transform.forward * currentSpeed;
+//			Debug.Log ("distance to end: " + Vector3.Distance (camVehicle.transform.position, endPos).ToString ());
+//			camVehicle.transform.position = Vector3.Lerp (startPos, endPos, timer / factor);
+			yield return 0;
+		}
+		Debug.Log ("stopping the player");
+		camVehicle.GetComponent<Rigidbody> ().velocity = Vector3.zero;
 		camVehicle.GetComponent<RigidbodyFirstPersonController> ().enabled = true;
 		yield return null;
 	}

@@ -18,7 +18,13 @@ public class CameraZone : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-		if (isTraining && Input.GetButtonDown("Sneak Button")) {
+		if (firstTime)
+			GetComponent<MeshRenderer> ().enabled = true;
+		else
+			GetComponent<MeshRenderer> ().enabled = false;
+		
+		if (Input.GetButtonDown("Sneak Button")) {
+			Debug.Log ("activate cam: " + activateCam.ToString () + " isFocus : " + isFocus.ToString ());
 			if (activateCam && isFocus) {
 				Experiment.Instance.shopLift.infoGroup.alpha = 0f;
 				Debug.Log ("SHOWING POSITIVE FEEDBACK");
@@ -37,6 +43,11 @@ public class CameraZone : MonoBehaviour {
 
 	}
 
+	public void Reset()
+	{
+		firstTime = true;
+	}
+
 	void Sneak()
 	{
 		Experiment.Instance.shopLiftLog.LogSneaking (Experiment.Instance.shopLift.camVehicle.transform.position, camIndex);
@@ -47,6 +58,7 @@ public class CameraZone : MonoBehaviour {
 	{
 		if (col.gameObject.tag == "Player") {
 			activateCam = true;
+			Debug.Log ("activate cam is true");
 			Debug.Log ("CAM ACTIVATED for " + gameObject.name);
 			if (isTraining) {
 				Experiment.Instance.shopLift.infoText.text = "Press (A) to Sneak now!";
@@ -62,10 +74,11 @@ public class CameraZone : MonoBehaviour {
 		firstTime = false;
 		if (col.gameObject.tag == "Player") {
 			activateCam = false;
+			Debug.Log ("activate cam is false");
 			if (isTraining) {
 				Experiment.Instance.shopLift.infoGroup.alpha = 0f;
 				//make the next cam the focus
-				Experiment.Instance.shopLift.ChangeCamZoneFocus (camIndex + 1);
+//				Experiment.Instance.shopLift.ChangeCamZoneFocus (camIndex + 1);
 			}
 		}
 	}

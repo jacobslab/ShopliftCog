@@ -29,6 +29,11 @@ public class EnvironmentManager : MonoBehaviour {
 	public GameObject roomOne;
 	public GameObject roomTwo;
 
+	//camera
+	public GameObject phase1CamZone;
+	public GameObject phase2CamZone_L;
+	public GameObject phase2CamZone_R;
+
 
 	//audio
 	public AudioSource baseAudio;
