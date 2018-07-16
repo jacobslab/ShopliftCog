@@ -82,6 +82,8 @@ public class ShoplifterScript : MonoBehaviour {
 	public Text intertrialText;
 	public CanvasGroup positiveFeedbackGroup;
 	public CanvasGroup negativeFeedbackGroup;
+	public CanvasGroup trainingInstructionsGroup;
+	public CanvasGroup trainingPeriodGroup;
 
 
 	private GameObject roomOne;
@@ -118,6 +120,8 @@ public class ShoplifterScript : MonoBehaviour {
 		positiveFeedbackGroup.alpha = 0f;
 		negativeFeedbackGroup.alpha = 0f;
         intertrialGroup.alpha = 0f;
+		trainingInstructionsGroup.alpha = 0f;
+		trainingPeriodGroup.alpha = 0f;
         registerVals = new int[4];
 //        cartAnim.enabled = true;
         camVehicle.SetActive(true);
@@ -185,13 +189,29 @@ public class ShoplifterScript : MonoBehaviour {
 	{
 		switch (camIndex) {
 		case 0:
+			phase1CamZone.SetActive (true);
+			phase2CamZone_L.SetActive (false);
+			phase2CamZone_R.SetActive (false);
 			phase1CamZone.GetComponent<CameraZone> ().isFocus = true;
+			phase2CamZone_L.GetComponent<CameraZone> ().isFocus = false;
+			phase2CamZone_R.GetComponent<CameraZone> ().isFocus = false;
 			break;
 		case 1:
+
+			phase2CamZone_L.SetActive (true);
+			phase2CamZone_R.SetActive (false);
+			phase1CamZone.SetActive (false);
 			phase2CamZone_L.GetComponent<CameraZone> ().isFocus = true;
+			phase2CamZone_R.GetComponent<CameraZone> ().isFocus = false;
+			phase1CamZone.GetComponent<CameraZone> ().isFocus = false;
 			break;
 		case 2:
+			phase2CamZone_R.SetActive (true);
+			phase2CamZone_L.SetActive (false);
+			phase1CamZone.SetActive (false);
 			phase2CamZone_R.GetComponent<CameraZone> ().isFocus = true;
+			phase2CamZone_L.GetComponent<CameraZone> ().isFocus = false;
+			phase1CamZone.GetComponent<CameraZone> ().isFocus = false;
 			break;
 		default:
 			phase1CamZone.GetComponent<CameraZone> ().isFocus = true;
@@ -313,6 +333,11 @@ public class ShoplifterScript : MonoBehaviour {
 	IEnumerator RunCamTrainingPhase()
 	{
 		CameraZone.isTraining = true;
+
+		trainingInstructionsGroup.alpha = 1f;
+		yield return new WaitForSeconds (3f);
+		trainingInstructionsGroup.alpha = 0f;
+		trainingPeriodGroup.alpha = 1f;
 		int numTraining = 0;
 		while (numTraining < 3) {
 			Debug.Log ("about to run phase 1");
@@ -328,6 +353,8 @@ public class ShoplifterScript : MonoBehaviour {
 		}
 		ResetCamZone ();
 		CameraZone.isTraining = false;
+
+		trainingPeriodGroup.alpha = 0f;
 		yield return null;
 	}
 
@@ -371,6 +398,7 @@ public class ShoplifterScript : MonoBehaviour {
 		Experiment.Instance.shopLiftLog.LogDecisionEvent (true);
 		fakeRoadblockP1.SetActive (true);
 		yield return StartCoroutine(WaitForPlayerDecision(phase1LeftDoor.transform.position,phase1RightDoor.transform.position));
+		Doors.canOpen = true;
 		fakeRoadblockP1.SetActive (false);
 //		ToggleMouseLook(false);
 
@@ -434,6 +462,7 @@ public class ShoplifterScript : MonoBehaviour {
 //			yield return StartCoroutine (MovePlayerTo (phase2LeftDoorStart.transform.position, phase2Start.transform.position, 2f));
 //			cartAnim.Play("LeftDoorMove");
 		}
+		Doors.canOpen = false;
 		yield return null;
 	}
 
@@ -533,6 +562,12 @@ public class ShoplifterScript : MonoBehaviour {
     IEnumerator RunTask()
     {
 		stageIndex = 1;
+
+
+		yield return StartCoroutine (PickEnvironment ());
+
+		yield return StartCoroutine (RunCamTrainingPhase ());
+
 		//Experiment.Instance.trialLog.LogTrialNavigation (true);
         Debug.Log("running task");
 		instructionGroup.alpha = 1f;
@@ -541,10 +576,6 @@ public class ShoplifterScript : MonoBehaviour {
 			yield return 0;
 		}
 		instructionGroup.alpha = 0f;
-
-		yield return StartCoroutine (PickEnvironment ());
-
-		yield return StartCoroutine (RunCamTrainingPhase ());
 
 		ChangeCameraZoneVisibility (true);
         yield return StartCoroutine(PickFourRegisterValues());
