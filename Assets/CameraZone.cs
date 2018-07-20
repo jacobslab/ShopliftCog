@@ -10,6 +10,9 @@ public class CameraZone : MonoBehaviour {
 	public static bool isTraining= false;
 	public bool isFocus = false;
 
+	private bool hasSneaked = false;
+	private bool justOnce = true;
+
 	// Use this for initialization
 	void Start () {
 		
@@ -23,15 +26,17 @@ public class CameraZone : MonoBehaviour {
 		else
 			GetComponent<MeshRenderer> ().enabled = false;
 
-		Debug.Log ("activate cam: " + activateCam.ToString ());
-		if (Input.GetButtonDown("Sneak Button")) {
+//		Debug.Log ("activate cam: " + activateCam.ToString ());
+		if (Input.GetButtonDown("Sneak Button") && justOnce) {
 			Debug.Log ("activate cam: " + activateCam.ToString () + " isFocus : " + isFocus.ToString ());
 			if (activateCam && isFocus) {
 				Experiment.Instance.shopLift.infoGroup.alpha = 0f;
 				Debug.Log ("SHOWING POSITIVE FEEDBACK");
 				Sneak ();
+				justOnce = false;
+				hasSneaked = true;
 				StartCoroutine (Experiment.Instance.shopLift.ShowPositiveFeedback ());
-			} else if(isFocus && !activateCam) {
+			} else if(isFocus && !activateCam && !hasSneaked) {
 				Experiment.Instance.shopLift.infoGroup.alpha = 0f;
 				Debug.Log ("SHOWING NEGATIVE FEEDBACK");
 				StartCoroutine (Experiment.Instance.shopLift.ShowNegativeFeedback ());
@@ -58,6 +63,8 @@ public class CameraZone : MonoBehaviour {
 	void OnTriggerEnter(Collider col)
 	{
 		if (col.gameObject.tag == "Player") {
+			justOnce = true;
+			hasSneaked = false;
 			activateCam = true;
 			Debug.Log ("activate cam is true");
 			Debug.Log ("CAM ACTIVATED for " + gameObject.name);
@@ -80,10 +87,13 @@ public class CameraZone : MonoBehaviour {
 			activateCam = false;
 			Debug.Log ("activate cam is false");
 			if (isTraining) {
-				Experiment.Instance.shopLift.infoGroup.alpha = 0f;
+				if (!hasSneaked)
+					StartCoroutine (Experiment.Instance.shopLift.ShowNegativeFeedback ());
 				//make the next cam the focus
 //				Experiment.Instance.shopLift.ChangeCamZoneFocus (camIndex + 1);
 			}
+
+			Experiment.Instance.shopLift.infoGroup.alpha = 0f;
 		}
 	}
 }

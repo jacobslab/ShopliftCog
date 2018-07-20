@@ -28,11 +28,20 @@ public class EnvironmentManager : MonoBehaviour {
 
 	public GameObject roomOne;
 	public GameObject roomTwo;
+	public GameObject leftDoor;
+	public GameObject rightDoor;
 
 	//camera
 	public GameObject phase1CamZone;
 	public GameObject phase2CamZone_L;
 	public GameObject phase2CamZone_R;
+
+	//registerobj
+
+	public GameObject oneLeftRegisterObj;
+	public GameObject oneRightRegisterObj;
+	public GameObject twoLeftRegisterObj;
+	public GameObject twoRightRegisterObj;
 
 
 	//audio
