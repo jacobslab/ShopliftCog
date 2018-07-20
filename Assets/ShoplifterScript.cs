@@ -45,6 +45,9 @@ public class ShoplifterScript : MonoBehaviour {
 	private GameObject leftRegisterObj_R;
 	private GameObject rightRegisterObj_R;
 
+	//stage 2 reevaulation variables
+	public int maxTrials_Reeval = 8;
+	public int maxBlocks_Reeval = 4;
 
 	private GameObject phase2Start;
 	private GameObject phase2End;
@@ -91,6 +94,7 @@ public class ShoplifterScript : MonoBehaviour {
 	public CanvasGroup negativeFeedbackGroup;
 	public CanvasGroup trainingInstructionsGroup;
 	public CanvasGroup trainingPeriodGroup;
+	public CanvasGroup restGroup;
 
 
 	private GameObject roomOne;
@@ -537,6 +541,7 @@ public class ShoplifterScript : MonoBehaviour {
 //			animBody.GetComponent<Rigidbody> ().isKinematic = false;
 //			camVehicle.transform.position = phase2End.transform.position;
 			camVehicle.SetActive (true);
+			camVehicle.transform.position = phase2Start.transform.position;
 //			camVehicle.GetComponent<RigidbodyFirstPersonController> ().mouseLook.m_CharacterTargetRot = Quaternion.Euler (dummyObj.transform.eulerAngles);
 //			Debug.Log ("moving cartanim");
 			//			cartAnim.Play ("Phase2Move");
@@ -595,6 +600,115 @@ public class ShoplifterScript : MonoBehaviour {
 		yield return null;
 	}
 
+	IEnumerator RunLearningPhase()
+	{
+		Debug.Log("running task");
+		instructionGroup.alpha = 1f;
+		while(!Input.GetButtonDown("Action Button"))
+		{
+			yield return 0;
+		}
+		instructionGroup.alpha = 0f;
+
+		ChangeCameraZoneVisibility (true);
+		yield return StartCoroutine(PickFourRegisterValues());
+
+		//stage 1
+		Experiment.Instance.shopLiftLog.LogStageEvent(1,true);
+
+
+		//		while(numTrials < 1)
+		while(registerLeft.Count > 0 || numTrials < maxTrials)
+		{ 
+			Debug.Log ("about to run phase 1");
+			if (registerLeft.Count == 1)
+				yield return StartCoroutine (RunPhaseOne (true,(registerLeft[0] < 2) ? 0 : 1)); //check if the leftover register val belongs to left or right choice for phase 1 
+			else
+				yield return StartCoroutine (RunPhaseOne (false, -1));
+
+			Debug.Log ("about to run phase 2");
+
+			if (registerLeft.Count == 1)
+				yield return StartCoroutine (RunPhaseTwo(false,true,true,(registerLeft[0]%2==0)? 0 : 1)); // all left register indexes are even (0,2) and right registers are odd (1,3)
+			else
+
+				yield return StartCoroutine (RunPhaseTwo(false,true,false,-1));
+			TurnOffRooms ();
+			if (numTrials < maxTrials - 1 || registerLeft.Count > 0)
+				yield return StartCoroutine (ShowEndTrialScreen ());
+			else
+				yield return StartCoroutine (ShowNextStageScreen ());
+			numTrials++;
+			yield return 0;
+		}
+
+		Experiment.Instance.shopLiftLog.LogStageEvent (1, false);
+		yield return null;
+	}
+
+	IEnumerator RunReevaluationPhase()
+	{
+		int numTrials_Reeval = 0;
+		int numBlocks_Reeval = 0;
+		Debug.Log("about to start Re-Evaluation Phase");
+		stageIndex = 2;
+		bool leftChoice = false;
+		Experiment.Instance.shopLiftLog.LogStageEvent(2,true);
+		while (numBlocks_Reeval < maxBlocks_Reeval) {
+			while (numTrials_Reeval < maxTrials_Reeval) {
+				leftChoice = !leftChoice; //flip it
+				if (leftChoice) {
+					leftRoom.SetActive (true);
+					leftAudio.Play ();
+					ChangeColors (leftRoomColor);
+					phase1Choice = 0;
+
+					phase2CamZone_L.SetActive (true);
+					phase2CamZone_R.SetActive (false);
+
+					phase2Start = envManager.phase2Start_L;
+					phase2End = envManager.phase2End_L;
+					phase2LeftRegister = envManager.phase2LeftRegister_L;
+					phase2RightRegister = envManager.phase2RightRegister_L;
+
+				} else {
+					rightRoom.SetActive (true);
+					rightAudio.Play ();
+					ChangeColors (rightRoomColor);
+					phase1Choice = 1;
+
+					phase2CamZone_R.SetActive (true);
+					phase2CamZone_L.SetActive (false);
+
+					phase2Start = envManager.phase2Start_R;
+					phase2End = envManager.phase2End_R;
+					phase2LeftRegister = envManager.phase2LeftRegister_R;
+					phase2RightRegister = envManager.phase2RightRegister_R;
+
+				}
+				yield return StartCoroutine (RunPhaseTwo (true, true, false, -1));
+				TurnOffRooms ();
+				yield return StartCoroutine (ShowEndTrialScreen ());
+				numTrials_Reeval++;
+				yield return 0;
+			}
+
+			yield return StartCoroutine (RunRestPeriod());
+			numBlocks_Reeval++;
+			yield return 0;
+		}
+
+		Experiment.Instance.shopLiftLog.LogStageEvent(2,false);
+		yield return null;
+	}
+	IEnumerator RunRestPeriod()
+	{
+		restGroup.alpha = 1f;
+		yield return new WaitForSeconds (30f);
+		restGroup.alpha = 0f;
+		yield return null;
+	}
+
 	IEnumerator PickEnvironment()
 	{
 		Debug.Log ("picking environment");
@@ -631,78 +745,15 @@ public class ShoplifterScript : MonoBehaviour {
 
 //		yield return StartCoroutine (RunCamTrainingPhase ());
 
-		//Experiment.Instance.trialLog.LogTrialNavigation (true);
-        Debug.Log("running task");
-		instructionGroup.alpha = 1f;
-		while(!Input.GetButtonDown("Action Button"))
-		{
-			yield return 0;
-		}
-		instructionGroup.alpha = 0f;
+		//learning phase
+		yield return StartCoroutine(RunLearningPhase());
 
-		ChangeCameraZoneVisibility (true);
-        yield return StartCoroutine(PickFourRegisterValues());
-
-		//stage 1
-		Experiment.Instance.shopLiftLog.LogStageEvent(1,true);
-
-
-//		while(numTrials < 1)
-		while(registerLeft.Count > 0 || numTrials < maxTrials)
-        { 
-			Debug.Log ("about to run phase 1");
-			if (registerLeft.Count == 1)
-				yield return StartCoroutine (RunPhaseOne (true,(registerVals[0] < 2) ? 0 : 1)); //check if the leftover register val belongs to left or right choice for phase 1 
-			else
-				yield return StartCoroutine (RunPhaseOne (false, -1));
-
-			Debug.Log ("about to run phase 2");
-
-			if (registerLeft.Count == 1)
-				yield return StartCoroutine (RunPhaseTwo(false,true,true,(registerVals[0]%2==0)? 0 : 1)); // all left register indexes are even (0,2) and right registers are odd (1,3)
-			else
-
-				yield return StartCoroutine (RunPhaseTwo(false,true,false,-1));
-			TurnOffRooms ();
-			if (numTrials < maxTrials - 1 || registerLeft.Count > 0)
-				yield return StartCoroutine (ShowEndTrialScreen ());
-			else
-				yield return StartCoroutine (ShowNextStageScreen ());
-        	numTrials++;
-        	yield return 0;
-		}
-		Experiment.Instance.shopLiftLog.LogStageEvent (1, false);
+		//shuffle rewards
 //		ReassignRooms ();
 		ShuffleRegisterRewards ();
-		numTrials = 0; //reset num trials
-
 
 		//re-evaluation phase
-
-		Debug.Log("about to start Re-Evaluation Phase");
-		stageIndex = 2;
-		bool leftChoice = false;
-		Experiment.Instance.shopLiftLog.LogStageEvent(2,true);
-		while (numTrials < maxTrials) {
-			leftChoice = !leftChoice; //flip it
-			if (leftChoice) {
-				leftRoom.SetActive (true);
-				leftAudio.Play ();
-				ChangeColors (leftRoomColor);
-				phase1Choice = 0;
-			} else {
-				rightRoom.SetActive (true);
-				rightAudio.Play ();
-				ChangeColors (rightRoomColor);
-				phase1Choice = 1;
-			}
-			yield return StartCoroutine (RunPhaseTwo (true,true,false,-1));
-			TurnOffRooms ();
-			yield return StartCoroutine(ShowEndTrialScreen());
-			yield return 0;
-		}
-
-		Experiment.Instance.shopLiftLog.LogStageEvent(2,false);
+		yield return StartCoroutine(RunReevaluationPhase());
         yield return null;
 	}
 
@@ -768,6 +819,9 @@ public class ShoplifterScript : MonoBehaviour {
 //		infoGroup.alpha = 1f;
 		GameObject coinShowerObj = Instantiate(coinShower,chosenRegister.transform.position,Quaternion.identity) as GameObject;
 		GameObject rewardPopup = Instantiate(rewardPopupText,chosenRegister.transform.position,Quaternion.identity) as GameObject;
+
+		chosenRegister.GetComponent<AudioSource> ().Play (); //play the cash register audio
+
 		rewardPopup.transform.GetChild(0).gameObject.GetComponent<TextMesh> ().text = "$" + registerVals [choiceOutput].ToString ();
 		Experiment.Instance.shopLiftLog.LogRegisterReward(phase1Choice,phase2Choice,registerVals[choiceOutput]);
 //        infoText.text = "You got $" + registerVals[choiceOutput].ToString() + " from the register";
