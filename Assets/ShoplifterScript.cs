@@ -531,7 +531,7 @@ public class ShoplifterScript : MonoBehaviour {
 			camVehicle.transform.position = phase2Start.transform.position;
 //			camVehicle.SetActive (true);
 //			camVehicle.GetComponent<RigidbodyFirstPersonController> ().mouseLook.m_CharacterTargetRot = Quaternion.Euler (dummyObj.transform.eulerAngles);
-			phase1Choice = playerChoice; //store player choice for this phase to calculate the register reward
+//			phase1Choice = playerChoice; //store player choice for this phase to calculate the register reward
 			Debug.Log("about to move player in phase 2");
 			yield return StartCoroutine(MovePlayerTo(camVehicle.transform.position,phase2End.transform.position,10f));
 
