@@ -26,7 +26,7 @@ public class SceneController : MonoBehaviour { //there can be a separate scene c
 
 	// Use this for initialization
 	void Start () {
-
+		Cursor.visible = true;
 		DontDestroyOnLoad (this.gameObject);
 
 	}
@@ -67,6 +67,7 @@ public class SceneController : MonoBehaviour { //there can be a separate scene c
 			Debug.Log ("loading experiment!");
 //			Application.LoadLevel (1);
 			menuObj.SetActive(false);
+			Cursor.visible = false;
 			sceneObj.SetActive (true);
 		} else {
 			Debug.Log ("Subject has already finished all blocks! Loading end menu.");

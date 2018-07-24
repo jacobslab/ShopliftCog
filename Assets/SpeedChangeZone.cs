@@ -16,7 +16,7 @@ public class SpeedChangeZone : MonoBehaviour {
 	void OnTriggerEnter(Collider col)
 	{
 		if (col.gameObject.tag == "Player") {
-			Debug.Log ("about to RANDOMIZE SPEED");
+//			Debug.Log ("about to RANDOMIZE SPEED");
 			Experiment.Instance.shopLift.RandomizeSpeed ();
 		}
 

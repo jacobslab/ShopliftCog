@@ -193,7 +193,7 @@ public class Logger_Threading : MonoBehaviour{
 	public void close(){
 		//Application stopped running -- close() was called
 		//applicationIsRunning = false;
-		UnityEngine.Debug.Log("is running will be false");
+//		UnityEngine.Debug.Log("is running will be false");
 		logfile.Flush ();
 		logfile.Close ();
 		isRunning=false;

@@ -66,11 +66,11 @@ public class CameraZone : MonoBehaviour {
 			justOnce = true;
 			hasSneaked = false;
 			activateCam = true;
-			Debug.Log ("activate cam is true");
-			Debug.Log ("CAM ACTIVATED for " + gameObject.name);
+//			Debug.Log ("activate cam is true");
+//			Debug.Log ("CAM ACTIVATED for " + gameObject.name);
 			activateCam = true;
 			if (isTraining) {
-				Debug.Log ("showing sneak text now");
+//				Debug.Log ("showing sneak text now");
 				Experiment.Instance.shopLift.infoText.text = "Press (A) to Sneak now!";
 				activateCam = true;
 				Experiment.Instance.shopLift.infoGroup.alpha = 1f;
@@ -85,13 +85,13 @@ public class CameraZone : MonoBehaviour {
 		firstTime = false;
 		if (col.gameObject.tag == "Player") {
 			activateCam = false;
-			Debug.Log ("activate cam is false");
-			if (isTraining) {
-				if (!hasSneaked)
-					StartCoroutine (Experiment.Instance.shopLift.ShowNegativeFeedback ());
+//			Debug.Log ("activate cam is false");
+			if (!hasSneaked) {
+				Debug.Log ("showing negative feedback");
+				StartCoroutine (Experiment.Instance.shopLift.ShowNegativeFeedback ());
+			}
 				//make the next cam the focus
 //				Experiment.Instance.shopLift.ChangeCamZoneFocus (camIndex + 1);
-			}
 
 			Experiment.Instance.shopLift.infoGroup.alpha = 0f;
 		}
