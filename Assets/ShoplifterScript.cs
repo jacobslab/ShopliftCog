@@ -381,10 +381,10 @@ public class ShoplifterScript : MonoBehaviour {
 		int numTraining = 0;
 		while (numTraining < 3) {
 			Debug.Log ("about to run phase 1");
-			yield return StartCoroutine (RunPhaseOne (false,-1));
+			yield return StartCoroutine (RunPhaseOne (false,-1,false));
 
 			Debug.Log ("about to run phase 2");
-			yield return StartCoroutine (RunPhaseTwo (false,false,false,-1));
+			yield return StartCoroutine (RunPhaseTwo (false,false,false,-1,false));
 			TurnOffRooms ();
 			if (numTrials < maxTrials - 1)
 				yield return StartCoroutine (ShowEndTrialScreen ());
@@ -410,7 +410,7 @@ public class ShoplifterScript : MonoBehaviour {
         yield return null;
     }
 
-	IEnumerator RunPhaseOne(bool isGuided, int guidedChoice)
+	IEnumerator RunPhaseOne(bool isGuided, int guidedChoice, bool terminateWithChoice)
 	{
 		Debug.Log ("running phase one");
 		baseAudio.Play ();
@@ -445,8 +445,10 @@ public class ShoplifterScript : MonoBehaviour {
 			
 			yield return StartCoroutine (WaitForPlayerDecision (phase1LeftDoor.transform.position, phase1RightDoor.transform.position));
 		}
+		if (!terminateWithChoice) {
 			Doors.canOpen = true;
 			fakeRoadblockP1.SetActive (false);
+		}
 //		ToggleMouseLook(false);
 
 
@@ -473,11 +475,13 @@ public class ShoplifterScript : MonoBehaviour {
 				camVehicle.GetComponent<RigidbodyFirstPersonController> ().enabled = false;
 
 				Experiment.Instance.shopLiftLog.LogMoveEvent (2, true);
+			if (!terminateWithChoice) {
 				yield return StartCoroutine (rightDoorObj.GetComponent<Doors> ().Open ());
 				yield return StartCoroutine (MovePlayerTo (camVehicle.transform.position, phase1RightDoor.transform.position, 2f));
 				baseAudio.Stop ();
 				choiceAudio.Play ();
 				yield return StartCoroutine (MovePlayerTo (phase1RightDoor.transform.position, phase2Start.transform.position, 2f));
+			}
 
 //			yield return StartCoroutine (MovePlayerTo (phase2RightDoorStart.transform.position, phase2Start.transform.position, 2f));
 //			cartAnim.Play("RightDoorMove");
@@ -502,11 +506,13 @@ public class ShoplifterScript : MonoBehaviour {
 
 				camVehicle.GetComponent<RigidbodyFirstPersonController> ().enabled = false;
 				Experiment.Instance.shopLiftLog.LogMoveEvent (2, true);
+			if (!terminateWithChoice) {
 				yield return StartCoroutine (leftDoorObj.GetComponent<Doors> ().Open ());
 				yield return StartCoroutine (MovePlayerTo (camVehicle.transform.position, phase1LeftDoor.transform.position, 2f));
 				baseAudio.Stop ();
 				choiceAudio.Play ();
 				yield return StartCoroutine (MovePlayerTo (phase1LeftDoor.transform.position, phase2Start.transform.position, 2f));
+			}
 
 //			yield return StartCoroutine (MovePlayerTo (phase2LeftDoorStart.transform.position, phase2Start.transform.position, 2f));
 //			cartAnim.Play("LeftDoorMove");
@@ -515,7 +521,7 @@ public class ShoplifterScript : MonoBehaviour {
 		yield return null;
 	}
 
-	IEnumerator RunPhaseTwo(bool isDirect, bool hasRewards, bool isGuided, int guidedChoice)
+	IEnumerator RunPhaseTwo(bool isDirect, bool hasRewards, bool isGuided, int guidedChoice, bool terminateWithChoice)
 	{
 
 		Debug.Log ("running phase two");
@@ -590,11 +596,9 @@ public class ShoplifterScript : MonoBehaviour {
 			}
 
 			phase2Choice = playerChoice;
-//		animBody.GetComponent<Rigidbody> ().isKinematic = true;
-//		yield return new WaitForSeconds(3f);
-//		cartAnim.enabled = false;
-//		camVehicle.GetComponent<RigidbodyFirstPersonController>().mouseLook.m_CharacterTargetRot = Quaternion.Euler(dummyObj.transform.eulerAngles);
-			yield return StartCoroutine (ShowRegisterReward ());
+
+			if(!terminateWithChoice)
+				yield return StartCoroutine (ShowRegisterReward ());
 		}
 
 		yield return null;
@@ -622,17 +626,17 @@ public class ShoplifterScript : MonoBehaviour {
 		{ 
 			Debug.Log ("about to run phase 1");
 			if (registerLeft.Count == 1)
-				yield return StartCoroutine (RunPhaseOne (true,(registerLeft[0] < 2) ? 0 : 1)); //check if the leftover register val belongs to left or right choice for phase 1 
+				yield return StartCoroutine (RunPhaseOne (true,(registerLeft[0] < 2) ? 0 : 1,false)); //check if the leftover register val belongs to left or right choice for phase 1 
 			else
-				yield return StartCoroutine (RunPhaseOne (false, -1));
+				yield return StartCoroutine (RunPhaseOne (false, -1,false));
 
 			Debug.Log ("about to run phase 2");
 
 			if (registerLeft.Count == 1)
-				yield return StartCoroutine (RunPhaseTwo(false,true,true,(registerLeft[0]%2==0)? 0 : 1)); // all left register indexes are even (0,2) and right registers are odd (1,3)
+				yield return StartCoroutine (RunPhaseTwo(false,true,true,(registerLeft[0]%2==0)? 0 : 1,false)); // all left register indexes are even (0,2) and right registers are odd (1,3)
 			else
 
-				yield return StartCoroutine (RunPhaseTwo(false,true,false,-1));
+				yield return StartCoroutine (RunPhaseTwo(false,true,false,-1,false));
 			TurnOffRooms ();
 			if (numTrials < maxTrials - 1 || registerLeft.Count > 0)
 				yield return StartCoroutine (ShowEndTrialScreen ());
@@ -686,7 +690,7 @@ public class ShoplifterScript : MonoBehaviour {
 					phase2RightRegister = envManager.phase2RightRegister_R;
 
 				}
-				yield return StartCoroutine (RunPhaseTwo (true, true, false, -1));
+				yield return StartCoroutine (RunPhaseTwo (true, true, false, -1,false));
 				TurnOffRooms ();
 				yield return StartCoroutine (ShowEndTrialScreen ());
 				numTrials_Reeval++;
@@ -706,6 +710,52 @@ public class ShoplifterScript : MonoBehaviour {
 		restGroup.alpha = 1f;
 		yield return new WaitForSeconds (30f);
 		restGroup.alpha = 0f;
+		yield return null;
+	}
+
+
+	IEnumerator RunTestingPhase()
+	{
+		for (int i = 0; i < 4; i++) {
+			yield return StartCoroutine (RunPhaseOne (false,-1,true));
+		}
+		bool leftChoice = false;
+		TurnOffRooms ();
+		for (int j = 0; j < 16; j++) {
+			leftChoice = !leftChoice; //flip it
+			if (leftChoice) {
+				leftRoom.SetActive (true);
+				leftAudio.Play ();
+				ChangeColors (leftRoomColor);
+				phase1Choice = 0;
+
+				phase2CamZone_L.SetActive (true);
+				phase2CamZone_R.SetActive (false);
+
+				phase2Start = envManager.phase2Start_L;
+				phase2End = envManager.phase2End_L;
+				phase2LeftRegister = envManager.phase2LeftRegister_L;
+				phase2RightRegister = envManager.phase2RightRegister_L;
+
+			} else {
+				rightRoom.SetActive (true);
+				rightAudio.Play ();
+				ChangeColors (rightRoomColor);
+				phase1Choice = 1;
+
+				phase2CamZone_R.SetActive (true);
+				phase2CamZone_L.SetActive (false);
+
+				phase2Start = envManager.phase2Start_R;
+				phase2End = envManager.phase2End_R;
+				phase2LeftRegister = envManager.phase2LeftRegister_R;
+				phase2RightRegister = envManager.phase2RightRegister_R;
+
+			}
+			yield return StartCoroutine (RunPhaseTwo (true, true, false, -1,true));
+			TurnOffRooms ();
+			yield return StartCoroutine (ShowEndTrialScreen ());
+		}
 		yield return null;
 	}
 
@@ -740,10 +790,9 @@ public class ShoplifterScript : MonoBehaviour {
     {
 		stageIndex = 1;
 
-
 		yield return StartCoroutine (PickEnvironment ());
 
-//		yield return StartCoroutine (RunCamTrainingPhase ());
+		yield return StartCoroutine (RunCamTrainingPhase ());
 
 		//learning phase
 		yield return StartCoroutine(RunLearningPhase());
@@ -754,6 +803,9 @@ public class ShoplifterScript : MonoBehaviour {
 
 		//re-evaluation phase
 		yield return StartCoroutine(RunReevaluationPhase());
+
+		//testing phase
+		yield return StartCoroutine(RunTestingPhase());
         yield return null;
 	}
 
