@@ -12,6 +12,7 @@ public class CameraZone : MonoBehaviour {
 
 	private bool hasSneaked = false;
 	private bool justOnce = true;
+	private bool alreadyShown = false;
 
 	// Use this for initialization
 	void Start () {
@@ -40,6 +41,7 @@ public class CameraZone : MonoBehaviour {
 				Experiment.Instance.shopLift.infoGroup.alpha = 0f;
 				Debug.Log ("SHOWING NEGATIVE FEEDBACK");
 				StartCoroutine (Experiment.Instance.shopLift.ShowNegativeFeedback ());
+				alreadyShown = true;
 			}
 		}
 //		if (activateCam &&  !firstTime && Input.GetButtonDown("Sneak Button")) {
@@ -86,9 +88,11 @@ public class CameraZone : MonoBehaviour {
 		if (col.gameObject.tag == "Player") {
 			activateCam = false;
 //			Debug.Log ("activate cam is false");
-			if (!hasSneaked) {
+			if (!hasSneaked && !alreadyShown) {
 				Debug.Log ("showing negative feedback");
 				StartCoroutine (Experiment.Instance.shopLift.ShowNegativeFeedback ());
+				isFocus = false;
+				alreadyShown = false;
 			}
 				//make the next cam the focus
 //				Experiment.Instance.shopLift.ChangeCamZoneFocus (camIndex + 1);

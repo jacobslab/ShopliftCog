@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityStandardAssets.CrossPlatformInput;
 using UnityStandardAssets.Characters.FirstPerson;
+using UnityEngine.SceneManagement;
 public class ShoplifterScript : MonoBehaviour {
 
     public GameObject camVehicle;
@@ -697,7 +698,8 @@ public class ShoplifterScript : MonoBehaviour {
 				}
 				yield return StartCoroutine (RunPhaseTwo (true, true, false, -1,false));
 				TurnOffRooms ();
-				yield return StartCoroutine (ShowEndTrialScreen ());
+				if(numTrials_Reeval < maxTrials_Reeval-1)
+					yield return StartCoroutine (ShowEndTrialScreen ());
 				numTrials_Reeval++;
 				yield return 0;
 			}
@@ -760,7 +762,8 @@ public class ShoplifterScript : MonoBehaviour {
 			}
 			yield return StartCoroutine (RunPhaseTwo (true, true, false, -1,true));
 			TurnOffRooms ();
-			yield return StartCoroutine (ShowEndTrialScreen ());
+			if(j<15)
+				yield return StartCoroutine (ShowEndTrialScreen ());
 		}
 		yield return null;
 	}
@@ -800,19 +803,27 @@ public class ShoplifterScript : MonoBehaviour {
 
 //		yield return StartCoroutine (RunCamTrainingPhase ());
 
+		//randomize rooms and cam zones again
 		AssignRooms ();
+		RandomizeCameraZones ();
+
 		//learning phase
-		yield return StartCoroutine(RunLearningPhase());
+//		yield return StartCoroutine(RunLearningPhase());
 
 		//shuffle rewards
 //		ReassignRooms ();
 		ShuffleRegisterRewards ();
 
 		//re-evaluation phase
-		yield return StartCoroutine(RunReevaluationPhase());
+//		yield return StartCoroutine(RunReevaluationPhase());
 
 		//testing phase
 		yield return StartCoroutine(RunTestingPhase());
+
+		//show end session screen
+		yield return StartCoroutine(ShowEndSessionScreen());
+		SceneManager.LoadScene (0); //load main menu
+		SceneManager.UnloadSceneAsync (1); //then destroy all objects of the current scene
         yield return null;
 	}
 
@@ -882,6 +893,7 @@ public class ShoplifterScript : MonoBehaviour {
 			}
 		}
 //		infoGroup.alpha = 1f;
+		Debug.Log("chosen register is: " + chosenRegister.name);
 		GameObject coinShowerObj = Instantiate(coinShower,chosenRegister.transform.position,Quaternion.identity) as GameObject;
 		GameObject rewardPopup = Instantiate(rewardPopupText,chosenRegister.transform.position,Quaternion.identity) as GameObject;
 
@@ -918,6 +930,17 @@ public class ShoplifterScript : MonoBehaviour {
         intertrialGroup.alpha = 0f;
         yield return null;
     }
+
+	IEnumerator ShowEndSessionScreen()
+	{ 
+		intertrialGroup.alpha = 1f;
+		intertrialText.text = "Congratulations! You have completed your session!";
+		Experiment.Instance.shopLiftLog.LogEndSession();
+		yield return new WaitForSeconds(2f);
+		intertrialGroup.alpha = 0f;
+		yield return null;
+		
+	}
 
 	public void RandomizeSpeed()
 	{
