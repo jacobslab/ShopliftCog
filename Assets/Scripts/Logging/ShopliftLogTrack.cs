@@ -57,6 +57,11 @@ public class ShopliftLogTrack : LogTrack {
 	{
 		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "END_TRIAL");
 	}
+
+	public void LogEndEnvironmentStage()
+	{
+		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "END_ENVIRONMENT_STAGE");
+	}
 	public void LogEndSession()
 	{
 		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "END_SESSION");

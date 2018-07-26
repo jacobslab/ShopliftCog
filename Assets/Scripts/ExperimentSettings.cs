@@ -43,6 +43,16 @@ public class ExperimentSettings : MonoBehaviour {
 	public Text gamifiedText;
 	public Dropdown sessionType;
 
+	public static bool isTraining=true;
+	public static bool isTesting=true;
+	public static bool isReeval=true;
+	public static bool isLearning=true;
+
+	public Toggle trainingToggle;
+	public Toggle learningToggle;
+	public Toggle reevalToggle;
+	public Toggle testingToggle;
+
 	bool isWeb = false;
 
 	//SINGLETON
@@ -170,6 +180,23 @@ public class ExperimentSettings : MonoBehaviour {
 //			}
 //		}
 //	}
+
+	public void ChangeTestingStatus()
+	{
+		isTesting = testingToggle.isOn;
+	}
+	public void ChangeLearningStatus()
+	{
+		isLearning = learningToggle.isOn;
+	}
+	public void ChangeReevalStatus()
+	{
+		isReeval = reevalToggle.isOn;
+	}
+	public void ChangeTrainingStatus()
+	{
+		isTraining = trainingToggle.isOn;
+	}
 
 
 	// Use this for initialization

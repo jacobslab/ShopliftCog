@@ -96,6 +96,7 @@ public class ShoplifterScript : MonoBehaviour {
 	public CanvasGroup trainingInstructionsGroup;
 	public CanvasGroup trainingPeriodGroup;
 	public CanvasGroup restGroup;
+	public Text rewardScore;
 
 
 	private GameObject roomOne;
@@ -116,7 +117,6 @@ public class ShoplifterScript : MonoBehaviour {
 	private Color roomTwoColor;
 
 	public GameObject coinShower;
-	public GameObject rewardPopupText;
 
 	private List<int> registerLeft;
 	private int stageIndex  = 0;
@@ -152,7 +152,7 @@ public class ShoplifterScript : MonoBehaviour {
         camTrans = camVehicle.GetComponent<RigidbodyFirstPersonController>().cam.transform;
 		RandomizeSpeed ();
 //		RandomizeCameraZones ();
-        
+		rewardScore.enabled=false;
 //		mouseLook.XSensitivity = 0f;
 
 		Cursor.visible = false;
@@ -196,10 +196,10 @@ public class ShoplifterScript : MonoBehaviour {
 	void RandomizeCameraZones()
 	{
 		Debug.Log ("randomized cam zones");
-		phase1CamZone.transform.localPosition = new Vector3 (phase1Start.transform.localPosition.x, phase1CamZone.transform.localPosition.y, Random.Range(phase1Start.transform.localPosition.z,phase1End.transform.localPosition.z));
+		phase1CamZone.transform.localPosition = new Vector3 (phase1Start.transform.localPosition.x, phase1CamZone.transform.localPosition.y, Random.Range(Vector3.Lerp(phase1Start.transform.localPosition,phase1End.transform.localPosition,0.15f).z,Vector3.Lerp(phase1Start.transform.localPosition,phase1End.transform.localPosition,0.85f).z));
 
-		phase2CamZone_L.transform.localPosition = new Vector3 (envManager.phase2Start_L.transform.localPosition.x, phase2CamZone_L.transform.localPosition.y, Random.Range (envManager.phase2Start_L.transform.localPosition.z, envManager.phase2End_L.transform.localPosition.z));
-		phase2CamZone_R.transform.localPosition = new Vector3 (envManager.phase2Start_R.transform.localPosition.x, phase2CamZone_R.transform.localPosition.y, Random.Range (envManager.phase2Start_R.transform.localPosition.z, envManager.phase2End_R.transform.localPosition.z));
+		phase2CamZone_L.transform.localPosition = new Vector3 (envManager.phase2Start_L.transform.localPosition.x, phase2CamZone_L.transform.localPosition.y, Random.Range (Vector3.Lerp(envManager.phase2Start_L.transform.localPosition, envManager.phase2End_L.transform.localPosition,0.15f).z,Vector3.Lerp(envManager.phase2Start_L.transform.localPosition,envManager.phase2Start_L.transform.localScale,0.85f).z));
+		phase2CamZone_R.transform.localPosition = new Vector3 (envManager.phase2Start_R.transform.localPosition.x, phase2CamZone_R.transform.localPosition.y, Random.Range (Vector3.Lerp(envManager.phase2Start_R.transform.localPosition, envManager.phase2End_R.transform.localPosition,0.15f).z,Vector3.Lerp(envManager.phase2End_R.transform.localPosition,envManager.phase2End_R.transform.localPosition,0.85f).z));
 
 	}
 
@@ -482,6 +482,7 @@ public class ShoplifterScript : MonoBehaviour {
 				yield return StartCoroutine (MovePlayerTo (camVehicle.transform.position, phase1RightDoor.transform.position, 2f));
 				baseAudio.Stop ();
 				choiceAudio.Play ();
+				rightDoorObj.GetComponent<Doors> ().Close ();
 				yield return StartCoroutine (MovePlayerTo (phase1RightDoor.transform.position, phase2Start.transform.position, 2f));
 			}
 
@@ -513,6 +514,7 @@ public class ShoplifterScript : MonoBehaviour {
 				yield return StartCoroutine (MovePlayerTo (camVehicle.transform.position, phase1LeftDoor.transform.position, 2f));
 				baseAudio.Stop ();
 				choiceAudio.Play ();
+				leftDoorObj.GetComponent<Doors> ().Close ();
 				yield return StartCoroutine (MovePlayerTo (phase1LeftDoor.transform.position, phase2Start.transform.position, 2f));
 			}
 
@@ -694,7 +696,6 @@ public class ShoplifterScript : MonoBehaviour {
 					phase2End = envManager.phase2End_R;
 					phase2LeftRegister = envManager.phase2LeftRegister_R;
 					phase2RightRegister = envManager.phase2RightRegister_R;
-
 				}
 				yield return StartCoroutine (RunPhaseTwo (true, true, false, -1,false));
 				TurnOffRooms ();
@@ -768,11 +769,23 @@ public class ShoplifterScript : MonoBehaviour {
 		yield return null;
 	}
 
-	IEnumerator PickEnvironment()
+	IEnumerator PickEnvironment(int envIndex)
 	{
+		//first turn off all environments
+		for (int i = 0; i<environments.Count; i++) {
+			environments [i].SetActive (false);
+		}
 		Debug.Log ("picking environment");
-		environments [0].SetActive (true); //just turn space station on for now
-		envManager =  environments[0].GetComponent<SpaceStationManager>();
+		switch (envIndex) {
+		case 0:
+			environments [0].SetActive (true); //just turn space station on for now
+			envManager =  environments[0].GetComponent<EnvironmentManager>();
+			break;
+		case 1:
+			environments [1].SetActive (true);
+			envManager = environments [1].GetComponent<EnvironmentManager> ();
+			break;
+		}
 		phase1Start =envManager.phase1Start;
 		phase1End = envManager.phase1End;
 		phase1LeftDoor = envManager.phase1LeftDoor;
@@ -798,33 +811,38 @@ public class ShoplifterScript : MonoBehaviour {
     IEnumerator RunTask()
     {
 		stageIndex = 1;
+		for (int i = 0; i < environments.Count; i++) {
+			yield return StartCoroutine (PickEnvironment (i));
 
-		yield return StartCoroutine (PickEnvironment ());
+			if (ExperimentSettings.isTraining)
+				yield return StartCoroutine (RunCamTrainingPhase ());
 
-//		yield return StartCoroutine (RunCamTrainingPhase ());
+			//randomize rooms and cam zones again
+			AssignRooms ();
+			RandomizeCameraZones ();
 
-		//randomize rooms and cam zones again
-		AssignRooms ();
-		RandomizeCameraZones ();
+			//learning phase
+			if (ExperimentSettings.isLearning)
+				yield return StartCoroutine (RunLearningPhase ());
 
-		//learning phase
-//		yield return StartCoroutine(RunLearningPhase());
-
-		//shuffle rewards
+			//shuffle rewards
 //		ReassignRooms ();
-		ShuffleRegisterRewards ();
+			ShuffleRegisterRewards ();
 
-		//re-evaluation phase
-//		yield return StartCoroutine(RunReevaluationPhase());
+			//re-evaluation phase
+			if (ExperimentSettings.isReeval)
+				yield return StartCoroutine (RunReevaluationPhase ());
 
-		//testing phase
-		yield return StartCoroutine(RunTestingPhase());
+			//testing phase
+			if (ExperimentSettings.isTesting)
+				yield return StartCoroutine (RunTestingPhase ());
 
-		//show end session screen
-		yield return StartCoroutine(ShowEndSessionScreen());
-		SceneManager.LoadScene (0); //load main menu
-		SceneManager.UnloadSceneAsync (1); //then destroy all objects of the current scene
-        yield return null;
+			//show end session screen
+			yield return StartCoroutine (ShowEndEnvironmentStageScreen ());
+//			SceneManager.LoadScene (0); //load main menu
+//			SceneManager.UnloadSceneAsync (1); //then destroy all objects of the current scene
+			yield return null;
+		}
 	}
 
 	void TurnOffRooms()
@@ -895,18 +913,19 @@ public class ShoplifterScript : MonoBehaviour {
 //		infoGroup.alpha = 1f;
 		Debug.Log("chosen register is: " + chosenRegister.name);
 		GameObject coinShowerObj = Instantiate(coinShower,chosenRegister.transform.position,Quaternion.identity) as GameObject;
-		GameObject rewardPopup = Instantiate(rewardPopupText,chosenRegister.transform.position,Quaternion.identity) as GameObject;
+		rewardScore.enabled = true;
+		rewardScore.text = "$" + registerVals [choiceOutput].ToString ();
 
 		chosenRegister.GetComponent<AudioSource> ().Play (); //play the cash register audio
 
-		rewardPopup.transform.GetChild(0).gameObject.GetComponent<TextMesh> ().text = "$" + registerVals [choiceOutput].ToString ();
 		Experiment.Instance.shopLiftLog.LogRegisterReward(phase1Choice,phase2Choice,registerVals[choiceOutput]);
 //        infoText.text = "You got $" + registerVals[choiceOutput].ToString() + " from the register";
 		Debug.Log("waiting for 2 seconds");
 		yield return new WaitForSeconds(2f);
+
+		rewardScore.enabled = false;
 //        infoGroup.alpha = 0f;
 		Destroy(coinShowerObj);
-		Destroy (rewardPopup);
 		camVehicle.GetComponent<RigidbodyFirstPersonController> ().enabled = true;
         yield return null;
     }
@@ -930,7 +949,14 @@ public class ShoplifterScript : MonoBehaviour {
         intertrialGroup.alpha = 0f;
         yield return null;
     }
-
+	IEnumerator ShowEndEnvironmentStageScreen()
+	{ 	intertrialGroup.alpha = 1f;
+		intertrialText.text = "Congratulations! You finished one environment \n Now, take a short rest before teleporting to the next dimension!";
+		Experiment.Instance.shopLiftLog.LogEndEnvironmentStage();
+		yield return new WaitForSeconds(60f);
+		intertrialGroup.alpha = 0f;
+		yield return null;
+	}
 	IEnumerator ShowEndSessionScreen()
 	{ 
 		intertrialGroup.alpha = 1f;
