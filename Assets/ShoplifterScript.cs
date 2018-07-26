@@ -39,6 +39,10 @@ public class ShoplifterScript : MonoBehaviour {
 	private GameObject phase2RightRegister_R;
 	private GameObject phase2LeftRegister_R;
 
+	//environments
+	public GameObject spaceStationEnv;
+	public GameObject cybercityEnv;
+
 	//registerobj
 
 	private GameObject leftRegisterObj_L;
@@ -62,6 +66,7 @@ public class ShoplifterScript : MonoBehaviour {
     private int playerChoice = -1; //0 for left and 1 for right
     public int[] registerVals; // 0-1 is L-R for toy , 2-3 is L-R for hardware
 
+	private string activeEnvLabel = "";
 
 	public List<GameObject> environments;
 	private EnvironmentManager envManager;
@@ -78,7 +83,10 @@ public class ShoplifterScript : MonoBehaviour {
 
 
 	public GameObject fakeRoadblockP1;
-	public GameObject fakeRoadblockP2;
+	public GameObject fakeRoadblockP2_L;
+	public GameObject fakeRoadblockP2_R;
+
+	private bool clearCameraZoneFlags = false;
 
     private Transform camTrans;
 
@@ -97,6 +105,7 @@ public class ShoplifterScript : MonoBehaviour {
 	public CanvasGroup trainingPeriodGroup;
 	public CanvasGroup restGroup;
 	public Text rewardScore;
+	public CanvasGroup warningFeedbackGroup;
 
 
 	private GameObject roomOne;
@@ -132,8 +141,10 @@ public class ShoplifterScript : MonoBehaviour {
 
 	public GameObject testFloor;
 
+
     // Use this for initialization
     void Start() {
+		UpdateFirstEnvironments ();
         infoGroup.alpha = 0f;
 		positiveFeedbackGroup.alpha = 0f;
 		negativeFeedbackGroup.alpha = 0f;
@@ -182,14 +193,14 @@ public class ShoplifterScript : MonoBehaviour {
 	void RandomizeSpeedChangeZones()
 	{
 		Debug.Log ("randomized speed change zones");
-		phase1SpeedChangeZones [0].transform.position = new Vector3(phase1Start.transform.position.x,phase1SpeedChangeZones[0].transform.position.y,Random.Range(phase1Start.transform.position.z,Vector3.Lerp (phase1Start.transform.position, phase1End.transform.position, 0.5f).z));
-		phase1SpeedChangeZones [1].transform.position = new Vector3(phase1Start.transform.position.x,phase1SpeedChangeZones[1].transform.position.y,Random.Range(Vector3.Lerp (phase1Start.transform.position, phase1End.transform.position, 0.5f).z,phase1End.transform.position.z));
+		phase1SpeedChangeZones [0].transform.position = new Vector3(phase1Start.transform.position.x,phase1Start.transform.position.y,Random.Range(phase1Start.transform.position.z,Vector3.Lerp (phase1Start.transform.position, phase1End.transform.position, 0.5f).z));
+		phase1SpeedChangeZones [1].transform.position = new Vector3(phase1Start.transform.position.x,phase1Start.transform.position.y,Random.Range(Vector3.Lerp (phase1Start.transform.position, phase1End.transform.position, 0.5f).z,phase1End.transform.position.z));
 
-		phase2SpeedChangeZones_L[0].transform.position = new Vector3(envManager.phase2Start_L.transform.position.x,phase2SpeedChangeZones_L[0].transform.position.y,Random.Range(envManager.phase2Start_L.transform.position.z,Vector3.Lerp (envManager.phase2Start_L.transform.position, envManager.phase2End_L.transform.position, 0.5f).z));
-		phase2SpeedChangeZones_L[1].transform.position = new Vector3(envManager.phase2Start_L.transform.position.x,phase2SpeedChangeZones_L[0].transform.position.y,Random.Range(Vector3.Lerp (envManager.phase2Start_L.transform.position, envManager.phase2End_L.transform.position, 0.5f).z,envManager.phase2End_L.transform.position.z));
+		phase2SpeedChangeZones_L[0].transform.position = new Vector3(envManager.phase2Start_L.transform.position.x,phase2Start_L.transform.position.y,Random.Range(envManager.phase2Start_L.transform.position.z,Vector3.Lerp (envManager.phase2Start_L.transform.position, envManager.phase2End_L.transform.position, 0.5f).z));
+		phase2SpeedChangeZones_L[1].transform.position = new Vector3(envManager.phase2Start_L.transform.position.x,phase2Start_L.transform.position.y,Random.Range(Vector3.Lerp (envManager.phase2Start_L.transform.position, envManager.phase2End_L.transform.position, 0.5f).z,envManager.phase2End_L.transform.position.z));
 
-		phase2SpeedChangeZones_R[0].transform.position = new Vector3(envManager.phase2Start_R.transform.position.x,phase2SpeedChangeZones_R[0].transform.position.y,Random.Range(envManager.phase2Start_R.transform.position.z,Vector3.Lerp (envManager.phase2Start_R.transform.position, envManager.phase2End_R.transform.position, 0.5f).z));
-		phase2SpeedChangeZones_R[1].transform.position = new Vector3(envManager.phase2Start_R.transform.position.x,phase2SpeedChangeZones_R[0].transform.position.y,Random.Range(Vector3.Lerp (envManager.phase2Start_R.transform.position, envManager.phase2End_R.transform.position, 0.5f).z,envManager.phase2End_R.transform.position.z));
+		phase2SpeedChangeZones_R[0].transform.position = new Vector3(envManager.phase2Start_R.transform.position.x,phase2Start_R.transform.position.y,Random.Range(envManager.phase2Start_R.transform.position.z,Vector3.Lerp (envManager.phase2Start_R.transform.position, envManager.phase2End_R.transform.position, 0.5f).z));
+		phase2SpeedChangeZones_R[1].transform.position = new Vector3(envManager.phase2Start_R.transform.position.x,phase2Start_R.transform.position.y,Random.Range(Vector3.Lerp (envManager.phase2Start_R.transform.position, envManager.phase2End_R.transform.position, 0.5f).z,envManager.phase2End_R.transform.position.z));
 
 	}
 
@@ -255,6 +266,8 @@ public class ShoplifterScript : MonoBehaviour {
     //for initial random assignment
     void AssignRooms()
     {
+
+		fakeRoadblockP1 = envManager.p1Roadblock;
         if (Random.value < 0.5f)
         {
             leftRoom = roomOne;
@@ -268,6 +281,9 @@ public class ShoplifterScript : MonoBehaviour {
 			rightRoomColor = roomTwoColor;
 			leftRegisterObj_R = envManager.twoLeftRegisterObj;
 			rightRegisterObj_R = envManager.twoRightRegisterObj;
+
+			fakeRoadblockP2_L = envManager.roomOneRoadblock;
+			fakeRoadblockP2_R = envManager.roomTwoRoadblock;
 
 			Experiment.Instance.shopLiftLog.LogRooms ("TOY","HARDWARE");
         }
@@ -284,6 +300,9 @@ public class ShoplifterScript : MonoBehaviour {
 			rightRoomColor = roomOneColor;
 			leftRegisterObj_R = envManager.oneLeftRegisterObj;
 			rightRegisterObj_R = envManager.oneRightRegisterObj;
+
+			fakeRoadblockP2_L = envManager.roomTwoRoadblock;
+			fakeRoadblockP2_R = envManager.roomOneRoadblock;
 
 			Experiment.Instance.shopLiftLog.LogRooms ("HARDWARE","TOY");
         }
@@ -414,6 +433,8 @@ public class ShoplifterScript : MonoBehaviour {
 
 	IEnumerator RunPhaseOne(bool isGuided, int guidedChoice, bool terminateWithChoice)
 	{
+
+		clearCameraZoneFlags = false;
 		Debug.Log ("running phase one");
 		baseAudio.Play ();
 		if (numTrials >= 1)
@@ -523,12 +544,14 @@ public class ShoplifterScript : MonoBehaviour {
 		}
 		phase1Choice = playerChoice;
 		Doors.canOpen = false;
+		clearCameraZoneFlags = true;
 		yield return null;
 	}
 
 	IEnumerator RunPhaseTwo(bool isDirect, bool hasRewards, bool isGuided, int guidedChoice, bool terminateWithChoice)
 	{
 
+		clearCameraZoneFlags = false;
 		Debug.Log ("running phase two");
 		if (isDirect) {
 			camVehicle.transform.position = phase2Start.transform.position;
@@ -563,10 +586,11 @@ public class ShoplifterScript : MonoBehaviour {
 			Experiment.Instance.shopLiftLog.LogMoveEvent (2, false);
 		}
 //		ToggleMouseLook (true);
-
-
+		if (phase1Choice == 0)
+			fakeRoadblockP2_L.SetActive (true);
+		else
+			fakeRoadblockP2_R.SetActive (true);
 		if (hasRewards) {
-			fakeRoadblockP2.SetActive (true);
 			if (isGuided) {
 				Debug.Log ("forcing player choice");
 				infoGroup.alpha = 1f;
@@ -583,10 +607,14 @@ public class ShoplifterScript : MonoBehaviour {
 				Debug.Log ("waiting for player choice");
 				yield return StartCoroutine (WaitForPlayerDecision (phase2LeftRegister.transform.position, phase2RightRegister.transform.position));
 			}
-			fakeRoadblockP2.SetActive (false);
 			//		ToggleMouseLook(false);
 			Debug.Log("PLAYER CHOICE: " + playerChoice.ToString());
 			Experiment.Instance.shopLiftLog.LogDecisionEvent (false);
+
+			if (phase1Choice == 0)
+				fakeRoadblockP2_L.SetActive (false);
+			else
+				fakeRoadblockP2_R.SetActive (false);
 
 			camVehicle.GetComponent<RigidbodyFirstPersonController>().enabled=false;
 			if (playerChoice == 1) {
@@ -606,6 +634,7 @@ public class ShoplifterScript : MonoBehaviour {
 				yield return StartCoroutine (ShowRegisterReward ());
 		}
 
+		clearCameraZoneFlags = true;
 		yield return null;
 	}
 
@@ -769,6 +798,17 @@ public class ShoplifterScript : MonoBehaviour {
 		yield return null;
 	}
 
+	void UpdateFirstEnvironments ()
+	{
+		if (ExperimentSettings.env == ExperimentSettings.Environment.Cybercity) {
+			environments [0] = cybercityEnv;
+			environments [1] = spaceStationEnv;
+		} else {
+			environments [0] = spaceStationEnv;
+			environments [1] = cybercityEnv;
+		}
+	}
+
 	IEnumerator PickEnvironment(int envIndex)
 	{
 		//first turn off all environments
@@ -778,12 +818,14 @@ public class ShoplifterScript : MonoBehaviour {
 		Debug.Log ("picking environment");
 		switch (envIndex) {
 		case 0:
-			environments [0].SetActive (true); //just turn space station on for now
-			envManager =  environments[0].GetComponent<EnvironmentManager>();
+			environments [0].SetActive (true);
+			envManager = environments [0].GetComponent<EnvironmentManager> ();
+			activeEnvLabel = environments [0].name;
 			break;
 		case 1:
 			environments [1].SetActive (true);
 			envManager = environments [1].GetComponent<EnvironmentManager> ();
+			activeEnvLabel = environments [1].name;
 			break;
 		}
 		phase1Start =envManager.phase1Start;
@@ -878,6 +920,16 @@ public class ShoplifterScript : MonoBehaviour {
 		yield return null;
 	}
 
+	public IEnumerator ShowWarning()
+	{
+		warningFeedbackGroup.alpha = 1f;
+		while (!clearCameraZoneFlags) {
+			yield return 0;
+		}
+		warningFeedbackGroup.alpha = 0f;
+		yield return null;
+	}
+
 	IEnumerator ShowRegisterReward()
     {
 		GameObject chosenRegister = null;
@@ -913,6 +965,9 @@ public class ShoplifterScript : MonoBehaviour {
 //		infoGroup.alpha = 1f;
 		Debug.Log("chosen register is: " + chosenRegister.name);
 		GameObject coinShowerObj = Instantiate(coinShower,chosenRegister.transform.position,Quaternion.identity) as GameObject;
+		if (activeEnvLabel == "Cybercity") {
+			coinShowerObj.transform.GetChild (0).transform.localPosition = Vector3.zero;
+		}
 		rewardScore.enabled = true;
 		rewardScore.text = "$" + registerVals [choiceOutput].ToString ();
 

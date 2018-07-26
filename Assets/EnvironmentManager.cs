@@ -49,6 +49,11 @@ public class EnvironmentManager : MonoBehaviour {
 	public AudioSource roomOneAudio;
 	public AudioSource roomTwoAudio;
 
+	//roadblocks
+	public GameObject p1Roadblock;
+	public GameObject roomOneRoadblock;
+	public GameObject roomTwoRoadblock;
+
 	// Use this for initialization
 	void Start () {
 		

@@ -17,6 +17,14 @@ public class ExperimentSettings : MonoBehaviour {
 
 
 	public static bool isLogging = true;
+
+	public enum Environment
+	{
+		Cybercity,
+		SpaceStation
+	}
+
+	public static Environment env;
 	//build info
 	string buildDate;
 	public Text buildType;
@@ -52,6 +60,8 @@ public class ExperimentSettings : MonoBehaviour {
 	public Toggle learningToggle;
 	public Toggle reevalToggle;
 	public Toggle testingToggle;
+
+	public Dropdown firstEnvDropdown;
 
 	bool isWeb = false;
 
@@ -180,6 +190,20 @@ public class ExperimentSettings : MonoBehaviour {
 //			}
 //		}
 //	}
+	public void ChangeFirstEnvironment()
+	{
+		switch (firstEnvDropdown.value) {
+		case 0:
+			env = Environment.Cybercity;
+			break;
+		case 1: 
+			env = Environment.SpaceStation;
+			break;
+		default:
+			env = Environment.Cybercity;
+			break;
+		}
+	}
 
 	public void ChangeTestingStatus()
 	{

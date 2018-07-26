@@ -14,6 +14,8 @@ public class CameraZone : MonoBehaviour {
 	private bool justOnce = true;
 	private bool alreadyShown = false;
 
+	private int pressCount = 0;
+
 	// Use this for initialization
 	void Start () {
 		
@@ -29,19 +31,24 @@ public class CameraZone : MonoBehaviour {
 
 //		Debug.Log ("activate cam: " + activateCam.ToString ());
 		if (Input.GetButtonDown("Sneak Button") && justOnce) {
-			Debug.Log ("activate cam: " + activateCam.ToString () + " isFocus : " + isFocus.ToString ());
-			if (activateCam && isFocus) {
-				Experiment.Instance.shopLift.infoGroup.alpha = 0f;
-				Debug.Log ("SHOWING POSITIVE FEEDBACK");
-				Sneak ();
-				justOnce = false;
-				hasSneaked = true;
-				StartCoroutine (Experiment.Instance.shopLift.ShowPositiveFeedback ());
-			} else if(isFocus && !activateCam && !hasSneaked) {
-				Experiment.Instance.shopLift.infoGroup.alpha = 0f;
-				Debug.Log ("SHOWING NEGATIVE FEEDBACK");
-				StartCoroutine (Experiment.Instance.shopLift.ShowNegativeFeedback ());
-				alreadyShown = true;
+			pressCount++;
+			if (pressCount <= 2) {
+				Debug.Log ("activate cam: " + activateCam.ToString () + " isFocus : " + isFocus.ToString ());
+				if (activateCam && isFocus) {
+					Experiment.Instance.shopLift.infoGroup.alpha = 0f;
+					Debug.Log ("SHOWING POSITIVE FEEDBACK");
+					Sneak ();
+					justOnce = false;
+					hasSneaked = true;
+					StartCoroutine (Experiment.Instance.shopLift.ShowPositiveFeedback ());
+				} else if (isFocus && !activateCam && !hasSneaked) {
+					Experiment.Instance.shopLift.infoGroup.alpha = 0f;
+					Debug.Log ("SHOWING NEGATIVE FEEDBACK");
+					StartCoroutine (Experiment.Instance.shopLift.ShowNegativeFeedback ());
+					alreadyShown = true;
+				}
+			} else {
+				StartCoroutine (Experiment.Instance.shopLift.ShowWarning ());
 			}
 		}
 //		if (activateCam &&  !firstTime && Input.GetButtonDown("Sneak Button")) {
@@ -98,6 +105,8 @@ public class CameraZone : MonoBehaviour {
 //				Experiment.Instance.shopLift.ChangeCamZoneFocus (camIndex + 1);
 
 			Experiment.Instance.shopLift.infoGroup.alpha = 0f;
+			pressCount = 0;
 		}
+
 	}
 }
