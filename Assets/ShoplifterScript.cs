@@ -207,11 +207,10 @@ public class ShoplifterScript : MonoBehaviour {
 	void RandomizeCameraZones()
 	{
 		Debug.Log ("randomized cam zones");
-		phase1CamZone.transform.localPosition = new Vector3 (phase1Start.transform.localPosition.x, phase1CamZone.transform.localPosition.y, Random.Range(Vector3.Lerp(phase1Start.transform.localPosition,phase1End.transform.localPosition,0.15f).z,Vector3.Lerp(phase1Start.transform.localPosition,phase1End.transform.localPosition,0.85f).z));
+		phase1CamZone.transform.localPosition = Vector3.Lerp (phase1Start.transform.localPosition, phase1End.transform.localPosition, 0.5f);
 
-		phase2CamZone_L.transform.localPosition = new Vector3 (envManager.phase2Start_L.transform.localPosition.x, phase2CamZone_L.transform.localPosition.y, Random.Range (Vector3.Lerp(envManager.phase2Start_L.transform.localPosition, envManager.phase2End_L.transform.localPosition,0.15f).z,Vector3.Lerp(envManager.phase2Start_L.transform.localPosition,envManager.phase2Start_L.transform.localScale,0.85f).z));
-		phase2CamZone_R.transform.localPosition = new Vector3 (envManager.phase2Start_R.transform.localPosition.x, phase2CamZone_R.transform.localPosition.y, Random.Range (Vector3.Lerp(envManager.phase2Start_R.transform.localPosition, envManager.phase2End_R.transform.localPosition,0.15f).z,Vector3.Lerp(envManager.phase2End_R.transform.localPosition,envManager.phase2End_R.transform.localPosition,0.85f).z));
-
+		phase2CamZone_L.transform.localPosition = Vector3.Lerp (envManager.phase2Start_L.transform.localPosition, envManager.phase2End_L.transform.localPosition, 0.5f);
+		phase2CamZone_R.transform.localPosition = Vector3.Lerp (envManager.phase2Start_R.transform.localPosition, envManager.phase2End_R.transform.localPosition, 0.5f);
 	}
 
 	public void ChangeCamZoneFocus(int camIndex)
