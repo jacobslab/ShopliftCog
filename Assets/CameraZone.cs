@@ -30,8 +30,8 @@ public class CameraZone : MonoBehaviour {
 			GetComponent<MeshRenderer> ().enabled = false;
 
 //		Debug.Log ("activate cam: " + activateCam.ToString ());
-		if (Input.GetButtonDown("Sneak Button") && justOnce) {
-			pressCount++;
+		if (Input.GetButtonDown("Action Button") && justOnce && isFocus) {
+			
 			if (pressCount <= 2) {
 				Debug.Log ("activate cam: " + activateCam.ToString () + " isFocus : " + isFocus.ToString ());
 				if (activateCam && isFocus) {
@@ -42,6 +42,7 @@ public class CameraZone : MonoBehaviour {
 					hasSneaked = true;
 					StartCoroutine (Experiment.Instance.shopLift.ShowPositiveFeedback ());
 				} else if (isFocus && !activateCam && !hasSneaked) {
+					pressCount++;
 					Experiment.Instance.shopLift.infoGroup.alpha = 0f;
 					Debug.Log ("SHOWING NEGATIVE FEEDBACK");
 					StartCoroutine (Experiment.Instance.shopLift.ShowNegativeFeedback ());
@@ -80,7 +81,7 @@ public class CameraZone : MonoBehaviour {
 			activateCam = true;
 			if (isTraining) {
 //				Debug.Log ("showing sneak text now");
-				Experiment.Instance.shopLift.infoText.text = "Press (A) to Sneak now!";
+				Experiment.Instance.shopLift.infoText.text = "Press (X) to Sneak now!";
 				activateCam = true;
 				Experiment.Instance.shopLift.infoGroup.alpha = 1f;
 			}

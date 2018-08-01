@@ -56,6 +56,9 @@ public class ExperimentSettings : MonoBehaviour {
 	public static bool isReeval=true;
 	public static bool isLearning=true;
 
+	public static bool isRewardReeval = false;
+	public static bool isTransitionReeval = false;
+
 	public Toggle trainingToggle;
 	public Toggle learningToggle;
 	public Toggle reevalToggle;

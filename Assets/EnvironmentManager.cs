@@ -57,9 +57,12 @@ public class EnvironmentManager : MonoBehaviour {
 
 
 	//audio
-	public AudioSource baseAudio;
-	public AudioSource roomOneAudio;
-	public AudioSource roomTwoAudio;
+	public AudioSource one_L_Audio;
+	public AudioSource two_L_Audio;
+	public AudioSource three_L_Audio;
+	public AudioSource one_R_Audio;
+	public AudioSource two_R_Audio;
+	public AudioSource three_R_Audio;
 
 	//roadblocks
 	public GameObject p1Roadblock;
