@@ -5,6 +5,7 @@ using UnityEngine;
 public class ColorChanger : MonoBehaviour {
 
 	public Color selColor;
+	public Color emissionColor;
 	// Use this for initialization
 	void Start () {
 		ChangeColors (selColor);
@@ -21,8 +22,8 @@ public class ColorChanger : MonoBehaviour {
 		for (int i = 0; i < meshRend.Length; i++) {
 			meshRend [i].material.color = selColor;
 			meshRend [i].material.EnableKeyword ("_EMISSION");
-			meshRend [i].material.SetColor ("_EmissionColor", selColor);
-			meshRend [i].material.SetTexture ("_EmissionMaterial", null);
+			meshRend [i].material.SetColor ("_EmissionColor", emissionColor);
+			meshRend [i].material.SetTexture ("_EmissionMap", null);
 		}
 	}
 }

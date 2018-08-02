@@ -66,7 +66,7 @@ public class ShoplifterScript : MonoBehaviour {
 
 	//stage 1 learning variables
 	private int numTrials_Learning = 0;
-	public int maxTrials_Learning = 20;
+	public int maxTrials_Learning = 24;
 
 	//stage 2 reevaulation variables
 	public int maxTrials_Reeval = 4;
@@ -558,6 +558,8 @@ public class ShoplifterScript : MonoBehaviour {
 		} else {
 			baseAudio.Stop ();
 		}
+
+		Debug.Log ("closing the first door now");
 		targetDoor.GetComponent<Doors> ().Close ();
 		yield return null;
 	}
@@ -605,6 +607,7 @@ public class ShoplifterScript : MonoBehaviour {
 				yield return StartCoroutine (MovePlayerTo (phase2Door_R.transform.GetChild(0).position, phase3Start_R.transform.position, 1f));
 			}
 
+		Debug.Log ("closing the second door now");
 		targetDoor.GetComponent<Doors>().Close();
 		yield return null;
 	}
@@ -645,6 +648,7 @@ public class ShoplifterScript : MonoBehaviour {
 			yield return StartCoroutine (ShowRegisterReward (pathIndex));
 		}
 		currentAudio.Stop ();
+		Debug.Log ("closing the third door now");
 		targetDoor.GetComponent<Doors>().Close();
 		yield return null;
 	}
@@ -653,13 +657,15 @@ public class ShoplifterScript : MonoBehaviour {
 	IEnumerator RunLearningPhase()
 	{
 		Debug.Log("running task");
+		int sliderCount = 0;
 		instructionGroup.alpha = 1f;
 		yield return StartCoroutine (WaitForButtonPress (10000f));
 		instructionGroup.alpha = 0f;
 
-		ChangeCameraZoneVisibility (true);
+		ChangeCameraZoneVisibility (false); // no need to show cam zones as they were already shown during training
 
 		bool isLeft = (Random.value < 0.5f) ? true: false;
+		bool showOneTwo = false;
 		//stage 1
 		Experiment.Instance.shopLiftLog.LogStageEvent(1,true);
 
@@ -679,7 +685,14 @@ public class ShoplifterScript : MonoBehaviour {
 			yield return StartCoroutine(RunPhaseThree((isLeft) ? 0:1,false,true));
 //			TurnOffRooms ();
 			if (numTrials_Learning % 3 == 0 && numTrials_Learning > 0) {
-				yield return StartCoroutine (AskPreference (0));
+				showOneTwo = !showOneTwo;
+				if (sliderCount <= 5) {
+					if (showOneTwo) {
+						yield return StartCoroutine (AskPreference (0));
+					} else
+						yield return StartCoroutine (AskPreference (1));
+				}
+				sliderCount++;
 			}
 			if (numTrials_Learning < maxTrials_Learning - 1)
 				yield return StartCoroutine (ShowEndTrialScreen ());
@@ -735,7 +748,7 @@ public class ShoplifterScript : MonoBehaviour {
 	IEnumerator RunRestPeriod()
 	{
 		restGroup.alpha = 1f;
-		yield return new WaitForSeconds (30f);
+		yield return new WaitForSeconds (20f);
 		restGroup.alpha = 0f;
 		yield return null;
 	}
