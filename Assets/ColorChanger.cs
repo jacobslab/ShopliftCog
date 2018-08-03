@@ -20,10 +20,16 @@ public class ColorChanger : MonoBehaviour {
 	{
 		MeshRenderer[] meshRend = GetComponentsInChildren<MeshRenderer>();
 		for (int i = 0; i < meshRend.Length; i++) {
-			meshRend [i].material.color = selColor;
-			meshRend [i].material.EnableKeyword ("_EMISSION");
-			meshRend [i].material.SetColor ("_EmissionColor", emissionColor);
-			meshRend [i].material.SetTexture ("_EmissionMap", null);
+			if (meshRend [i].gameObject.layer == 11) {
+				Debug.Log ("reset: " + meshRend [i].gameObject.name);
+				meshRend [i].material.color = Color.white;
+				meshRend [i].material.DisableKeyword ("_EMISSION");
+			} else {
+				meshRend [i].material.color = selColor;
+				meshRend [i].material.EnableKeyword ("_EMISSION");
+				meshRend [i].material.SetColor ("_EmissionColor", emissionColor);
+				meshRend [i].material.SetTexture ("_EmissionMap", null);
+			}
 		}
 	}
 }

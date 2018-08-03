@@ -452,7 +452,7 @@ public class ShoplifterScript : MonoBehaviour {
 			numTraining++;
 			yield return 0;
 		}
-		ResetCamZone ();
+//		ResetCamZone ();
 		CameraZone.isTraining = false;
 
 		trainingPeriodGroup.alpha = 0f;
@@ -646,10 +646,10 @@ public class ShoplifterScript : MonoBehaviour {
 			}
 
 			yield return StartCoroutine (ShowRegisterReward (pathIndex));
+			Debug.Log ("closing the third door now");
+			targetDoor.GetComponent<Doors>().Close();
 		}
 		currentAudio.Stop ();
-		Debug.Log ("closing the third door now");
-		targetDoor.GetComponent<Doors>().Close();
 		yield return null;
 	}
 
@@ -798,6 +798,7 @@ public class ShoplifterScript : MonoBehaviour {
 	IEnumerator AskPreference(int prefType)
 	{
 		Cursor.visible = true;
+		Cursor.lockState = CursorLockMode.None;
 		switch (prefType) {
 		//between 1 and 2
 		case 0:
