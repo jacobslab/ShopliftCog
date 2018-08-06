@@ -314,8 +314,6 @@ public class ShoplifterScript : MonoBehaviour {
 			three_R_Audio = envManager.three_R_Audio;
 			rightRoomColor = roomTwoColor;
 
-			phase3Door_L = envManager.phase3Door_L;
-			phase3Door_R = envManager.phase3Door_R;
 
 			Experiment.Instance.shopLiftLog.LogRooms ("TOY","HARDWARE");
         }
@@ -329,8 +327,6 @@ public class ShoplifterScript : MonoBehaviour {
 			three_R_Audio = envManager.three_L_Audio;
 			rightRoomColor = roomOneColor;
 
-			phase3Door_L = envManager.phase3Door_R;
-			phase3Door_R = envManager.phase3Door_L;
 
 			Experiment.Instance.shopLiftLog.LogRooms ("HARDWARE","TOY");
         }
@@ -377,14 +373,12 @@ public class ShoplifterScript : MonoBehaviour {
         {
 			leftRoom = roomOne;
 			leftRoomColor = roomOneColor;
-			phase3Door_L = envManager.phase3Door_L;
 
 			three_L_Audio = envManager.three_L_Audio;
 
 
 			rightRoom = roomTwo;
 			rightRoomColor = roomTwoColor;
-			phase3Door_R = envManager.phase3Door_R;
 			three_R_Audio = envManager.three_R_Audio;
 
 			Experiment.Instance.shopLiftLog.LogRooms ("HARDWARE","TOY");
@@ -394,12 +388,10 @@ public class ShoplifterScript : MonoBehaviour {
         {
 			leftRoom = roomTwo;
 			leftRoomColor = roomTwoColor;
-			phase3Door_L = envManager.phase3Door_R;
 			three_L_Audio = envManager.three_R_Audio;
 
 			rightRoom = roomOne;
 			rightRoomColor = roomOneColor;
-			phase3Door_R = envManager.phase3Door_L;
 			three_R_Audio = envManager.three_L_Audio;
 
 			Experiment.Instance.shopLiftLog.LogRooms ("TOY","HARDWARE");
@@ -615,7 +607,6 @@ public class ShoplifterScript : MonoBehaviour {
 	IEnumerator RunPhaseThree(int pathIndex,bool isDirect, bool hasRewards)
 	{
 		ChangeCamZoneFocus ((pathIndex == 0) ? 2 : 5);
-		GameObject targetDoor = (pathIndex==0) ? phase3Door_L : phase3Door_R;
 		Vector3 startPos = (pathIndex == 0) ? phase3Start_L.transform.position : phase3Start_R.transform.position;
 		Vector3 endPos = (pathIndex == 0) ? phase3End_L.transform.position : phase3End_R.transform.position;
 		if (isDirect) {
@@ -634,20 +625,16 @@ public class ShoplifterScript : MonoBehaviour {
 		if (hasRewards) {
 			clearCameraZoneFlags = true;
 
-			yield return StartCoroutine (WaitForDoorOpenPress ());
-			yield return StartCoroutine(targetDoor.GetComponent<Doors> ().Open ());
 			if (pathIndex == 0) {
-				yield return StartCoroutine (MovePlayerTo (camVehicle.transform.position, phase3Door_L.transform.GetChild(0).position, 1f));
-				yield return StartCoroutine (MovePlayerTo (phase3Door_L.transform.GetChild(0).position, register_L.transform.position, 1f));
+				yield return StartCoroutine (MovePlayerTo (camVehicle.transform.position, register_L.transform.position, 1f));
 
 			} else if (pathIndex == 1) {
-				yield return StartCoroutine (MovePlayerTo (camVehicle.transform.position, phase3Door_R.transform.GetChild(0).position, 1f));
-				yield return StartCoroutine (MovePlayerTo (phase3Door_R.transform.GetChild(0).position, register_R.transform.position, 1f));
+				yield return StartCoroutine (MovePlayerTo (camVehicle.transform.position, register_R.transform.position, 1f));
 			}
 
+			yield return StartCoroutine (WaitForDoorOpenPress ());
 			yield return StartCoroutine (ShowRegisterReward (pathIndex));
 			Debug.Log ("closing the third door now");
-			targetDoor.GetComponent<Doors>().Close();
 		}
 		currentAudio.Stop ();
 		yield return null;
@@ -821,7 +808,7 @@ public class ShoplifterScript : MonoBehaviour {
 
 	IEnumerator WaitForDoorOpenPress()
 	{
-		infoText.text = "Press (X) to open door!";
+		infoText.text = "Press (X) to open register!";
 		infoGroup.alpha = 1f;
 		yield return StartCoroutine (WaitForButtonPress (5f));
 		infoGroup.alpha = 0f;
@@ -866,8 +853,6 @@ public class ShoplifterScript : MonoBehaviour {
 		phase1Door_R = envManager.phase1Door_R;
 		phase2Door_L = envManager.phase2Door_L;
 		phase2Door_R = envManager.phase2Door_R;
-		phase3Door_L = envManager.phase3Door_L;
-		phase3Door_R = envManager.phase3Door_R;
 
 		phase2Start_L =envManager.phase2Start_L;
 		phase2Start_R =envManager.phase2Start_R;

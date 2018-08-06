@@ -28,8 +28,6 @@ public class EnvironmentManager : MonoBehaviour {
 	public GameObject phase1Door_R;
 	public GameObject phase2Door_L;
 	public GameObject phase2Door_R;
-	public GameObject phase3Door_L;
-	public GameObject phase3Door_R;
 
 	//registers
 	public GameObject register_L;
