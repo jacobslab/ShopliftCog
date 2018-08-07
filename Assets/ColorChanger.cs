@@ -25,11 +25,14 @@ public class ColorChanger : MonoBehaviour {
 //				meshRend [i].material.DisableKeyword ("_EMISSION");
 //			} 
 			if (meshRend [i].gameObject.layer == 13) {
-
-				meshRend [i].material.color = selColor;
-				meshRend [i].material.DisableKeyword ("_EMISSION");
-//				meshRend [i].material.SetColor ("_EmissionColor", selColor);
-//				meshRend [i].material.SetTexture ("_EmissionMap", null);
+				Material[] mats = meshRend [i].materials;
+				for(int j=0;j<mats.Length;j++)
+				{
+					if (mats [j].name.Contains ("Concrete")) {
+						meshRend [i].materials [j].color = selColor;
+						meshRend [i].materials [j].DisableKeyword ("_EMISSION");
+					}
+				}
 			}
 			else {
 				meshRend [i].material.color = Color.white;
