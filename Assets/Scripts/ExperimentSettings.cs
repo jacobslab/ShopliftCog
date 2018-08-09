@@ -91,6 +91,8 @@ public class ExperimentSettings : MonoBehaviour {
 //		CheckGamifiedStatus ();
 //		if (SceneManager.GetActiveScene ().name == "EndMenu") {
 //			AttachSceneController ();
+
+		ChangeFirstEnvironment ();
 //		}
 	}
 	// Update is called once per frame
@@ -195,15 +197,16 @@ public class ExperimentSettings : MonoBehaviour {
 //	}
 	public void ChangeFirstEnvironment()
 	{
+		Debug.Log("env dropdown val: " + firstEnvDropdown.value.ToString());
 		switch (firstEnvDropdown.value) {
 		case 0:
-			env = Environment.Cybercity;
-			break;
-		case 1: 
 			env = Environment.SpaceStation;
 			break;
-		default:
+		case 1: 
 			env = Environment.Cybercity;
+			break;
+		default:
+			env = Environment.SpaceStation;
 			break;
 		}
 	}
