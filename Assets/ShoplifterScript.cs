@@ -8,6 +8,7 @@ using UnityEngine.SceneManagement;
 public class ShoplifterScript : MonoBehaviour {
 
     public GameObject camVehicle;
+	public Camera mainCam;
     public GameObject animBody;
     private MouseLook mouseLook;
 
@@ -66,11 +67,11 @@ public class ShoplifterScript : MonoBehaviour {
 
 	//stage 1 learning variables
 	private int numTrials_Learning = 0;
-	public int maxTrials_Learning = 24;
+	private int maxTrials_Learning = 24;
 
 	//stage 2 reevaulation variables
-	public int maxTrials_Reeval = 4;
-	public int maxBlocks_Reeval = 3;
+	private int maxTrials_Reeval = 4;
+	private int maxBlocks_Reeval = 3;
 
     public GameObject leftDoorPos;
     public GameObject rightDoorPos;
@@ -86,6 +87,8 @@ public class ShoplifterScript : MonoBehaviour {
 
     private GameObject leftRoom;
     private GameObject rightRoom;
+
+	float suggestedSpeed = 0f;
 
     private int phase1Choice = 0;
     private int phase2Choice = 0;
@@ -141,6 +144,8 @@ public class ShoplifterScript : MonoBehaviour {
 	private Color roomOneColor;
 	private Color roomTwoColor;
 
+	private GameObject suitcaseObj;
+
 	public GameObject coinShower;
 
 	private List<int> registerLeft;
@@ -160,18 +165,28 @@ public class ShoplifterScript : MonoBehaviour {
 
     public GameObject dummyObj;
 
-
-	private Texture leftTexture;
-	private Texture rightTexture;
-	public List<Texture> suitcaseTextures;
+	private GameObject leftSuitcase;
+	private GameObject rightSuitcase;
+	public List<GameObject> suitcases;
 
 
 	public GameObject suitcasePrefab;
 
 	public GameObject testFloor;
 
+	void Awake()
+	{
+		EnablePlayerCam (false);
+	}
+
+	void EnablePlayerCam(bool shouldEnable)
+	{
+		mainCam.enabled = shouldEnable;
+	}
+
     // Use this for initialization
     void Start() {
+		
 		UpdateFirstEnvironments ();
         infoGroup.alpha = 0f;
 		positiveFeedbackGroup.alpha = 0f;
@@ -179,8 +194,10 @@ public class ShoplifterScript : MonoBehaviour {
         intertrialGroup.alpha = 0f;
 		trainingInstructionsGroup.alpha = 0f;
 		trainingPeriodGroup.alpha = 0f;
-		prefSolo.alpha = 0f;
-		prefGroup.alpha = 0f;
+		prefSolo.gameObject.SetActive (false);
+		prefGroup.gameObject.SetActive (false);
+
+		suitcaseObj = null;
 //        cartAnim.enabled = true;
         camVehicle.SetActive(true);
 //        animBody.SetActive(false);
@@ -220,14 +237,14 @@ public class ShoplifterScript : MonoBehaviour {
 
     }
 
-	void RandomizeSuitcaseTextures()
+	void RandomizeSuitcases()
 	{
 		if (Random.value > 0.5f) {
-			leftTexture = suitcaseTextures [0];
-			rightTexture = suitcaseTextures [1];
+			leftSuitcase = suitcases[0];
+			rightSuitcase = suitcases[1];
 		} else {
-			leftTexture = suitcaseTextures [1];
-			rightTexture = suitcaseTextures [0];
+			leftSuitcase = suitcases[1];
+			rightSuitcase = suitcases[0];
 		}
 	}
 
@@ -341,7 +358,7 @@ public class ShoplifterScript : MonoBehaviour {
 			rightRoomColor = roomTwoColor;
 
 
-			Experiment.Instance.shopLiftLog.LogRooms ("TOY","HARDWARE");
+			Experiment.Instance.shopLiftLog.LogRooms (roomOne.name,roomTwo.name);
         }
         else
         {
@@ -354,7 +371,7 @@ public class ShoplifterScript : MonoBehaviour {
 			rightRoomColor = roomOneColor;
 
 
-			Experiment.Instance.shopLiftLog.LogRooms ("HARDWARE","TOY");
+			Experiment.Instance.shopLiftLog.LogRooms  (roomTwo.name,roomOne.name);
         }
 
 		leftRoom.transform.localPosition = envManager.leftRoomTransform.localPosition;
@@ -406,7 +423,7 @@ public class ShoplifterScript : MonoBehaviour {
 			rightRoomColor = roomTwoColor;
 			three_R_Audio = envManager.three_R_Audio;
 
-			Experiment.Instance.shopLiftLog.LogRooms ("HARDWARE","TOY");
+			Experiment.Instance.shopLiftLog.LogRooms (roomOne.name,roomTwo.name);
 
         }
         else
@@ -420,13 +437,13 @@ public class ShoplifterScript : MonoBehaviour {
 			rightRoomColor = roomOneColor;
 			three_R_Audio = envManager.three_L_Audio;
 
-			Experiment.Instance.shopLiftLog.LogRooms ("TOY","HARDWARE");
+			Experiment.Instance.shopLiftLog.LogRooms  (roomTwo.name,roomOne.name);
         }
 
-		Texture tempTexture=null;
-		leftTexture = tempTexture;
-		leftTexture = rightTexture;
-		rightTexture = tempTexture;
+		GameObject tempSuitcase=null;
+		tempSuitcase = leftSuitcase;
+		leftSuitcase = rightSuitcase;
+		rightSuitcase = tempSuitcase;
 		leftRoom.transform.position = envManager.leftRoomTransform.position;
 		rightRoom.transform.position = envManager.rightRoomTransform.position;
     }
@@ -465,7 +482,7 @@ public class ShoplifterScript : MonoBehaviour {
 			yield return StartCoroutine (RunPhaseOne ((isLeft) ? 0:1,false,-1,false));
 
 			Debug.Log ("about to run phase 2");
-			yield return StartCoroutine (RunPhaseTwo ((isLeft) ? 0:1,false,false,-1,false));
+			yield return StartCoroutine (RunPhaseTwo ((isLeft) ? 0:1,false,false,-1,false,false));
 //			TurnOffRooms ();
 			Debug.Log("about to run phase 3");
 			yield return StartCoroutine(RunPhaseThree((isLeft) ? 0:1,false,false));
@@ -488,7 +505,9 @@ public class ShoplifterScript : MonoBehaviour {
 		registerVals = new List<int> ();
 		for(int i=0;i<2;i++)
         {
-			registerVals.Add(Random.Range(5, 95));
+			int chosenVal = Random.Range (5, 95);
+			registerVals.Add(chosenVal);
+			Experiment.Instance.shopLiftLog.LogRegisterValues (chosenVal);
         }
 
 		Debug.Log ("register val at 0 is: " + registerVals [0].ToString ());
@@ -498,6 +517,9 @@ public class ShoplifterScript : MonoBehaviour {
 
 	IEnumerator RunPhaseOne(int pathIndex, bool isGuided, int guidedChoice, bool terminateWithChoice)
 	{
+		Experiment.Instance.shopLiftLog.LogPathIndex (pathIndex);
+		EnablePlayerCam (true);
+
 		ChangeCamZoneFocus ((pathIndex == 0) ? 0 : 3);
 		GameObject targetDoor = (pathIndex==0) ? phase1Door_L : phase1Door_R;
 		camVehicle.GetComponent<RigidbodyFirstPersonController> ().enabled = false;
@@ -513,22 +535,18 @@ public class ShoplifterScript : MonoBehaviour {
 
 		ChangeCamZoneFocus((pathIndex==0) ? 0:3);
 		ToggleMouseLook(false);
-		Debug.Log ("path index is: " + pathIndex.ToString ());
 		Vector3 startPos = (pathIndex == 0) ? phase1Start_L.transform.position : phase1Start_R.transform.position;
 		Vector3 endPos = (pathIndex == 0) ? phase1End_L.transform.position : phase1End_R.transform.position;
-		Debug.Log ("player pos: " + camVehicle.transform.position.ToString());
-		Debug.Log ("start pos is: " + startPos.ToString());
 		camVehicle.transform.position = startPos;
 		camVehicle.SetActive (true);
-		Debug.Log ("player pos: " + camVehicle.transform.position.ToString());
 		Experiment.Instance.shopLiftLog.LogMoveEvent (1,true);
-		Debug.Log ("about to velo move player");
 		yield return StartCoroutine(VelocityPlayerTo (startPos,endPos, phase1Factor));
 
-		Debug.Log ("finished velo move player");
 		Experiment.Instance.shopLiftLog.LogMoveEvent (1,false);
 
 		clearCameraZoneFlags = true;
+		if(activeCamZone!=null)
+			activeCamZone.GetComponent<CameraZone> ().isFocus = false;
 		yield return StartCoroutine(WaitForDoorOpenPress (doorText));
 		float delayTwo = 0f;
 		if (!terminateWithChoice) {
@@ -586,8 +604,9 @@ public class ShoplifterScript : MonoBehaviour {
 		yield return null;
 	}
 
-	IEnumerator RunPhaseTwo(int pathIndex,bool isDirect, bool isGuided, int guidedChoice, bool terminateWithChoice)
+	IEnumerator RunPhaseTwo(int pathIndex,bool isDirect, bool isGuided, int guidedChoice, bool terminateWithChoice,bool hasRewards)
 	{
+		EnablePlayerCam (true);
 		ChangeCamZoneFocus ((pathIndex == 0) ? 1 : 4);
 		GameObject targetDoor = (pathIndex==0) ? phase2Door_L : phase2Door_R;
 		Vector3 startPos = (pathIndex == 0) ? phase2Start_L.transform.position : phase2Start_R.transform.position;
@@ -607,8 +626,12 @@ public class ShoplifterScript : MonoBehaviour {
 
 		clearCameraZoneFlags = true;
 		float delayThree = 0f;
+		if(activeCamZone!=null)
+			activeCamZone.GetComponent<CameraZone> ().isFocus = false;
 		yield return StartCoroutine (WaitForDoorOpenPress (doorText));
-
+		if (hasRewards) { 
+			suitcaseObj = Instantiate ((pathIndex==0)?leftSuitcase:rightSuitcase, ((pathIndex==0) ?  register_L.transform.position : register_R.transform.position ) + (new Vector3(0f,0.2f,-1f) * 2f), Quaternion.Euler (new Vector3 (-90f, 0f, 0f))) as GameObject;
+		}
 			yield return StartCoroutine(targetDoor.GetComponent<Doors> ().Open ());
 			if (pathIndex == 0) {
 			yield return StartCoroutine (MovePlayerTo (camVehicle.transform.position, phase2Door_L.transform.GetChild(0).position, 0.5f));
@@ -636,6 +659,7 @@ public class ShoplifterScript : MonoBehaviour {
 
 	IEnumerator RunPhaseThree(int pathIndex,bool isDirect, bool hasRewards)
 	{
+		
 		ChangeCamZoneFocus ((pathIndex == 0) ? 2 : 5);
 		Vector3 startPos = (pathIndex == 0) ? phase3Start_L.transform.position : phase3Start_R.transform.position;
 		Vector3 endPos = (pathIndex == 0) ? phase3End_L.transform.position : phase3End_R.transform.position;
@@ -661,12 +685,16 @@ public class ShoplifterScript : MonoBehaviour {
 			} else if (pathIndex == 1) {
 				yield return StartCoroutine (MovePlayerTo (camVehicle.transform.position, register_R.transform.position, 0.5f));
 			}
-
+			Experiment.Instance.shopLiftLog.LogWaitEvent ("REGISTER", true);
+			if(activeCamZone!=null)
+				activeCamZone.GetComponent<CameraZone> ().isFocus = false;
 			yield return StartCoroutine (WaitForDoorOpenPress (registerText));
+			Experiment.Instance.shopLiftLog.LogWaitEvent ("REGISTER", false);
 			yield return StartCoroutine (ShowRegisterReward (pathIndex));
 			Debug.Log ("closing the third door now");
 		}
 		currentAudio.Stop ();
+
 		yield return null;
 	}
 
@@ -684,7 +712,7 @@ public class ShoplifterScript : MonoBehaviour {
 		bool isLeft = (Random.value < 0.5f) ? true: false;
 		bool showOneTwo = false;
 		//stage 1
-		Experiment.Instance.shopLiftLog.LogStageEvent(1,true);
+		Experiment.Instance.shopLiftLog.LogPhaseEvent(1,true);
 
 
 		//		while(numTrials < 1)
@@ -696,12 +724,12 @@ public class ShoplifterScript : MonoBehaviour {
 
 			Debug.Log ("about to run phase 2");
 
-				yield return StartCoroutine (RunPhaseTwo((isLeft) ? 0 : 1,false,false,-1,true));
+				yield return StartCoroutine (RunPhaseTwo((isLeft) ? 0 : 1,false,false,-1,true,true));
 
 			Debug.Log("about to run phase 3");
 			yield return StartCoroutine(RunPhaseThree((isLeft) ? 0:1,false,true));
 //			TurnOffRooms ();
-			if (numTrials_Learning % 3 == 0 && numTrials_Learning > 0) {
+			if (numTrials_Learning==2 || numTrials_Learning==15 || numTrials_Learning==maxTrials_Learning-1) {
 				showOneTwo = !showOneTwo;
 				if (sliderCount <= 5) {
 					if (showOneTwo) {
@@ -720,7 +748,7 @@ public class ShoplifterScript : MonoBehaviour {
 		}
 
 		camVehicle.GetComponent<RigidbodyFirstPersonController>().enabled=false;
-		Experiment.Instance.shopLiftLog.LogStageEvent (1, false);
+		Experiment.Instance.shopLiftLog.LogPhaseEvent (1, false);
 		yield return null;
 	}
 
@@ -736,13 +764,13 @@ public class ShoplifterScript : MonoBehaviour {
 		else
 			SetupRewardReeval ();
 		
-		Experiment.Instance.shopLiftLog.LogStageEvent(2,true);
+		Experiment.Instance.shopLiftLog.LogPhaseEvent(2,true);
 		while (numBlocks_Reeval < maxBlocks_Reeval) {
 			while (numTrials_Reeval < maxTrials_Reeval) {
 				leftChoice = !leftChoice; //flip it
 
 				Debug.Log ("about to run phase 2");
-				yield return StartCoroutine (RunPhaseTwo((leftChoice) ? 0 : 1,true,false,-1,true));
+				yield return StartCoroutine (RunPhaseTwo((leftChoice) ? 0 : 1,true,false,-1,true,true));
 
 				Debug.Log("about to run phase 3");
 				yield return StartCoroutine(RunPhaseThree((leftChoice) ? 0:1,false,true));
@@ -759,13 +787,14 @@ public class ShoplifterScript : MonoBehaviour {
 			yield return 0;
 		}
 		yield return StartCoroutine (ShowNextStageScreen ());
-		Experiment.Instance.shopLiftLog.LogStageEvent(2,false);
+		Experiment.Instance.shopLiftLog.LogPhaseEvent(2,false);
 		yield return null;
 	}
 	IEnumerator RunRestPeriod()
 	{
 		restGroup.alpha = 1f;
-		yield return new WaitForSeconds (20f);
+		EnablePlayerCam (false);
+		yield return new WaitForSeconds (15f);
 		restGroup.alpha = 0f;
 		yield return null;
 	}
@@ -774,32 +803,34 @@ public class ShoplifterScript : MonoBehaviour {
 	IEnumerator RunTestingPhase()
 	{
 		bool leftChoice = false;
-		for (int i = 3; i < 4; i++) {
+		Experiment.Instance.shopLiftLog.LogPhaseEvent (3, true);
+		for (int i = 0; i < 4; i++) {
 			leftChoice = !leftChoice;
 			yield return StartCoroutine(RunPhaseOne ((leftChoice) ? 0 : 1, false, -1, true));
 			if (i == 1 || i == 3) {
 				yield return StartCoroutine (RunRestPeriod ());
 			}
-			if (i==3) {
+			if (i==1) {
 				yield return StartCoroutine (AskSoloPreference (0));
 				yield return StartCoroutine (AskSoloPreference (1));
 				yield return StartCoroutine (AskPreference (0));
 
 			}
 		}
-		yield return StartCoroutine (ShowEndTrialScreen ());
+
+		Experiment.Instance.shopLiftLog.LogPhaseEvent (3, false);
 		yield return null;
 	}
 
 	void SetupTransitionReeval()
 	{
+		Experiment.Instance.shopLiftLog.LogTransitionReeval ();
 		ReassignRooms ();
 	}
 
 	void SetupRewardReeval()
 	{
-		int temp = 0;
-		int temp2 = 0;
+		Experiment.Instance.shopLiftLog.LogRewardReeval ();
 		Debug.Log ("count: " + registerVals.Count.ToString ());
 		registerVals.Reverse ();
 		Debug.Log ("count: " + registerVals.Count.ToString ());
@@ -822,11 +853,12 @@ public class ShoplifterScript : MonoBehaviour {
 	{
 		Cursor.visible = true;
 		Cursor.lockState = CursorLockMode.None;
+		prefSolo.gameObject.SetActive (true);
 		prefSolo.GetComponent<PrefSoloSetup> ().SetupPrefs (prefIndex);
 
-		prefSolo.alpha = 1f;
 		yield return StartCoroutine (WaitForButtonPress (10f));
-		prefSolo.alpha = 0f;
+
+		prefSolo.gameObject.SetActive (false);
 		Cursor.visible = false;
 
 		yield return null;
@@ -835,7 +867,9 @@ public class ShoplifterScript : MonoBehaviour {
 	IEnumerator AskPreference(int prefType)
 	{
 		Cursor.visible = true;
+		EnablePlayerCam (false);
 		Cursor.lockState = CursorLockMode.None;
+		prefGroup.gameObject.SetActive (true);
 		switch (prefType) {
 		//between 1 and 2
 		case 0:
@@ -848,9 +882,9 @@ public class ShoplifterScript : MonoBehaviour {
 			
 		}
 
-		prefGroup.alpha = 1f;
 		yield return StartCoroutine (WaitForButtonPress (10f));
-		prefGroup.alpha = 0f;
+
+		prefGroup.gameObject.SetActive (false);
 
 		Cursor.visible = false;
 		yield return null;
@@ -860,7 +894,9 @@ public class ShoplifterScript : MonoBehaviour {
 	{
 		infoText.text = text;
 		infoGroup.alpha = 1f;
+		Experiment.Instance.shopLiftLog.LogWaitEvent("DOOR",true);
 		yield return StartCoroutine (WaitForButtonPress (5f));
+		Experiment.Instance.shopLiftLog.LogWaitEvent("DOOR",false);
 		infoGroup.alpha = 0f;
 		yield return null;
 	}
@@ -872,6 +908,10 @@ public class ShoplifterScript : MonoBehaviour {
 			timer += Time.deltaTime;
 			yield return 0;
 		}
+		if (timer < maxWaitTime)
+			Experiment.Instance.shopLiftLog.LogButtonPress ();
+		else
+			Experiment.Instance.shopLiftLog.LogTimeout (maxWaitTime);
 		yield return null;
 	}
 
@@ -940,6 +980,8 @@ public class ShoplifterScript : MonoBehaviour {
 		leftRegisterObj = envManager.leftRegisterObj;
 		rightRegisterObj = envManager.rightRegisterObj;
 
+		Experiment.Instance.shopLiftLog.LogEnvironmentSelection(activeEnvLabel);
+
 		//after env has been selected and all necessary object references set, assign rooms and randomize cam zones
 		AssignRooms ();
 		RandomizeSpeedChangeZones ();
@@ -950,6 +992,7 @@ public class ShoplifterScript : MonoBehaviour {
     IEnumerator RunTask()
     {
 		stageIndex = 1;
+
 
 		yield return StartCoroutine(PickRegisterValues());
 
@@ -962,7 +1005,7 @@ public class ShoplifterScript : MonoBehaviour {
 			//randomize rooms and cam zones again
 			AssignRooms ();
 			RandomizeCameraZones ();
-			RandomizeSuitcaseTextures ();
+			RandomizeSuitcases();
 
 			//learning phase
 			if (ExperimentSettings.isLearning)
@@ -1037,17 +1080,14 @@ public class ShoplifterScript : MonoBehaviour {
 		switch (choiceOutput) {
 		case 0:
 			chosenRegister = leftRegisterObj;
-			chosenTexture = leftTexture;
 			break;
 		case 1:
 			chosenRegister = rightRegisterObj;
-			chosenTexture = rightTexture;
 			break;
 		
 		}
 
 		Debug.Log("chosen register is: " + chosenRegister.name);
-		GameObject suitcaseObj = Instantiate (suitcasePrefab, camVehicle.transform.position + (new Vector3(0f,0.2f,-1f) * 2f), Quaternion.Euler (new Vector3 (-90f, 180f, 0f))) as GameObject;
 //		suitcaseObj.GetComponent<Suitcase> ().ChooseTexture (chosenTexture);
 		//first wait for 1 second to show face/scene
 //		yield return new WaitForSeconds (2f);
@@ -1056,18 +1096,20 @@ public class ShoplifterScript : MonoBehaviour {
 		suitcaseObj.GetComponent<Animator> ().SetTrigger ("Open");
 //		suitcaseObj.GetComponent<Suitcase>().TurnImageOff();
 
-		GameObject coinShowerObj = Instantiate(coinShower,chosenRegister.transform.position,Quaternion.identity) as GameObject;		
+		//wait until suitcase is fully open
+		yield return new WaitForSeconds (0.5f);
+
+		GameObject coinShowerObj = Instantiate(coinShower,((pathIndex==0) ?  register_L.transform.position : register_R.transform.position ) + (new Vector3(0f,0.2f,-1f) * 2f),Quaternion.identity) as GameObject;		
+
 		if (activeEnvLabel == "Cybercity") {
 			coinShowerObj.transform.GetChild (0).transform.localPosition = Vector3.zero;
 		}
-		//wait until suitcase is fully open
-		yield return new WaitForSeconds (0.5f);
 		rewardScore.enabled = true;
 		rewardScore.text = "$" + registerVals [choiceOutput].ToString ();
 
 		chosenRegister.GetComponent<AudioSource> ().Play (); //play the cash register audio
 
-		Experiment.Instance.shopLiftLog.LogRegisterReward(phase1Choice,phase2Choice,registerVals[choiceOutput]);
+		Experiment.Instance.shopLiftLog.LogRegisterReward(registerVals[choiceOutput],choiceOutput);
 //        infoText.text = "You got $" + registerVals[choiceOutput].ToString() + " from the register";
 		Debug.Log("waiting for 2 seconds");
 		yield return StartCoroutine(rewardScore.gameObject.GetComponent<FontChanger> ().GrowText (2f));
@@ -1081,6 +1123,8 @@ public class ShoplifterScript : MonoBehaviour {
 
 	IEnumerator ShowNextStageScreen()
 	{
+
+		EnablePlayerCam (false);
 		intertrialGroup.alpha = 1f;
 		intertrialText.text = "On the next day...";
 		Experiment.Instance.shopLiftLog.LogEndTrial ();
@@ -1091,6 +1135,8 @@ public class ShoplifterScript : MonoBehaviour {
 
     IEnumerator ShowEndTrialScreen()
     {
+
+		EnablePlayerCam (false);
         intertrialGroup.alpha = 1f;
 		intertrialText.text = "Starting next trial...";
 		Experiment.Instance.shopLiftLog.LogEndTrial ();
@@ -1119,6 +1165,12 @@ public class ShoplifterScript : MonoBehaviour {
 
 	public void RandomizeSpeed()
 	{
+		if (suggestedSpeed != 0f) {
+			Debug.Log ("set speed to suggested speed: " + suggestedSpeed.ToString ());
+
+			currentSpeed = Mathf.Clamp (suggestedSpeed, minSpeed, maxSpeed);
+		}
+		else
 		currentSpeed = Random.Range (minSpeed, maxSpeed);
 //		Debug.Log ("randomized speed to: " + currentSpeed.ToString ());
 	}
@@ -1192,19 +1244,22 @@ public class ShoplifterScript : MonoBehaviour {
 	IEnumerator VelocityPlayerTo(Vector3 startPos, Vector3 endPos, float factor)
 	{
 		Vector3 moveDir = new Vector3 (0f, 0f, -1f);
+		//set some initial current speed
+		currentSpeed = Random.Range(minSpeed,maxSpeed);
+		float distanceLeft = Vector3.Distance(camVehicle.transform.position,endPos);
 		camVehicle.GetComponent<RigidbodyFirstPersonController> ().enabled = false;
 		float timer = 0f;
 		Debug.Log ("velocity player movement");
-		while (Vector3.Distance(camVehicle.transform.position,endPos) > 1.5f) {
+		while (distanceLeft > 1.5f) {
 			timer += Time.deltaTime;
-//			Debug.Log ("timer " + timer.ToString ());
-//			Debug.Log("move dir: " + moveDir.ToString() + " current speed: " + currentSpeed.ToString());
 			camVehicle.GetComponent<Rigidbody>().velocity = moveDir * currentSpeed;
-//			Debug.Log ("distance to end: " + Vector3.Distance (camVehicle.transform.position, endPos).ToString ());
-//			camVehicle.transform.position = Vector3.Lerp (startPos, endPos, timer / factor);
+			distanceLeft = Vector3.Distance (camVehicle.transform.position, endPos);
+			if(factor > timer + 0.1f)
+				suggestedSpeed = distanceLeft / (factor - timer);
 			yield return 0;
 		}
 //		Debug.Log ("stopping the player");
+		Debug.Log("final timer: " + timer.ToString());
 		camVehicle.GetComponent<Rigidbody> ().velocity = Vector3.zero;
 //		camVehicle.GetComponent<RigidbodyFirstPersonController> ().enabled = true;
 		yield return null;

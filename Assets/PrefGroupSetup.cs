@@ -19,6 +19,10 @@ public class PrefGroupSetup : MonoBehaviour {
 	void Update () {
 		
 	}
+	public void UpdateSlider()
+	{
+		Experiment.Instance.shopLiftLog.LogSliderValue (0, prefSlider.value);
+	}
 
 	public void SetupPrefs(int prefType)
 	{
@@ -36,9 +40,11 @@ public class PrefGroupSetup : MonoBehaviour {
 		if (Random.value < 0.5f) {
 			leftImg.texture = targetGroup [0];
 			rightImg.texture = targetGroup [1];
+			Experiment.Instance.shopLiftLog.LogComparativePrefImage (prefType,0, 1);
 		} else {
 			leftImg.texture = targetGroup [1];
 			rightImg.texture = targetGroup [0];
+			Experiment.Instance.shopLiftLog.LogComparativePrefImage (prefType,1, 0);
 		}
 	}
 }

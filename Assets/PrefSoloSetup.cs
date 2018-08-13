@@ -18,10 +18,16 @@ public class PrefSoloSetup : MonoBehaviour {
 
 	}
 
+	public void UpdateSlider()
+	{
+		Experiment.Instance.shopLiftLog.LogSliderValue (1, prefSlider.value);
+	}
+
 	public void SetupPrefs(int prefIndex)
 	{
 		List<Texture> targetGroup = new List<Texture> ();
 		prefSlider.value = 0.5f;
+		Experiment.Instance.shopLiftLog.LogSoloPrefImage (prefIndex);
 		focusImg.texture = imgGroup [prefIndex];
 	}
 }

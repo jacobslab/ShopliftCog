@@ -5,16 +5,36 @@ using UnityEngine;
 
 public class Suitcase : MonoBehaviour {
 
-	public GameObject imageQuad;
+	public List<MeshRenderer> targetRends;
+	public List<Material> chosenMats;
 	// Use this for initialization
 	void Awake () {
 		TurnImageOff ();
 	}
 
-	public void ChooseTexture(Texture targetTexture)
+//	public void ChooseTexture(Texture targetTexture)
+//	{
+//		for (int i = 0; i < targetRends.Count; i++) {
+//			targetRends[i].GetComponent<MeshRenderer> ().material.mainTexture = targetTexture;
+//		}
+//	}
+
+	public void ChangeTargetRendMaterial(int matIndex)
 	{
-		imageQuad.GetComponent<MeshRenderer> ().material.mainTexture = targetTexture;
-		imageQuad.SetActive (true);
+		Debug.Log ("changing for index: " + matIndex.ToString ());
+		for (int i = 0; i < targetRends.Count; i++) {
+
+			if (i == 0) {
+				Debug.Log (targetRends [i].materials [1].name);
+				targetRends [i].materials [1] = chosenMats [matIndex];
+				Debug.Log (targetRends [i].materials [1].name);
+			} else {
+				Debug.Log (targetRends [i].materials [0].name);
+				targetRends [i].material = chosenMats [matIndex];
+				Debug.Log (targetRends [i].materials [0].name);
+			}
+			
+		}
 	}
 	
 	// Update is called once per frame
@@ -24,6 +44,6 @@ public class Suitcase : MonoBehaviour {
 
 	public void TurnImageOff()
 	{
-		imageQuad.SetActive (false);
+	//	imageQuad.SetActive (false);
 	}
 }
