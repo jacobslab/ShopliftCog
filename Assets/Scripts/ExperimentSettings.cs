@@ -25,6 +25,15 @@ public class ExperimentSettings : MonoBehaviour {
 	}
 
 	public static Environment env;
+
+
+	public enum ReevalType
+	{
+		Transition,
+		Reward
+	}
+
+	public static ReevalType reevalType;
 	//build info
 	string buildDate;
 	public Text buildType;
@@ -65,6 +74,7 @@ public class ExperimentSettings : MonoBehaviour {
 	public Toggle testingToggle;
 
 	public Dropdown firstEnvDropdown;
+	public Dropdown reevalDropdown;
 
 	bool isWeb = false;
 
@@ -93,6 +103,7 @@ public class ExperimentSettings : MonoBehaviour {
 //			AttachSceneController ();
 
 		ChangeFirstEnvironment ();
+		ChangeReevalType ();
 //		}
 	}
 	// Update is called once per frame
@@ -207,6 +218,22 @@ public class ExperimentSettings : MonoBehaviour {
 			break;
 		default:
 			env = Environment.SpaceStation;
+			break;
+		}
+	}
+
+	public void ChangeReevalType()
+	{
+		Debug.Log("reeval dropdown val: " + reevalDropdown.value.ToString());
+		switch (reevalDropdown.value) {
+		case 0:
+			reevalType = ReevalType.Transition;
+			break;
+		case 1: 
+			reevalType = ReevalType.Reward;
+			break;
+		default:
+			reevalType = ReevalType.Transition;
 			break;
 		}
 	}

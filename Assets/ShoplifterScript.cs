@@ -73,6 +73,10 @@ public class ShoplifterScript : MonoBehaviour {
 	private int maxTrials_Reeval = 4;
 	private int maxBlocks_Reeval = 3;
 
+
+	//stage 4 post-test variables
+	private int maxTrials_PostTest = 10;
+
     public GameObject leftDoorPos;
     public GameObject rightDoorPos;
     public float phase1Factor = 5f;
@@ -220,18 +224,10 @@ public class ShoplifterScript : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
-//        if (Input.GetKeyDown(KeyCode.E)) {
-//            StartCoroutine("RunTask");
-//        }
-//		rigidStatusText.text = camVehicle.GetComponent<Rigidbody>().velocity.ToString();
+		
         if(Input.GetKeyDown(KeyCode.Escape))
         {
 			Application.Quit ();
-//			phase2Walls [0] = toyColor;
-            //camVehicle.GetComponent<RigidbodyFirstPersonController>().mouseLook.m_CharacterTargetRot = Quaternion.Euler(dummyObj.transform.eulerAngles);
-    //        camVehicle.GetComponent<RigidbodyFirstPersonController>().mouseLook.m_CameraTargetRot = Quaternion.identity;
-     //       camVehicle.GetComponent<RigidbodyFirstPersonController>().cam.transform.rotation = Quaternion.Euler(dummyObj.transform.eulerAngles);
-        //     camVehicle.GetComponent<RigidbodyFirstPersonController>().RotateView(dummyObj.transform);
         }
 
 
@@ -600,7 +596,9 @@ public class ShoplifterScript : MonoBehaviour {
 		}
 
 		Debug.Log ("closing the first door now");
-		targetDoor.GetComponent<Doors> ().Close ();
+		if (!terminateWithChoice) {
+			targetDoor.GetComponent<Doors> ().Close ();
+		}
 		yield return null;
 	}
 
@@ -699,24 +697,27 @@ public class ShoplifterScript : MonoBehaviour {
 	}
 
 
-	IEnumerator RunLearningPhase()
+	IEnumerator RunLearningPhase(bool isPostTest, int maxTrials)
 	{
 		Debug.Log("running task");
 		int sliderCount = 0;
-		instructionGroup.alpha = 1f;
-		yield return StartCoroutine (WaitForButtonPress (10000f));
-		instructionGroup.alpha = 0f;
+		if (!isPostTest) {
+			instructionGroup.alpha = 1f;
+			yield return StartCoroutine (WaitForButtonPress (10000f));
+			instructionGroup.alpha = 0f;
 
-		ChangeCameraZoneVisibility (false); // no need to show cam zones as they were already shown during training
-
+			ChangeCameraZoneVisibility (false); // no need to show cam zones as they were already shown during training
+			//stage 1
+			Experiment.Instance.shopLiftLog.LogPhaseEvent (1, true);
+		} else {
+			Experiment.Instance.shopLiftLog.LogPhaseEvent (4, true);
+		}
 		bool isLeft = (Random.value < 0.5f) ? true: false;
 		bool showOneTwo = false;
-		//stage 1
-		Experiment.Instance.shopLiftLog.LogPhaseEvent(1,true);
 
 
 		//		while(numTrials < 1)
-		while(numTrials_Learning < maxTrials_Learning)
+		while(numTrials_Learning < maxTrials)
 		{ 
 			Debug.Log ("about to run phase 1");
 			isLeft = !isLeft;
@@ -729,7 +730,7 @@ public class ShoplifterScript : MonoBehaviour {
 			Debug.Log("about to run phase 3");
 			yield return StartCoroutine(RunPhaseThree((isLeft) ? 0:1,false,true));
 //			TurnOffRooms ();
-			if (numTrials_Learning==2 || numTrials_Learning==15 || numTrials_Learning==maxTrials_Learning-1) {
+			if (numTrials_Learning==2 || numTrials_Learning==15 || numTrials_Learning==maxTrials-1) {
 				showOneTwo = !showOneTwo;
 				if (sliderCount <= 5) {
 					if (showOneTwo) {
@@ -739,7 +740,7 @@ public class ShoplifterScript : MonoBehaviour {
 				}
 				sliderCount++;
 			}
-			if (numTrials_Learning < maxTrials_Learning - 1)
+			if (numTrials_Learning < maxTrials - 1)
 				yield return StartCoroutine (ShowEndTrialScreen ());
 			else
 				yield return StartCoroutine (ShowNextStageScreen ());
@@ -759,9 +760,9 @@ public class ShoplifterScript : MonoBehaviour {
 		Debug.Log("about to start Re-Evaluation Phase");
 		stageIndex = 2;
 		bool leftChoice = false;
-		if (Random.value<0.5f)
+		if (ExperimentSettings.reevalType == ExperimentSettings.ReevalType.Transition)
 			SetupTransitionReeval ();
-		else
+		else if(ExperimentSettings.reevalType == ExperimentSettings.ReevalType.Reward)
 			SetupRewardReeval ();
 		
 		Experiment.Instance.shopLiftLog.LogPhaseEvent(2,true);
@@ -790,11 +791,11 @@ public class ShoplifterScript : MonoBehaviour {
 		Experiment.Instance.shopLiftLog.LogPhaseEvent(2,false);
 		yield return null;
 	}
-	IEnumerator RunRestPeriod()
+	IEnumerator RunRestPeriod(float waitTime)
 	{
 		restGroup.alpha = 1f;
 		EnablePlayerCam (false);
-		yield return new WaitForSeconds (15f);
+		yield return new WaitForSeconds (waitTime);
 		restGroup.alpha = 0f;
 		yield return null;
 	}
@@ -803,18 +804,49 @@ public class ShoplifterScript : MonoBehaviour {
 	IEnumerator RunTestingPhase()
 	{
 		bool leftChoice = false;
-		Experiment.Instance.shopLiftLog.LogPhaseEvent (3, true);
-		for (int i = 0; i < 4; i++) {
-			leftChoice = !leftChoice;
-			yield return StartCoroutine(RunPhaseOne ((leftChoice) ? 0 : 1, false, -1, true));
-			if (i == 1 || i == 3) {
-				yield return StartCoroutine (RunRestPeriod ());
-			}
-			if (i==1) {
-				yield return StartCoroutine (AskSoloPreference (0));
-				yield return StartCoroutine (AskSoloPreference (1));
-				yield return StartCoroutine (AskPreference (0));
 
+		Experiment.Instance.shopLiftLog.LogPhaseEvent (3, true);
+		//run two instances of comp slider  + 2sec resting phase
+		for (int i = 0; i < 2; i++) {
+			yield return StartCoroutine (AskPreference (0));
+			yield return StartCoroutine (RunRestPeriod (2f));
+		}
+		List<int> caseOrder = new List<int> ();
+		for (int i = 0; i < 4; i++) {
+			caseOrder.Add(i);
+		}
+
+		for (int i = 0; i < 4; i++) {
+
+			int randIndex = Random.Range (0, caseOrder.Count);
+			int chosenIndex = caseOrder [randIndex];
+			caseOrder.RemoveAt (randIndex);
+
+			switch (chosenIndex) {
+			case 0:
+				yield return StartCoroutine (RunPhaseOne (0, false, -1, true));
+				yield return StartCoroutine (RunRestPeriod (15f));
+				yield return StartCoroutine (AskSoloPreference (0));
+				yield return StartCoroutine (RunRestPeriod (2f));
+				break;
+			case 1:
+				yield return StartCoroutine(RunPhaseOne (1, false, -1, true));
+				yield return StartCoroutine (RunRestPeriod (15f));
+				yield return StartCoroutine (AskSoloPreference (1));
+				yield return StartCoroutine (RunRestPeriod (2f));
+				break;
+			case 2:
+				yield return StartCoroutine(RunPhaseOne (0, false, -1, true));
+				yield return StartCoroutine (RunRestPeriod (15f));
+				yield return StartCoroutine (AskSoloPreference (0));
+				yield return StartCoroutine (RunRestPeriod (2f));
+				break;
+			case 3:
+				yield return StartCoroutine(RunPhaseOne (1, false, -1, true));
+				yield return StartCoroutine (RunRestPeriod (15f));
+				yield return StartCoroutine (AskSoloPreference (1));
+				yield return StartCoroutine (RunRestPeriod (2f));
+				break;
 			}
 		}
 
@@ -867,7 +899,6 @@ public class ShoplifterScript : MonoBehaviour {
 	IEnumerator AskPreference(int prefType)
 	{
 		Cursor.visible = true;
-		EnablePlayerCam (false);
 		Cursor.lockState = CursorLockMode.None;
 		prefGroup.gameObject.SetActive (true);
 		switch (prefType) {
@@ -881,7 +912,6 @@ public class ShoplifterScript : MonoBehaviour {
 			break;
 			
 		}
-
 		yield return StartCoroutine (WaitForButtonPress (10f));
 
 		prefGroup.gameObject.SetActive (false);
@@ -1009,7 +1039,7 @@ public class ShoplifterScript : MonoBehaviour {
 
 			//learning phase
 			if (ExperimentSettings.isLearning)
-				yield return StartCoroutine (RunLearningPhase ());
+				yield return StartCoroutine (RunLearningPhase (false,maxTrials_Learning));
 
 			//shuffle rewards
 //		ReassignRooms ();
@@ -1022,6 +1052,11 @@ public class ShoplifterScript : MonoBehaviour {
 			//testing phase
 			if (ExperimentSettings.isTesting)
 				yield return StartCoroutine (RunTestingPhase ());
+
+			//if transition phase, play 10-trial additional learning
+			if (ExperimentSettings.reevalType == ExperimentSettings.ReevalType.Transition) {
+				yield return StartCoroutine (RunLearningPhase (true,maxTrials_PostTest));
+			}
 
 			//show end session screen
 			yield return StartCoroutine (ShowEndEnvironmentStageScreen ());

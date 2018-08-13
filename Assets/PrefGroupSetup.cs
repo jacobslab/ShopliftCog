@@ -12,7 +12,11 @@ public class PrefGroupSetup : MonoBehaviour {
 	public List<Texture> firstGroup;
 	public List<Texture> secondGroup;
 	// Use this for initialization
-	void Start () {
+	void OnEnable () {
+		//update on enable
+
+		if(Experiment.Instance!=null)
+			UpdateSlider ();
 	}
 	
 	// Update is called once per frame

@@ -10,7 +10,10 @@ public class PrefSoloSetup : MonoBehaviour {
 
 	public List<Texture> imgGroup;
 	// Use this for initialization
-	void Start () {
+	void OnEnable () {
+		//update on enable
+		if(Experiment.Instance!=null)
+			UpdateSlider ();
 	}
 
 	// Update is called once per frame
