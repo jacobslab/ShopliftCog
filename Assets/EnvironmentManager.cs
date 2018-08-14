@@ -67,6 +67,8 @@ public class EnvironmentManager : MonoBehaviour {
 	public GameObject roomOneRoadblock;
 	public GameObject roomTwoRoadblock;
 
+	public Material envSkybox;
+
 	// Use this for initialization
 	void Start () {
 		

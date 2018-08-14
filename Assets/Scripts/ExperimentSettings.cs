@@ -21,7 +21,8 @@ public class ExperimentSettings : MonoBehaviour {
 	public enum Environment
 	{
 		Cybercity,
-		SpaceStation
+		SpaceStation,
+		WesternTown
 	}
 
 	public static Environment env;
@@ -75,6 +76,8 @@ public class ExperimentSettings : MonoBehaviour {
 
 	public Dropdown firstEnvDropdown;
 	public Dropdown reevalDropdown;
+
+	public static int envIndex= 0;
 
 	bool isWeb = false;
 
@@ -209,12 +212,17 @@ public class ExperimentSettings : MonoBehaviour {
 	public void ChangeFirstEnvironment()
 	{
 		Debug.Log("env dropdown val: " + firstEnvDropdown.value.ToString());
+		envIndex = firstEnvDropdown.value;
 		switch (firstEnvDropdown.value) {
+
 		case 0:
 			env = Environment.SpaceStation;
 			break;
 		case 1: 
 			env = Environment.Cybercity;
+			break;
+		case 2:
+			env = Environment.WesternTown;
 			break;
 		default:
 			env = Environment.SpaceStation;

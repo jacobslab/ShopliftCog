@@ -56,6 +56,7 @@ public class ShoplifterScript : MonoBehaviour {
 	//environments
 	public GameObject spaceStationEnv;
 	public GameObject cybercityEnv;
+	public GameObject westernTownEnv;
 
 	//speed change zones
 	public List<GameObject> phase1SpeedChangeZones_L;
@@ -64,6 +65,10 @@ public class ShoplifterScript : MonoBehaviour {
 	public List<GameObject> phase2SpeedChangeZones_R;
 	public List<GameObject> phase3SpeedChangeZones_L;
 	public List<GameObject> phase3SpeedChangeZones_R;
+
+
+	public List<int> registerVal1;
+	public List<int> registerVal2;
 
 	//stage 1 learning variables
 	private int numTrials_Learning = 0;
@@ -123,6 +128,7 @@ public class ShoplifterScript : MonoBehaviour {
 	public CanvasGroup warningFeedbackGroup;
 	public CanvasGroup prefSolo;
 	public CanvasGroup prefGroup;
+	public CanvasGroup imagineGroup;
 
 
 	private GameObject roomOne;
@@ -175,6 +181,7 @@ public class ShoplifterScript : MonoBehaviour {
 
 
 	public GameObject suitcasePrefab;
+	private Material skyboxMat;
 
 	public GameObject testFloor;
 
@@ -193,6 +200,7 @@ public class ShoplifterScript : MonoBehaviour {
 		
 		UpdateFirstEnvironments ();
         infoGroup.alpha = 0f;
+		imagineGroup.alpha = 0f;
 		positiveFeedbackGroup.alpha = 0f;
 		negativeFeedbackGroup.alpha = 0f;
         intertrialGroup.alpha = 0f;
@@ -499,12 +507,15 @@ public class ShoplifterScript : MonoBehaviour {
     {
 		registerLeft = new List<int> ();
 		registerVals = new List<int> ();
-		for(int i=0;i<2;i++)
-        {
-			int chosenVal = Random.Range (5, 95);
-			registerVals.Add(chosenVal);
-			Experiment.Instance.shopLiftLog.LogRegisterValues (chosenVal);
-        }
+		int index = Random.Range(0,registerVal1.Count);
+		registerVals.Add(registerVal1[index]);
+		registerVals.Add(registerVal2[index]);
+
+		Experiment.Instance.shopLiftLog.LogRegisterValues (registerVal1[index]);
+		Experiment.Instance.shopLiftLog.LogRegisterValues (registerVal2[index]);
+
+		registerVal1.RemoveAt (index);
+		registerVal2.RemoveAt (index);
 
 		Debug.Log ("register val at 0 is: " + registerVals [0].ToString ());
 		Debug.Log ("register val at 1 is: " + registerVals [1].ToString ());
@@ -730,7 +741,7 @@ public class ShoplifterScript : MonoBehaviour {
 			Debug.Log("about to run phase 3");
 			yield return StartCoroutine(RunPhaseThree((isLeft) ? 0:1,false,true));
 //			TurnOffRooms ();
-			if (numTrials_Learning==2 || numTrials_Learning==15 || numTrials_Learning==maxTrials-1) {
+			if (numTrials_Learning==3 || numTrials_Learning==9 || numTrials_Learning ==15 || numTrials_Learning==maxTrials-1) {
 				showOneTwo = !showOneTwo;
 				if (sliderCount <= 5) {
 					if (showOneTwo) {
@@ -821,7 +832,9 @@ public class ShoplifterScript : MonoBehaviour {
 			int randIndex = Random.Range (0, caseOrder.Count);
 			int chosenIndex = caseOrder [randIndex];
 			caseOrder.RemoveAt (randIndex);
-
+			imagineGroup.alpha = 1f;
+			yield return new WaitForSeconds (2f);
+			imagineGroup.alpha = 0f;
 			switch (chosenIndex) {
 			case 0:
 				yield return StartCoroutine (RunPhaseOne (0, false, -1, true));
@@ -885,6 +898,7 @@ public class ShoplifterScript : MonoBehaviour {
 	{
 		Cursor.visible = true;
 		Cursor.lockState = CursorLockMode.None;
+		EnablePlayerCam (false);
 		prefSolo.gameObject.SetActive (true);
 		prefSolo.GetComponent<PrefSoloSetup> ().SetupPrefs (prefIndex);
 
@@ -900,6 +914,7 @@ public class ShoplifterScript : MonoBehaviour {
 	{
 		Cursor.visible = true;
 		Cursor.lockState = CursorLockMode.None;
+		EnablePlayerCam (false);
 		prefGroup.gameObject.SetActive (true);
 		switch (prefType) {
 		//between 1 and 2
@@ -952,18 +967,9 @@ public class ShoplifterScript : MonoBehaviour {
 			environments [i].SetActive (false);
 		}
 		Debug.Log ("picking environment");
-		switch (envIndex) {
-		case 0:
-			environments [0].SetActive (true);
-			envManager = environments [0].GetComponent<EnvironmentManager> ();
-			activeEnvLabel = environments [0].name;
-			break;
-		case 1:
-			environments [1].SetActive (true);
-			envManager = environments [1].GetComponent<EnvironmentManager> ();
-			activeEnvLabel = environments [1].name;
-			break;
-		}
+		environments [envIndex].SetActive (true);
+		envManager = environments [envIndex].GetComponent<EnvironmentManager> ();
+		activeEnvLabel = environments [envIndex].name;
 		phase1Start_L =envManager.phase1Start_L;
 		phase1Start_R =envManager.phase1Start_R;
 		phase1End_L =envManager.phase1End_L;
@@ -1004,6 +1010,9 @@ public class ShoplifterScript : MonoBehaviour {
 		phase3CamZone_L = envManager.phase3CamZone_L;
 		phase3CamZone_R = envManager.phase3CamZone_R;
 
+		skyboxMat = envManager.envSkybox;
+		RenderSettings.skybox = skyboxMat;
+
 		register_L = envManager.register_L;
 		register_R = envManager.register_R;
 
@@ -1027,7 +1036,7 @@ public class ShoplifterScript : MonoBehaviour {
 		yield return StartCoroutine(PickRegisterValues());
 
 		for (int i = 0; i < environments.Count; i++) {
-			yield return StartCoroutine (PickEnvironment (i));
+			yield return StartCoroutine (PickEnvironment (ExperimentSettings.envIndex));
 
 			if (ExperimentSettings.isTraining)
 				yield return StartCoroutine (RunCamTrainingPhase ());
@@ -1055,9 +1064,10 @@ public class ShoplifterScript : MonoBehaviour {
 
 			//if transition phase, play 10-trial additional learning
 			if (ExperimentSettings.reevalType == ExperimentSettings.ReevalType.Transition) {
+				Debug.Log ("RUNNING ADDITIONAL LEARN PHASE");
 				yield return StartCoroutine (RunLearningPhase (true,maxTrials_PostTest));
 			}
-
+			Debug.Log ("about to end session");
 			//show end session screen
 			yield return StartCoroutine (ShowEndEnvironmentStageScreen ());
 //			SceneManager.LoadScene (0); //load main menu

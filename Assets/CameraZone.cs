@@ -32,7 +32,7 @@ public class CameraZone : MonoBehaviour {
 
 //		Debug.Log ("activate cam: " + activateCam.ToString ());
 		if (Input.GetButtonDown("Action Button") && justOnce && isFocus) {
-			
+			Debug.Log ("press count is: " + pressCount.ToString ());
 			if (pressCount <= 2) {
 				Debug.Log ("activate cam: " + activateCam.ToString () + " isFocus : " + isFocus.ToString ());
 				if (activateCam && isFocus) {
@@ -44,6 +44,7 @@ public class CameraZone : MonoBehaviour {
 					StartCoroutine (Experiment.Instance.shopLift.ShowPositiveFeedback ());
 				} else if (isFocus && !activateCam && !hasSneaked) {
 					pressCount++;
+					Debug.Log ("PRESSED ONCE");
 					Experiment.Instance.shopLift.infoGroup.alpha = 0f;
 					Debug.Log ("SHOWING NEGATIVE FEEDBACK in update");
 					StartCoroutine (Experiment.Instance.shopLift.ShowNegativeFeedback ());
@@ -106,6 +107,7 @@ public class CameraZone : MonoBehaviour {
 				//make the next cam the focus
 //				Experiment.Instance.shopLift.ChangeCamZoneFocus (camIndex + 1);
 
+			hasSneaked = false;
 			Experiment.Instance.shopLift.infoGroup.alpha = 0f;
 			pressCount = 0;
 		}

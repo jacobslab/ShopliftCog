@@ -28,10 +28,8 @@ public class ColorChanger : MonoBehaviour {
 				Material[] mats = meshRend [i].materials;
 				for(int j=0;j<mats.Length;j++)
 				{
-					if (mats [j].name.Contains ("Concrete") || ExperimentSettings.env == ExperimentSettings.Environment.SpaceStation) {
 						meshRend [i].materials [j].color = selColor;
 						meshRend [i].materials [j].DisableKeyword ("_EMISSION");
-					}
 				}
 			}
 			else {
