@@ -11,17 +11,23 @@ public class PrefGroupSetup : MonoBehaviour {
 
 	public List<Texture> firstGroup;
 	public List<Texture> secondGroup;
+
+	private bool active=false;
 	// Use this for initialization
 	void OnEnable () {
 		//update on enable
 
+		active = true;
 		if(Experiment.Instance!=null)
 			UpdateSlider ();
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		
+		if (active) {
+			float move = Input.GetAxis ("Horizontal");
+			prefSlider.value += move * 0.05f;
+		}
 	}
 	public void UpdateSlider()
 	{
@@ -50,5 +56,10 @@ public class PrefGroupSetup : MonoBehaviour {
 			rightImg.texture = targetGroup [0];
 			Experiment.Instance.shopLiftLog.LogComparativePrefImage (prefType,1, 0);
 		}
+	}
+
+	void OnDisable()
+	{
+		active = false;
 	}
 }

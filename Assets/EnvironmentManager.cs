@@ -67,6 +67,10 @@ public class EnvironmentManager : MonoBehaviour {
 	public GameObject roomOneRoadblock;
 	public GameObject roomTwoRoadblock;
 
+	//for comparative and solo sliders
+	public List<Texture> groupOne;
+	public List<Texture> groupTwo;
+
 	public Material envSkybox;
 
 	// Use this for initialization

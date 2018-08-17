@@ -32,7 +32,7 @@ public class ColorChanger : MonoBehaviour {
 						meshRend [i].materials [j].DisableKeyword ("_EMISSION");
 				}
 			}
-			else {
+			else if(meshRend[i].gameObject.layer !=12) {
 				meshRend [i].material.color = Color.white;
 				meshRend [i].material.DisableKeyword ("_EMISSION");
 //				meshRend [i].material.EnableKeyword ("_EMISSION");

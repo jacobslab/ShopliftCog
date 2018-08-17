@@ -9,8 +9,10 @@ public class PrefSoloSetup : MonoBehaviour {
 	public RawImage focusImg;
 
 	public List<Texture> imgGroup;
+	private bool active=false;
 	// Use this for initialization
 	void OnEnable () {
+		active = true;
 		//update on enable
 		if(Experiment.Instance!=null)
 			UpdateSlider ();
@@ -18,7 +20,10 @@ public class PrefSoloSetup : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-
+		if (active) {
+			float move = Input.GetAxis ("Horizontal");
+			prefSlider.value += move * 0.05f;
+		}
 	}
 
 	public void UpdateSlider()
@@ -32,5 +37,12 @@ public class PrefSoloSetup : MonoBehaviour {
 		prefSlider.value = 0.5f;
 		Experiment.Instance.shopLiftLog.LogSoloPrefImage (prefIndex);
 		focusImg.texture = imgGroup [prefIndex];
+
 	}
+
+	void OnDisable()
+	{
+		active = false;
+	}
+
 }

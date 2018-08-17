@@ -106,7 +106,10 @@ public class ExperimentSettings : MonoBehaviour {
 //			AttachSceneController ();
 
 		ChangeFirstEnvironment ();
-		ChangeReevalType ();
+//		ChangeReevalType ();
+
+		reevalType = ReevalType.Transition;
+//		reevalType = ReevalType.Reward;
 //		}
 	}
 	// Update is called once per frame

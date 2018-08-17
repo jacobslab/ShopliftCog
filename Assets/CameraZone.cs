@@ -11,11 +11,11 @@ public class CameraZone : MonoBehaviour {
 	public bool isFocus = false;
 
 	private bool hasSneaked = false;
-	private bool justOnce = true;
 	private bool alreadyShown = false;
 	public MeshRenderer activeMeshRend;
 
 	private int pressCount = 0;
+	public static bool showingWarning=false;
 
 	// Use this for initialization
 	void Start () {
@@ -31,7 +31,8 @@ public class CameraZone : MonoBehaviour {
 			activeMeshRend.enabled = false;
 
 //		Debug.Log ("activate cam: " + activateCam.ToString ());
-		if (Input.GetButtonDown("Action Button") && justOnce && isFocus) {
+		if (Input.GetButtonDown("Action Button") && isFocus && !showingWarning && !hasSneaked) {
+			Debug.Log ("showing warning is: " + showingWarning.ToString ());
 			Debug.Log ("press count is: " + pressCount.ToString ());
 			if (pressCount <= 2) {
 				Debug.Log ("activate cam: " + activateCam.ToString () + " isFocus : " + isFocus.ToString ());
@@ -39,7 +40,6 @@ public class CameraZone : MonoBehaviour {
 					Experiment.Instance.shopLift.infoGroup.alpha = 0f;
 					Debug.Log ("SHOWING POSITIVE FEEDBACK");
 					Sneak ();
-					justOnce = false;
 					hasSneaked = true;
 					StartCoroutine (Experiment.Instance.shopLift.ShowPositiveFeedback ());
 				} else if (isFocus && !activateCam && !hasSneaked) {
@@ -51,6 +51,7 @@ public class CameraZone : MonoBehaviour {
 					alreadyShown = true;
 				}
 			} else {
+				showingWarning = true;
 				StartCoroutine (Experiment.Instance.shopLift.ShowWarning ());
 			}
 		}
@@ -75,9 +76,9 @@ public class CameraZone : MonoBehaviour {
 	void OnTriggerEnter(Collider col)
 	{
 		if (col.gameObject.tag == "Player") {
-			justOnce = true;
 			hasSneaked = false;
 			activateCam = true;
+			pressCount = 0;
 //			Debug.Log ("activate cam is true");
 //			Debug.Log ("CAM ACTIVATED for " + gameObject.name);
 			activateCam = true;
@@ -97,20 +98,27 @@ public class CameraZone : MonoBehaviour {
 		firstTime = false;
 		if (col.gameObject.tag == "Player") {
 			activateCam = false;
-//			Debug.Log ("activate cam is false");
 			if (!hasSneaked && !alreadyShown) {
 				Debug.Log ("showing negative feedback on trigger exit");
 				StartCoroutine (Experiment.Instance.shopLift.ShowNegativeFeedback ());
 				isFocus = false;
-				alreadyShown = false;
+				pressCount = 0;
 			}
-				//make the next cam the focus
-//				Experiment.Instance.shopLift.ChangeCamZoneFocus (camIndex + 1);
-
-			hasSneaked = false;
-			Experiment.Instance.shopLift.infoGroup.alpha = 0f;
-			pressCount = 0;
 		}
 
+		Experiment.Instance.shopLift.infoGroup.alpha = 0f;
+
+	}
+
+	void OnEnable()
+	{
+		hasSneaked = false;
+		pressCount = 0;
+	}
+
+	void OnDisable()
+	{
+		alreadyShown = false;
+		hasSneaked = false;
 	}
 }
