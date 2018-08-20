@@ -51,7 +51,6 @@ public class TrialLogTrack : LogTrack {
 
 	public void LogMicTest()
 	{
-		Debug.Log ("LOGGING ENDS");
 		subjectLog.Log (GameClock.SystemTime_Milliseconds, "0" + separator + "MIC_TEST");
 	}
 

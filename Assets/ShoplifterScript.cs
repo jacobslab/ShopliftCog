@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using UnityStandardAssets.CrossPlatformInput;
 using UnityStandardAssets.Characters.FirstPerson;
 using UnityEngine.SceneManagement;
+using System.Linq;
 public class ShoplifterScript : MonoBehaviour {
 
     public GameObject camVehicle;
@@ -283,19 +284,31 @@ public class ShoplifterScript : MonoBehaviour {
 
 	}
 
-	void RandomizeCameraZones()
+	IEnumerator RandomizeCameraZones()
 	{
-		Debug.Log ("randomized cam zones");
+		float randFactor1 = 0.5f;
+		float randFactor2 = 0.5f;
 
-		phase1CamZone_L.transform.position = new Vector3(envManager.phase1Start_L.transform.position.x,-1.7f,Mathf.Lerp (envManager.phase1Start_L.transform.position.z, envManager.phase1End_L.transform.position.z, 0.5f));
-		phase1CamZone_R.transform.position =new Vector3(envManager.phase1Start_R.transform.position.x,-1.7f, Mathf.Lerp (envManager.phase1Start_R.transform.position.z, envManager.phase1End_R.transform.position.z, 0.5f));
+		//keep trying until both random variables are significantly far apart
+		while (Mathf.Abs (randFactor1 - randFactor2) < 0.25f) {
+			randFactor1 = Random.Range (0.3f, 0.8f);
+			randFactor2 = Random.Range (0.3f, 0.8f);
+
+			yield return 0;
+		}
 
 
-		phase2CamZone_L.transform.position = new Vector3(envManager.phase2Start_L.transform.position.x,-1.7f,Mathf.Lerp (envManager.phase2Start_L.transform.position.z, envManager.phase2End_L.transform.position.z, 0.5f));
-		phase2CamZone_R.transform.position = new Vector3(envManager.phase2Start_R.transform.position.x,-1.7f,Mathf.Lerp (envManager.phase2Start_R.transform.position.z, envManager.phase2End_R.transform.position.z, 0.5f));
+		Experiment.Instance.shopLiftLog.LogCameraLerpIndex (randFactor1, randFactor2);
 
-		phase3CamZone_L.transform.position = new Vector3(envManager.phase3Start_L.transform.position.x,-1.7f,Mathf.Lerp (envManager.phase3Start_L.transform.position.z, envManager.phase3End_L.transform.position.z, 0.5f));
-		phase3CamZone_R.transform.position = new Vector3(envManager.phase3Start_R.transform.position.x,-1.7f,Mathf.Lerp (envManager.phase3Start_R.transform.position.z, envManager.phase3End_R.transform.position.z, 0.5f));
+		phase1CamZone_L.transform.position = new Vector3(envManager.phase1Start_L.transform.position.x,-1.7f,Mathf.Lerp (envManager.phase1Start_L.transform.position.z, envManager.phase1End_L.transform.position.z, randFactor1));
+		phase1CamZone_R.transform.position =new Vector3(envManager.phase1Start_R.transform.position.x,-1.7f, Mathf.Lerp (envManager.phase1Start_R.transform.position.z, envManager.phase1End_R.transform.position.z, randFactor2));
+
+
+		phase2CamZone_L.transform.position = new Vector3(envManager.phase2Start_L.transform.position.x,-1.7f,Mathf.Lerp (envManager.phase2Start_L.transform.position.z, envManager.phase2End_L.transform.position.z, randFactor1));
+		phase2CamZone_R.transform.position = new Vector3(envManager.phase2Start_R.transform.position.x,-1.7f,Mathf.Lerp (envManager.phase2Start_R.transform.position.z, envManager.phase2End_R.transform.position.z, randFactor2));
+
+		phase3CamZone_L.transform.position = new Vector3(envManager.phase3Start_L.transform.position.x,-1.7f,Mathf.Lerp (envManager.phase3Start_L.transform.position.z, envManager.phase3End_L.transform.position.z, randFactor1));
+		phase3CamZone_R.transform.position = new Vector3(envManager.phase3Start_R.transform.position.x,-1.7f,Mathf.Lerp (envManager.phase3Start_R.transform.position.z, envManager.phase3End_R.transform.position.z, randFactor2));
 
 		if (directionEnv == 1) { //is western town
 			Debug.Log("turned cam zones");
@@ -309,6 +322,13 @@ public class ShoplifterScript : MonoBehaviour {
 			phase3CamZone_R.transform.eulerAngles = new Vector3(0f,180f,0f);
 
 		}
+		phase1CamZone_L.SetActive (false);
+		phase1CamZone_R.SetActive (false);
+		phase2CamZone_L.SetActive (false);
+		phase2CamZone_R.SetActive (false);
+		phase3CamZone_L.SetActive (false);
+		phase3CamZone_R.SetActive (false);
+			yield return null;
 	}
 
 	public void ChangeCamZoneFocus(int camIndex)
@@ -473,19 +493,23 @@ public class ShoplifterScript : MonoBehaviour {
 		rightRoom.transform.position = envManager.rightRoomTransform.position;
     }
 
-	void ShuffleRegisterRewards()
+	List<int> ShuffleList(List<int> vals)
 	{
-		List<int> registerValList = new List<int> ();
-		for(int i=0;i<registerVals.Count;i++)
+		List<int> valList = new List<int> ();
+		int valCount = vals.Count;
+		for(int i=0;i<valCount;i++)
 		{
-			registerValList.Add (registerVals [i]);
+			valList.Add (vals [i]);
 		}
-		registerVals.Clear ();
-		for (int i = 0; i < registerVals.Count; i++) {
-			int randomIndex = Random.Range (0, registerValList.Count);
-			registerVals.Add(registerValList [randomIndex]);
-			registerValList.RemoveAt (randomIndex);
+		vals.Clear ();
+		int valListCount = valList.Count;
+		for (int i = 0; i < valListCount; i++) {
+			int randomIndex = Random.Range (0, valList.Count);
+			vals.Add(valList [randomIndex]);
+			valList.RemoveAt (randomIndex);
 		}
+
+		return vals;
 	}
 
 	IEnumerator RunCamTrainingPhase()
@@ -495,9 +519,9 @@ public class ShoplifterScript : MonoBehaviour {
 		Debug.Log ("starting cam training phase");
 		CameraZone.isTraining = true;
 
-		instructionGroup.alpha = 1f;
+		introInstructionGroup.alpha = 1f;
 		yield return StartCoroutine (WaitForButtonPress (10000f));
-		instructionGroup.alpha = 0f;
+		introInstructionGroup.alpha = 0f;
 
 		trainingInstructionsGroup.alpha = 1f;
 		yield return StartCoroutine(WaitForButtonPress (10000f));
@@ -525,6 +549,36 @@ public class ShoplifterScript : MonoBehaviour {
 
 		trainingPeriodGroup.alpha = 0f;
 		yield return null;
+	}
+
+	//adapted from https://bitbucket.org/Superbest/superbest-random
+	float NextGaussian(System.Random r, double mu = 0,double sigma=1)
+	{
+		var u1 = r.NextDouble();
+		var u2 = r.NextDouble();
+
+		var rand_std_normal = System.Math.Sqrt(-2.0 *  System.Math.Log(u1)) *
+			System.Math.Sin(2.0 *  System.Math.PI * u2);
+
+		float rand_normal =(float) (mu + sigma * rand_std_normal);
+
+		return rand_normal;
+	}
+
+	List<int> GiveRandSequenceOfTwoInts(int int1,int int2,int seqLength)
+	{
+		List<int> tempList = new List<int> ();
+		for (int i = 0; i < seqLength/2; i++) {
+			tempList.Add (int1);
+			tempList.Add (int2);
+		}
+		tempList=ShuffleList (tempList);
+		Debug.Log ("contents of templist are");
+		for(int i=0;i<tempList.Count;i++)
+		{
+			Debug.Log (tempList [i]);
+		}
+		return tempList;
 	}
 
 
@@ -754,12 +808,22 @@ public class ShoplifterScript : MonoBehaviour {
 		bool isLeft = (Random.value < 0.5f) ? true: false;
 		bool showOneTwo = false;
 
+		int[] sliderTrials = new int[] { 3,11,15,maxTrials-1 };
+
+		int trialsToNextSlider = sliderTrials [sliderCount] - (numTrials_Learning-1); //should be 4 in the beginning
+		List<int> randOrder = new List<int>();
+		int randIndex = 0;
+		randOrder = GiveRandSequenceOfTwoInts(0,1,trialsToNextSlider);
 
 		//		while(numTrials < 1)
 		while(numTrials_Learning < maxTrials)
 		{ 
 			Debug.Log ("about to run phase 1");
-			isLeft = !isLeft;
+			if (randOrder [0] == 0)
+				isLeft = true;
+			else
+				isLeft = false;
+			randOrder.RemoveAt (0);
 			yield return StartCoroutine (RunPhaseOne ((isLeft) ? 0 : 1, false, -1,false));
 
 			Debug.Log ("about to run phase 2");
@@ -769,7 +833,9 @@ public class ShoplifterScript : MonoBehaviour {
 			Debug.Log("about to run phase 3");
 			yield return StartCoroutine(RunPhaseThree((isLeft) ? 0:1,false,true));
 //			TurnOffRooms ();
-			if (numTrials_Learning==3 || numTrials_Learning==9 || numTrials_Learning ==15 || numTrials_Learning==maxTrials-1) {
+			if (sliderTrials.Contains(numTrials_Learning))
+//				=sliderTrials ==3 || numTrials_Learning==11 || numTrials_Learning ==15 || numTrials_Learning==maxTrials-1) 
+				{
 				showOneTwo = !showOneTwo;
 				if (sliderCount <= 5) {
 					if (showOneTwo) {
@@ -778,6 +844,13 @@ public class ShoplifterScript : MonoBehaviour {
 						yield return StartCoroutine (AskPreference (1));
 				}
 				sliderCount++;
+
+				//shuffle for next set
+				if (sliderCount < 4) {
+					randOrder.Clear ();
+					trialsToNextSlider = sliderTrials [sliderCount] - (numTrials_Learning - 1);
+					randOrder = GiveRandSequenceOfTwoInts (0, 1, trialsToNextSlider);
+				}
 			}
 			if (numTrials_Learning < maxTrials - 1)
 				yield return StartCoroutine (ShowEndTrialScreen ());
@@ -1098,7 +1171,7 @@ public class ShoplifterScript : MonoBehaviour {
 		//after env has been selected and all necessary object references set, assign rooms and randomize cam zones
 		AssignRooms ();
 		RandomizeSpeedChangeZones ();
-		RandomizeCameraZones ();
+		yield return StartCoroutine(RandomizeCameraZones ());
 
 		yield return null;
 	}
@@ -1108,7 +1181,7 @@ public class ShoplifterScript : MonoBehaviour {
 		stageIndex = 1;
 
 
-		yield return StartCoroutine(PickRegisterValues());
+//		yield return StartCoroutine(PickRegisterValues());
 
 		int totalEnvCount = environments.Count;
 
@@ -1123,15 +1196,17 @@ public class ShoplifterScript : MonoBehaviour {
 
 			yield return StartCoroutine (PickEnvironment ());
 
-			introInstructionGroup.alpha = 1f;
-			yield return WaitForButtonPress (10000f);
-			introInstructionGroup.alpha = 0f;
+			yield return StartCoroutine(PickRegisterValues()); //new reg values to be picked for each environment
+
+			isTransition = !isTransition; //flip the transition condition before the next round
+
+
 			if (ExperimentSettings.isTraining)
 				yield return StartCoroutine (RunCamTrainingPhase ());
 
 			//randomize rooms and cam zones again
 			AssignRooms ();
-			RandomizeCameraZones ();
+			yield return StartCoroutine(RandomizeCameraZones ());
 			RandomizeSuitcases();
 
 			//learning phase
@@ -1197,8 +1272,11 @@ public class ShoplifterScript : MonoBehaviour {
 	{
 		Debug.Log ("IN NEGATIVE");
 		negativeFeedbackGroup.alpha = 1f;
+		negativeFeedbackGroup.gameObject.GetComponent<AudioSource> ().Play ();
 //		Debug.Log ("about to wait for 1 second");
 		yield return new WaitForSeconds (1f);
+
+		negativeFeedbackGroup.gameObject.GetComponent<AudioSource> ().Stop ();
 //		Debug.Log ("turning it off");
 		negativeFeedbackGroup.alpha = 0f;
 		yield return null;
@@ -1249,12 +1327,14 @@ public class ShoplifterScript : MonoBehaviour {
 		if (activeEnvLabel == "Cybercity") {
 			coinShowerObj.transform.GetChild (0).transform.localPosition = Vector3.zero;
 		}
+		System.Random rand = new System.Random ();
+		int reward = Mathf.CeilToInt(NextGaussian (rand, registerVals [choiceOutput], 1));
 		rewardScore.enabled = true;
-		rewardScore.text = "$" + registerVals [choiceOutput].ToString ();
+		rewardScore.text = "$" + reward.ToString ();
 
 		chosenRegister.GetComponent<AudioSource> ().Play (); //play the cash register audio
 
-		Experiment.Instance.shopLiftLog.LogRegisterReward(registerVals[choiceOutput],choiceOutput);
+		Experiment.Instance.shopLiftLog.LogRegisterReward(reward,choiceOutput);
 //        infoText.text = "You got $" + registerVals[choiceOutput].ToString() + " from the register";
 		Debug.Log("waiting for 2 seconds");
 		yield return StartCoroutine(rewardScore.gameObject.GetComponent<FontChanger> ().GrowText (2f));

@@ -12,23 +12,36 @@ public class CameraZone : MonoBehaviour {
 
 	private bool hasSneaked = false;
 	private bool alreadyShown = false;
-	public MeshRenderer activeMeshRend;
 
 	private int pressCount = 0;
 	public static bool showingWarning=false;
 
+	public GameObject binoculars;
+	public GameObject securityCam;
+
 	// Use this for initialization
-	void Start () {
-		
+	void OnEnable () {
+
+		securityCam.SetActive (false);
+		binoculars.SetActive(false);
+
+		hasSneaked = false;
+		pressCount = 0;
+		if (firstTime) {
+			if (ExperimentSettings.env == ExperimentSettings.Environment.SpaceStation) {
+				securityCam.SetActive (true);
+				binoculars.SetActive (false);
+
+			} else if (ExperimentSettings.env == ExperimentSettings.Environment.WesternTown) {
+				securityCam.SetActive (false);
+				binoculars.SetActive (true);
+			}
+		}
 	}
 	
 	// Update is called once per frame
 	void LateUpdate () {
 
-		if (firstTime)
-			activeMeshRend.enabled = true;
-		else
-			activeMeshRend.enabled = false;
 
 //		Debug.Log ("activate cam: " + activateCam.ToString ());
 		if (Input.GetButtonDown("Action Button") && isFocus && !showingWarning && !hasSneaked) {
@@ -53,13 +66,15 @@ public class CameraZone : MonoBehaviour {
 			} else {
 				showingWarning = true;
 				StartCoroutine (Experiment.Instance.shopLift.ShowWarning ());
-			}
 		}
 //		if (activateCam &&  !firstTime && Input.GetButtonDown("Sneak Button")) {
 //			Sneak ();
 //			activateCam = false;
 //		}
 
+	}
+
+		
 	}
 
 	public void Reset()
@@ -110,15 +125,19 @@ public class CameraZone : MonoBehaviour {
 
 	}
 
-	void OnEnable()
-	{
-		hasSneaked = false;
-		pressCount = 0;
-	}
-
 	void OnDisable()
 	{
 		alreadyShown = false;
 		hasSneaked = false;
+		if (firstTime) {
+			if (ExperimentSettings.env == ExperimentSettings.Environment.SpaceStation) {
+				securityCam.SetActive (true);
+				binoculars.SetActive (false);
+
+			} else if (ExperimentSettings.env == ExperimentSettings.Environment.WesternTown) {
+				securityCam.SetActive (false);
+				binoculars.SetActive (true);
+			}
+		}
 	}
 }
