@@ -73,6 +73,9 @@ public class EnvironmentManager : MonoBehaviour {
 
 	public Material envSkybox;
 
+	public GameObject suitcasePrefab;
+	public List<GameObject> suitcases;
+
 	// Use this for initialization
 	void Start () {
 		

@@ -186,10 +186,10 @@ public class ShoplifterScript : MonoBehaviour {
 
 	private GameObject leftSuitcase;
 	private GameObject rightSuitcase;
-	public List<GameObject> suitcases;
+	private List<GameObject> suitcases;
 
 
-	public GameObject suitcasePrefab;
+	private GameObject suitcasePrefab;
 	private Material skyboxMat;
 
 	public GameObject testFloor;
@@ -252,13 +252,13 @@ public class ShoplifterScript : MonoBehaviour {
 
 	void RandomizeSuitcases()
 	{
-		if (Random.value > 0.5f) {
-			leftSuitcase = suitcases[0];
-			rightSuitcase = suitcases[1];
-		} else {
-			leftSuitcase = suitcases[1];
-			rightSuitcase = suitcases[0];
-		}
+			if (Random.value > 0.5f) {
+				leftSuitcase = suitcases [0];
+				rightSuitcase = suitcases [1];
+			} else {
+				leftSuitcase = suitcases [1];
+				rightSuitcase = suitcases [0];
+			}
 	}
 
 	void RandomizeSpeedChangeZones()
@@ -322,6 +322,7 @@ public class ShoplifterScript : MonoBehaviour {
 			phase3CamZone_R.transform.eulerAngles = new Vector3(0f,180f,0f);
 
 		}
+		ResetCamZone ();
 		phase1CamZone_L.SetActive (false);
 		phase1CamZone_R.SetActive (false);
 		phase2CamZone_L.SetActive (false);
@@ -719,10 +720,12 @@ public class ShoplifterScript : MonoBehaviour {
 		yield return StartCoroutine (WaitForDoorOpenPress (doorText));
 		if (hasRewards) { 
 			suitcaseObj = Instantiate ((pathIndex==0)?leftSuitcase:rightSuitcase, ((pathIndex==0) ?  register_L.transform.position : register_R.transform.position ) + (new Vector3(0f,0.35f,directionEnv) * 2f), Quaternion.identity) as GameObject;
-			Debug.Log ("original: " + suitcaseObj.transform.eulerAngles.ToString ());
-			suitcaseObj.transform.eulerAngles = (directionEnv == 1) ? new Vector3 (-90f, 0f, 0f) : new Vector3 (-90f, 0f, 180f);
-			Debug.Log ("after: " + suitcaseObj.transform.eulerAngles.ToString ());
-			suitcaseObj = suitcaseObj.transform.GetChild (0).gameObject;
+
+			if (ExperimentSettings.env != ExperimentSettings.Environment.WesternTown) {
+				Debug.Log ("NOT WESTERN TOWN");
+				suitcaseObj.transform.eulerAngles = (directionEnv == 1) ? new Vector3 (-90f, 0f, 0f) : new Vector3 (-90f, 0f, 180f);
+//				suitcaseObj = suitcaseObj.transform.GetChild (0).gameObject;
+			}
 		}
 			yield return StartCoroutine(targetDoor.GetComponent<Doors> ().Open ());
 			if (pathIndex == 0) {
@@ -874,7 +877,6 @@ public class ShoplifterScript : MonoBehaviour {
 		bool leftChoice = false;
 		if (isTransition) {
 			SetupTransitionReeval ();
-			isTransition = false;
 		}
 		else
 			SetupRewardReeval ();
@@ -1145,6 +1147,13 @@ public class ShoplifterScript : MonoBehaviour {
 
 		phase3CamZone_L = envManager.phase3CamZone_L;
 		phase3CamZone_R = envManager.phase3CamZone_R;
+
+		//suitcases
+		suitcasePrefab = envManager.suitcasePrefab;
+		suitcases = new List<GameObject> ();
+		for (int i = 0; i < envManager.suitcases.Count; i++) {
+			suitcases.Add (envManager.suitcases [i]);
+		}
 
 		//for comparative
 		prefGroup.gameObject.GetComponent<PrefGroupSetup>().firstGroup[0] = envManager.groupOne[0];
