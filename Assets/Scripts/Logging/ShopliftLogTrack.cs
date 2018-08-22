@@ -105,9 +105,9 @@ public class ShopliftLogTrack : LogTrack {
 		subjectLog.Log (GameClock.SystemTime_Milliseconds,subjectLog.GetFrameCount(), "CAM_SNEAKING" + separator + sneakPos.ToString () + separator + camZoneIndex.ToString ());
 	}
 
-	public void LogCameraLerpIndex (float randFactor1,float randFactor2)
+	public void LogCameraLerpIndex (float randFactor, int envIndex)
 	{
-		subjectLog.Log (GameClock.SystemTime_Milliseconds,subjectLog.GetFrameCount(), "CAMERA_ZONE_POSITION_INDEX" + separator + randFactor1.ToString () + separator + randFactor2.ToString ());
+		subjectLog.Log (GameClock.SystemTime_Milliseconds,subjectLog.GetFrameCount(), "CAMERA_ZONE_POSITION_INDEX" + separator + randFactor.ToString () + separator +  "ENV" + separator + envIndex.ToString ());
 	}
 
 	public void LogEndTrial()

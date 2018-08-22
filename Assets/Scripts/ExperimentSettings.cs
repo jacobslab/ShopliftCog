@@ -22,7 +22,8 @@ public class ExperimentSettings : MonoBehaviour {
 	{
 		Cybercity,
 		SpaceStation,
-		WesternTown
+		WesternTown,
+		VikingVillage
 	}
 
 	public static Environment env;

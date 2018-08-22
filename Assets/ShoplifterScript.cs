@@ -58,6 +58,7 @@ public class ShoplifterScript : MonoBehaviour {
 	public GameObject spaceStationEnv;
 	public GameObject cybercityEnv;
 	public GameObject westernTownEnv;
+	public GameObject vikingVillageEnv;
 
 	//speed change zones
 	public List<GameObject> phase1SpeedChangeZones_L;
@@ -82,6 +83,8 @@ public class ShoplifterScript : MonoBehaviour {
 	private int maxBlocks_Reeval = 3;
 
 	private int envIndex =0;
+
+	private List<float> camZoneFactors;
 
 
 	//stage 4 post-test variables
@@ -206,6 +209,8 @@ public class ShoplifterScript : MonoBehaviour {
 
     // Use this for initialization
     void Start() {
+		camZoneFactors = new List<float> ();
+		camZoneFactors = GetRandomNumbers (environments.Count); //get as many unique random numbers as there are environments
 		introInstructionGroup.alpha = 0f;
 //		UpdateFirstEnvironments ();
         infoGroup.alpha = 0f;
@@ -235,7 +240,7 @@ public class ShoplifterScript : MonoBehaviour {
 
 		Cursor.visible = false;
 		//then start the task
-		Debug.Log(ExperimentSettings.env.ToString());
+//		Debug.Log(ExperimentSettings.env.ToString());
 		StartCoroutine("RunTask");
     }
 
@@ -246,8 +251,6 @@ public class ShoplifterScript : MonoBehaviour {
         {
 			Application.Quit ();
         }
-
-
     }
 
 	void RandomizeSuitcases()
@@ -284,31 +287,35 @@ public class ShoplifterScript : MonoBehaviour {
 
 	}
 
-	IEnumerator RandomizeCameraZones()
+
+	List<float> GetRandomNumbers(int randomCount)
 	{
-		float randFactor1 = 0.5f;
-		float randFactor2 = 0.5f;
-
-		//keep trying until both random variables are significantly far apart
-		while (Mathf.Abs (randFactor1 - randFactor2) < 0.25f) {
-			randFactor1 = Random.Range (0.3f, 0.8f);
-			randFactor2 = Random.Range (0.3f, 0.8f);
-
-			yield return 0;
+		System.Random rand = new System.Random ();
+		List<float> randList = new List<float> ();
+		for (int i = 0; i < randomCount; i++) {
+			double mantissa = (rand.NextDouble() * 2.0) - 1.0;
+			double exponent =System.Math.Pow(2.0, rand.Next(-126, 128));
+			randList.Add((float)(mantissa * exponent));
 		}
+		return randList;
+	}
+
+	IEnumerator RandomizeCameraZones(int blockCount)
+	{
+		float randFactor = camZoneFactors [blockCount];
 
 
-		Experiment.Instance.shopLiftLog.LogCameraLerpIndex (randFactor1, randFactor2);
+		Experiment.Instance.shopLiftLog.LogCameraLerpIndex (randFactor,blockCount);
 
-		phase1CamZone_L.transform.position = new Vector3(envManager.phase1Start_L.transform.position.x,-1.7f,Mathf.Lerp (envManager.phase1Start_L.transform.position.z, envManager.phase1End_L.transform.position.z, randFactor1));
-		phase1CamZone_R.transform.position =new Vector3(envManager.phase1Start_R.transform.position.x,-1.7f, Mathf.Lerp (envManager.phase1Start_R.transform.position.z, envManager.phase1End_R.transform.position.z, randFactor2));
+		phase1CamZone_L.transform.position = new Vector3(envManager.phase1Start_L.transform.position.x,-1.7f,Mathf.Lerp (envManager.phase1Start_L.transform.position.z, envManager.phase1End_L.transform.position.z, randFactor));
+		phase1CamZone_R.transform.position =new Vector3(envManager.phase1Start_R.transform.position.x,-1.7f, Mathf.Lerp (envManager.phase1Start_R.transform.position.z, envManager.phase1End_R.transform.position.z, randFactor));
 
 
-		phase2CamZone_L.transform.position = new Vector3(envManager.phase2Start_L.transform.position.x,-1.7f,Mathf.Lerp (envManager.phase2Start_L.transform.position.z, envManager.phase2End_L.transform.position.z, randFactor1));
-		phase2CamZone_R.transform.position = new Vector3(envManager.phase2Start_R.transform.position.x,-1.7f,Mathf.Lerp (envManager.phase2Start_R.transform.position.z, envManager.phase2End_R.transform.position.z, randFactor2));
+		phase2CamZone_L.transform.position = new Vector3(envManager.phase2Start_L.transform.position.x,-1.7f,Mathf.Lerp (envManager.phase2Start_L.transform.position.z, envManager.phase2End_L.transform.position.z, randFactor));
+		phase2CamZone_R.transform.position = new Vector3(envManager.phase2Start_R.transform.position.x,-1.7f,Mathf.Lerp (envManager.phase2Start_R.transform.position.z, envManager.phase2End_R.transform.position.z, randFactor));
 
-		phase3CamZone_L.transform.position = new Vector3(envManager.phase3Start_L.transform.position.x,-1.7f,Mathf.Lerp (envManager.phase3Start_L.transform.position.z, envManager.phase3End_L.transform.position.z, randFactor1));
-		phase3CamZone_R.transform.position = new Vector3(envManager.phase3Start_R.transform.position.x,-1.7f,Mathf.Lerp (envManager.phase3Start_R.transform.position.z, envManager.phase3End_R.transform.position.z, randFactor2));
+		phase3CamZone_L.transform.position = new Vector3(envManager.phase3Start_L.transform.position.x,-1.7f,Mathf.Lerp (envManager.phase3Start_L.transform.position.z, envManager.phase3End_L.transform.position.z, randFactor));
+		phase3CamZone_R.transform.position = new Vector3(envManager.phase3Start_R.transform.position.x,-1.7f,Mathf.Lerp (envManager.phase3Start_R.transform.position.z, envManager.phase3End_R.transform.position.z, randFactor));
 
 		if (directionEnv == 1) { //is western town
 			Debug.Log("turned cam zones");
@@ -622,9 +629,11 @@ public class ShoplifterScript : MonoBehaviour {
 
 		ChangeCamZoneFocus((pathIndex==0) ? 0:3);
 		ToggleMouseLook(false);
+
 		Vector3 startPos = (pathIndex == 0) ? phase1Start_L.transform.position : phase1Start_R.transform.position;
 		Vector3 endPos = (pathIndex == 0) ? phase1End_L.transform.position : phase1End_R.transform.position;
 		camVehicle.transform.position = startPos;
+		Debug.Log ("start pos " + startPos.ToString ());
 		camVehicle.SetActive (true);
 		Experiment.Instance.shopLiftLog.LogMoveEvent (1,true);
 		yield return StartCoroutine(VelocityPlayerTo (startPos,endPos, phase1Factor));
@@ -1072,10 +1081,10 @@ public class ShoplifterScript : MonoBehaviour {
 		yield return null;
 	}
 
-	IEnumerator PickEnvironment()
+	IEnumerator PickEnvironment(int blockCount)
 	{
-//		envIndex = 1;
-		envIndex = Random.Range (0, environments.Count);
+		envIndex = 2;
+//		envIndex = Random.Range (0, environments.Count);
 
 		//first turn off all environments
 		for (int i = 0; i<environments.Count; i++) {
@@ -1089,6 +1098,7 @@ public class ShoplifterScript : MonoBehaviour {
 			camVehicle.transform.localEulerAngles = new Vector3 (0f, 180f, 0f);
 			camVehicle.transform.GetChild (0).GetChild (1).gameObject.SetActive (true);
 			camVehicle.transform.GetChild (0).GetChild (2).gameObject.SetActive (false);
+			camVehicle.transform.GetChild (0).GetChild (3).gameObject.SetActive (false);
 			directionEnv = -1;
 		} else if (environments [envIndex].name == "WesternTown") { //western town, for now
 			Debug.Log ("chosen western town");
@@ -1096,13 +1106,24 @@ public class ShoplifterScript : MonoBehaviour {
 			camVehicle.transform.localEulerAngles = new Vector3 (0f, 0f, 0f);
 			camVehicle.transform.GetChild (0).GetChild (1).gameObject.SetActive (false);
 			camVehicle.transform.GetChild (0).GetChild (2).gameObject.SetActive (true);
+			camVehicle.transform.GetChild (0).GetChild (3).gameObject.SetActive (false);
 			directionEnv = 1;
+		}
+		else if (environments [envIndex].name == "VikingVillage") { //viking village, for now
+			Debug.Log ("chosen viking village");
+			ExperimentSettings.env = ExperimentSettings.Environment.VikingVillage;
+			camVehicle.transform.localEulerAngles = new Vector3 (0f, 0f, 0f);
+			camVehicle.transform.GetChild (0).GetChild (1).gameObject.SetActive (false);
+			camVehicle.transform.GetChild (0).GetChild (2).gameObject.SetActive (false);
+			camVehicle.transform.GetChild (0).GetChild (3).gameObject.SetActive (true);
+			directionEnv = -1;
 		}
 		else
 		{
 			camVehicle.transform.localEulerAngles = new Vector3 (0f, 180f, 0f);
 			camVehicle.transform.GetChild (0).GetChild (1).gameObject.SetActive (true);
 			camVehicle.transform.GetChild (0).GetChild (2).gameObject.SetActive (false);
+			camVehicle.transform.GetChild (0).GetChild (3).gameObject.SetActive (false);
 			directionEnv = -1;
 		}
 		envManager = environments [envIndex].GetComponent<EnvironmentManager> ();
@@ -1180,7 +1201,7 @@ public class ShoplifterScript : MonoBehaviour {
 		//after env has been selected and all necessary object references set, assign rooms and randomize cam zones
 		AssignRooms ();
 		RandomizeSpeedChangeZones ();
-		yield return StartCoroutine(RandomizeCameraZones ());
+		yield return StartCoroutine(RandomizeCameraZones (blockCount));
 
 		yield return null;
 	}
@@ -1203,7 +1224,7 @@ public class ShoplifterScript : MonoBehaviour {
 			numTrials_Learning = 0;
 			numTrials = 0;
 
-			yield return StartCoroutine (PickEnvironment ());
+			yield return StartCoroutine (PickEnvironment (i));
 
 			yield return StartCoroutine(PickRegisterValues()); //new reg values to be picked for each environment
 
@@ -1215,7 +1236,7 @@ public class ShoplifterScript : MonoBehaviour {
 
 			//randomize rooms and cam zones again
 			AssignRooms ();
-			yield return StartCoroutine(RandomizeCameraZones ());
+//			yield return StartCoroutine(RandomizeCameraZones (i)); //we randomize cameras when picking environment now
 			RandomizeSuitcases();
 
 			//learning phase
@@ -1235,7 +1256,7 @@ public class ShoplifterScript : MonoBehaviour {
 				yield return StartCoroutine (RunTestingPhase ());
 
 			//if transition phase, play 10-trial additional learning
-			if (ExperimentSettings.reevalType == ExperimentSettings.ReevalType.Transition) {
+			if (isTransition) {
 				Debug.Log ("RUNNING ADDITIONAL LEARN PHASE");
 				yield return StartCoroutine (RunLearningPhase (true,maxTrials_PostTest));
 			}
@@ -1478,16 +1499,21 @@ public class ShoplifterScript : MonoBehaviour {
 	IEnumerator VelocityPlayerTo(Vector3 startPos, Vector3 endPos, float factor)
 	{
 		int sign = (int) ((endPos.z - startPos.z) / Mathf.Abs (endPos.z - startPos.z));
-
+		Debug.Log ("the sign is: " + sign.ToString ());
 		Vector3 moveDir = new Vector3 (0f, 0f, sign*1f);
+		Debug.Log ("move dir: " + moveDir.ToString ());
 		//set some initial current speed
 		currentSpeed = Random.Range(minSpeed,maxSpeed);
+		Debug.Log ("current speed is " + currentSpeed.ToString ());
 		float distanceLeft = Vector3.Distance(camVehicle.transform.position,endPos);
+
+		Debug.Log ("distance left is " + distanceLeft.ToString ());
 		camVehicle.GetComponent<RigidbodyFirstPersonController> ().enabled = false;
 		float timer = 0f;
 		Debug.Log ("velocity player movement");
 		while (distanceLeft > 1.5f) {
 			timer += Time.deltaTime;
+			Debug.Log ("velocity : " + camVehicle.GetComponent<Rigidbody> ().velocity.ToString ());
 			camVehicle.GetComponent<Rigidbody>().velocity = moveDir * currentSpeed;
 			distanceLeft = Vector3.Distance (camVehicle.transform.position, endPos);
 			if(factor > timer + 0.1f)
