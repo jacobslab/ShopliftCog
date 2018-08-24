@@ -992,7 +992,7 @@ public class ShoplifterScript : MonoBehaviour {
 			int chosenIndex = caseOrder [randIndex];
 			caseOrder.RemoveAt (randIndex);
 			imagineGroup.alpha = 1f;
-			yield return new WaitForSeconds (2f);
+			yield return new WaitForSeconds (4f);
 			imagineGroup.alpha = 0f;
 			switch (chosenIndex) {
 			case 0:
@@ -1121,8 +1121,8 @@ public class ShoplifterScript : MonoBehaviour {
 
 	IEnumerator PickEnvironment(int blockCount)
 	{
-		envIndex = 2;
-//		envIndex = Random.Range (0, environments.Count);
+//		envIndex = 2;
+		envIndex = Random.Range (0, environments.Count);
 
 		//first turn off all environments
 		for (int i = 0; i<environments.Count; i++) {
