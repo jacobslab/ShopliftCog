@@ -191,6 +191,8 @@ public class ShoplifterScript : MonoBehaviour {
 	private GameObject rightSuitcase;
 	private List<GameObject> suitcases;
 
+	private List<int> reevalConditions;
+
 
 	private GameObject suitcasePrefab;
 	private Material skyboxMat;
@@ -211,6 +213,8 @@ public class ShoplifterScript : MonoBehaviour {
     void Start() {
 		camZoneFactors = new List<float> ();
 		camZoneFactors = GetRandomNumbers (environments.Count); //get as many unique random numbers as there are environments
+		reevalConditions = new List<int>();
+		reevalConditions= ShuffleReevalConditions();
 		introInstructionGroup.alpha = 0f;
 //		UpdateFirstEnvironments ();
         infoGroup.alpha = 0f;
@@ -287,15 +291,31 @@ public class ShoplifterScript : MonoBehaviour {
 
 	}
 
+	List<int> ShuffleReevalConditions()
+	{
+		List<int> tempList = new List<int> ();
+		for (int i = 0; i < environments.Count; i++) {
+			tempList.Add (i);
+		}
+		tempList=ShuffleList (tempList);
+		for(int i=0;i<tempList.Count;i++)
+		{
+			Debug.Log ("reeval condition: " + tempList [i].ToString());
+		}
+		return tempList;
+	}
 
 	List<float> GetRandomNumbers(int randomCount)
 	{
 		System.Random rand = new System.Random ();
 		List<float> randList = new List<float> ();
 		for (int i = 0; i < randomCount; i++) {
-			double mantissa = (rand.NextDouble() * 2.0) - 1.0;
-			double exponent =System.Math.Pow(2.0, rand.Next(-126, 128));
-			randList.Add((float)(mantissa * exponent));
+//			double mantissa = (rand.NextDouble() * 2.0) - 1.0;
+//			double exponent =System.Math.Pow(2.0, rand.Next(-126, 128));
+			float nextDouble = (float)rand.NextDouble();
+			nextDouble = Mathf.Clamp (nextDouble, 0.2f, 0.8f);
+			randList.Add((float)(nextDouble));
+			Debug.Log ("cam zone factor: " + randList [i]);
 		}
 		return randList;
 	}
@@ -663,6 +683,7 @@ public class ShoplifterScript : MonoBehaviour {
 
 				Experiment.Instance.shopLiftLog.LogMoveEvent (2, true);
 				if (!terminateWithChoice) {
+					Debug.Log ("phase 1 door L: " + phase1Door_L.transform.GetChild (0).gameObject.name);
 					yield return StartCoroutine (MovePlayerTo (camVehicle.transform.position, phase1Door_L.transform.GetChild (0).position, 0.5f));
 					baseAudio.Stop ();
 					delayTwo = Random.Range (0f, currentAudio.clip.length);
@@ -681,6 +702,7 @@ public class ShoplifterScript : MonoBehaviour {
 				phase2End_R = envManager.phase2End_R;
 				Experiment.Instance.shopLiftLog.LogMoveEvent (2, true);
 				if (!terminateWithChoice) {
+					Debug.Log ("phase 1 door R: " + phase1Door_R.transform.GetChild (0).gameObject.name);
 					yield return StartCoroutine (MovePlayerTo (camVehicle.transform.position, phase1Door_R.transform.GetChild (0).position, 0.5f));
 									
 					baseAudio.Stop ();
@@ -730,10 +752,14 @@ public class ShoplifterScript : MonoBehaviour {
 		if (hasRewards) { 
 			suitcaseObj = Instantiate ((pathIndex==0)?leftSuitcase:rightSuitcase, ((pathIndex==0) ?  register_L.transform.position : register_R.transform.position ) + (new Vector3(0f,0.35f,directionEnv) * 2f), Quaternion.identity) as GameObject;
 
-			if (ExperimentSettings.env != ExperimentSettings.Environment.WesternTown) {
+			if (ExperimentSettings.env == ExperimentSettings.Environment.SpaceStation) {
 				Debug.Log ("NOT WESTERN TOWN");
 				suitcaseObj.transform.eulerAngles = (directionEnv == 1) ? new Vector3 (-90f, 0f, 0f) : new Vector3 (-90f, 0f, 180f);
 //				suitcaseObj = suitcaseObj.transform.GetChild (0).gameObject;
+			}
+
+			if (ExperimentSettings.env == ExperimentSettings.Environment.VikingVillage) {
+				suitcaseObj.transform.position = suitcaseObj.transform.position + new Vector3 (0f, -1f, 4f);
 			}
 		}
 			yield return StartCoroutine(targetDoor.GetComponent<Doors> ().Open ());
@@ -877,19 +903,31 @@ public class ShoplifterScript : MonoBehaviour {
 		yield return null;
 	}
 
-	IEnumerator RunReevaluationPhase()
+	IEnumerator RunReevaluationPhase(int reevalConditionIndex)
 	{
 		int numTrials_Reeval = 0;
 		int numBlocks_Reeval = 0;
 		Debug.Log("about to start Re-Evaluation Phase");
 		stageIndex = 2;
 		bool leftChoice = false;
-		if (isTransition) {
-			SetupTransitionReeval ();
-		}
-		else
+		switch (reevalConditionIndex) {
+		case 0:
+			Debug.Log ("IT'S CONTROL");
+			//control and thus do nothing
+			break;
+		case 1:
+			Debug.Log ("IT'S RR");
 			SetupRewardReeval ();
-		
+			break;
+		case 2:
+			Debug.Log ("IT'S TR");
+			SetupTransitionReeval ();
+			break;
+		default:
+			Debug.Log ("IT'S CONTROL");
+			//control and thus do nothing
+			break;
+		}
 		Experiment.Instance.shopLiftLog.LogPhaseEvent(2,true);
 		while (numBlocks_Reeval < maxBlocks_Reeval) {
 			while (numTrials_Reeval < maxTrials_Reeval) {
@@ -1214,6 +1252,7 @@ public class ShoplifterScript : MonoBehaviour {
 //		yield return StartCoroutine(PickRegisterValues());
 
 		int totalEnvCount = environments.Count;
+		int currentReevalCondition = 0;
 
 		if (Random.value > 0.5f) {
 			isTransition = true;
@@ -1223,6 +1262,7 @@ public class ShoplifterScript : MonoBehaviour {
 		for (int i = 0; i < totalEnvCount; i++) {
 			numTrials_Learning = 0;
 			numTrials = 0;
+			currentReevalCondition = reevalConditions [i];
 
 			yield return StartCoroutine (PickEnvironment (i));
 
@@ -1249,14 +1289,14 @@ public class ShoplifterScript : MonoBehaviour {
 
 			//re-evaluation phase
 			if (ExperimentSettings.isReeval)
-				yield return StartCoroutine (RunReevaluationPhase ());
+				yield return StartCoroutine (RunReevaluationPhase (currentReevalCondition));
 
 			//testing phase
 			if (ExperimentSettings.isTesting)
 				yield return StartCoroutine (RunTestingPhase ());
 
 			//if transition phase, play 10-trial additional learning
-			if (isTransition) {
+			if (currentReevalCondition==2) {
 				Debug.Log ("RUNNING ADDITIONAL LEARN PHASE");
 				yield return StartCoroutine (RunLearningPhase (true,maxTrials_PostTest));
 			}
@@ -1499,21 +1539,21 @@ public class ShoplifterScript : MonoBehaviour {
 	IEnumerator VelocityPlayerTo(Vector3 startPos, Vector3 endPos, float factor)
 	{
 		int sign = (int) ((endPos.z - startPos.z) / Mathf.Abs (endPos.z - startPos.z));
-		Debug.Log ("the sign is: " + sign.ToString ());
+//		Debug.Log ("the sign is: " + sign.ToString ());
 		Vector3 moveDir = new Vector3 (0f, 0f, sign*1f);
-		Debug.Log ("move dir: " + moveDir.ToString ());
+//		Debug.Log ("move dir: " + moveDir.ToString ());
 		//set some initial current speed
 		currentSpeed = Random.Range(minSpeed,maxSpeed);
-		Debug.Log ("current speed is " + currentSpeed.ToString ());
+//		Debug.Log ("current speed is " + currentSpeed.ToString ());
 		float distanceLeft = Vector3.Distance(camVehicle.transform.position,endPos);
 
-		Debug.Log ("distance left is " + distanceLeft.ToString ());
+//		Debug.Log ("distance left is " + distanceLeft.ToString ());
 		camVehicle.GetComponent<RigidbodyFirstPersonController> ().enabled = false;
 		float timer = 0f;
-		Debug.Log ("velocity player movement");
+//		Debug.Log ("velocity player movement");
 		while (distanceLeft > 1.5f) {
 			timer += Time.deltaTime;
-			Debug.Log ("velocity : " + camVehicle.GetComponent<Rigidbody> ().velocity.ToString ());
+//			Debug.Log ("velocity : " + camVehicle.GetComponent<Rigidbody> ().velocity.ToString ());
 			camVehicle.GetComponent<Rigidbody>().velocity = moveDir * currentSpeed;
 			distanceLeft = Vector3.Distance (camVehicle.transform.position, endPos);
 			if(factor > timer + 0.1f)
@@ -1521,7 +1561,7 @@ public class ShoplifterScript : MonoBehaviour {
 			yield return 0;
 		}
 //		Debug.Log ("stopping the player");
-		Debug.Log("final timer: " + timer.ToString());
+//		Debug.Log("final timer: " + timer.ToString());
 		camVehicle.GetComponent<Rigidbody> ().velocity = Vector3.zero;
 //		camVehicle.GetComponent<RigidbodyFirstPersonController> ().enabled = true;
 		yield return null;

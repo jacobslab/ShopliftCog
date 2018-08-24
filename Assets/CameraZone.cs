@@ -18,12 +18,14 @@ public class CameraZone : MonoBehaviour {
 
 	public GameObject binoculars;
 	public GameObject securityCam;
+	public GameObject magnifyingGlass;
 
 	// Use this for initialization
 	void OnEnable () {
 
 		securityCam.SetActive (false);
 		binoculars.SetActive(false);
+		magnifyingGlass.SetActive (false);
 
 		hasSneaked = false;
 		pressCount = 0;
@@ -31,10 +33,16 @@ public class CameraZone : MonoBehaviour {
 			if (ExperimentSettings.env == ExperimentSettings.Environment.SpaceStation) {
 				securityCam.SetActive (true);
 				binoculars.SetActive (false);
+				magnifyingGlass.SetActive (false);
 
 			} else if (ExperimentSettings.env == ExperimentSettings.Environment.WesternTown) {
 				securityCam.SetActive (false);
 				binoculars.SetActive (true);
+				magnifyingGlass.SetActive (false);
+			}else if (ExperimentSettings.env == ExperimentSettings.Environment.VikingVillage) {
+				securityCam.SetActive (false);
+				binoculars.SetActive (false);
+				magnifyingGlass.SetActive (true);
 			}
 		}
 	}
@@ -110,8 +118,8 @@ public class CameraZone : MonoBehaviour {
 
 	void OnTriggerExit(Collider col)
 	{
-		firstTime = false;
 		if (col.gameObject.tag == "Player") {
+			firstTime = false;
 			activateCam = false;
 			if (!hasSneaked && !alreadyShown) {
 				Debug.Log ("showing negative feedback on trigger exit");
@@ -137,6 +145,10 @@ public class CameraZone : MonoBehaviour {
 			} else if (ExperimentSettings.env == ExperimentSettings.Environment.WesternTown) {
 				securityCam.SetActive (false);
 				binoculars.SetActive (true);
+			}else if (ExperimentSettings.env == ExperimentSettings.Environment.VikingVillage) {
+				securityCam.SetActive (false);
+				binoculars.SetActive (false);
+				magnifyingGlass.SetActive (true);
 			}
 		}
 	}
