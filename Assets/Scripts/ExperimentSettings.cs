@@ -23,11 +23,13 @@ public class ExperimentSettings : MonoBehaviour {
 		Cybercity,
 		SpaceStation,
 		WesternTown,
-		VikingVillage
+		VikingVillage,
+		Office,
+		Apartment,
 	}
 
 	public static Environment env;
-
+	public static int envDropdownIndex=0;
 
 	public enum ReevalType
 	{
@@ -217,16 +219,20 @@ public class ExperimentSettings : MonoBehaviour {
 	{
 		Debug.Log("env dropdown val: " + firstEnvDropdown.value.ToString());
 		envIndex = firstEnvDropdown.value;
+		envDropdownIndex = firstEnvDropdown.value;
 		switch (firstEnvDropdown.value) {
 
 		case 0:
 			env = Environment.SpaceStation;
 			break;
 		case 1: 
-			env = Environment.Cybercity;
+			env = Environment.WesternTown;
 			break;
 		case 2:
-			env = Environment.WesternTown;
+			env = Environment.Office;
+			break;
+		case 3:
+			env = Environment.Apartment;
 			break;
 		default:
 			env = Environment.SpaceStation;

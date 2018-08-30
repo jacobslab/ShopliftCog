@@ -56,9 +56,11 @@ public class ShoplifterScript : MonoBehaviour {
 
 	//environments
 	public GameObject spaceStationEnv;
-	public GameObject cybercityEnv;
+//	public GameObject cybercityEnv;
 	public GameObject westernTownEnv;
-	public GameObject vikingVillageEnv;
+//	public GameObject vikingVillageEnv;
+	public GameObject officeEnv;
+	public GameObject apartmentEnv;
 
 	//speed change zones
 	public List<GameObject> phase1SpeedChangeZones_L;
@@ -185,8 +187,6 @@ public class ShoplifterScript : MonoBehaviour {
 
 	public Text rigidStatusText;
 
-    public GameObject dummyObj;
-
 	private GameObject leftSuitcase;
 	private GameObject rightSuitcase;
 	private List<GameObject> suitcases;
@@ -202,6 +202,7 @@ public class ShoplifterScript : MonoBehaviour {
 	void Awake()
 	{
 		EnablePlayerCam (false);
+		Application.targetFrameRate = 60;
 	}
 
 	void EnablePlayerCam(bool shouldEnable)
@@ -232,7 +233,6 @@ public class ShoplifterScript : MonoBehaviour {
         camVehicle.SetActive(true);
 //        animBody.SetActive(false);
 
-        dummyObj.transform.eulerAngles = new Vector3(0f, 90f, 0f);
 //        cartAnim.Play("Phase1Start");
         //camVehicle.transform.position = phase1Start.transform.position;
 //        mouseLook = camVehicle.GetComponent<RigidbodyFirstPersonController>().mouseLook;
@@ -327,15 +327,15 @@ public class ShoplifterScript : MonoBehaviour {
 
 		Experiment.Instance.shopLiftLog.LogCameraLerpIndex (randFactor,blockCount);
 
-		phase1CamZone_L.transform.position = new Vector3(envManager.phase1Start_L.transform.position.x,-1.7f,Mathf.Lerp (envManager.phase1Start_L.transform.position.z, envManager.phase1End_L.transform.position.z, randFactor));
-		phase1CamZone_R.transform.position =new Vector3(envManager.phase1Start_R.transform.position.x,-1.7f, Mathf.Lerp (envManager.phase1Start_R.transform.position.z, envManager.phase1End_R.transform.position.z, randFactor));
+		phase1CamZone_L.transform.position = new Vector3(envManager.phase1Start_L.transform.position.x,envManager.phase1Start_L.transform.position.y,Mathf.Lerp (envManager.phase1Start_L.transform.position.z, envManager.phase1End_L.transform.position.z, randFactor));
+		phase1CamZone_R.transform.position =new Vector3(envManager.phase1Start_R.transform.position.x,envManager.phase1Start_R.transform.position.y, Mathf.Lerp (envManager.phase1Start_R.transform.position.z, envManager.phase1End_R.transform.position.z, randFactor));
 
 
-		phase2CamZone_L.transform.position = new Vector3(envManager.phase2Start_L.transform.position.x,-1.7f,Mathf.Lerp (envManager.phase2Start_L.transform.position.z, envManager.phase2End_L.transform.position.z, randFactor));
-		phase2CamZone_R.transform.position = new Vector3(envManager.phase2Start_R.transform.position.x,-1.7f,Mathf.Lerp (envManager.phase2Start_R.transform.position.z, envManager.phase2End_R.transform.position.z, randFactor));
+		phase2CamZone_L.transform.position = new Vector3(envManager.phase2Start_L.transform.position.x,envManager.phase2Start_L.transform.position.y,Mathf.Lerp (envManager.phase2Start_L.transform.position.z, envManager.phase2End_L.transform.position.z, randFactor));
+		phase2CamZone_R.transform.position = new Vector3(envManager.phase2Start_R.transform.position.x,envManager.phase2Start_R.transform.position.y,Mathf.Lerp (envManager.phase2Start_R.transform.position.z, envManager.phase2End_R.transform.position.z, randFactor));
 
-		phase3CamZone_L.transform.position = new Vector3(envManager.phase3Start_L.transform.position.x,-1.7f,Mathf.Lerp (envManager.phase3Start_L.transform.position.z, envManager.phase3End_L.transform.position.z, randFactor));
-		phase3CamZone_R.transform.position = new Vector3(envManager.phase3Start_R.transform.position.x,-1.7f,Mathf.Lerp (envManager.phase3Start_R.transform.position.z, envManager.phase3End_R.transform.position.z, randFactor));
+		phase3CamZone_L.transform.position = new Vector3(envManager.phase3Start_L.transform.position.x,envManager.phase3Start_L.transform.position.y,Mathf.Lerp (envManager.phase3Start_L.transform.position.z, envManager.phase3End_L.transform.position.z, randFactor));
+		phase3CamZone_R.transform.position = new Vector3(envManager.phase3Start_R.transform.position.x,envManager.phase3Start_R.transform.position.y,Mathf.Lerp (envManager.phase3Start_R.transform.position.z, envManager.phase3End_R.transform.position.z, randFactor));
 
 		if (directionEnv == 1) { //is western town
 			Debug.Log("turned cam zones");
@@ -758,9 +758,9 @@ public class ShoplifterScript : MonoBehaviour {
 //				suitcaseObj = suitcaseObj.transform.GetChild (0).gameObject;
 			}
 
-			if (ExperimentSettings.env == ExperimentSettings.Environment.VikingVillage) {
-				suitcaseObj.transform.position = suitcaseObj.transform.position + new Vector3 (0f, -1f, 4f);
-			}
+//			if (ExperimentSettings.env == ExperimentSettings.Environment.VikingVillage) {
+//				suitcaseObj.transform.position = suitcaseObj.transform.position + new Vector3 (0f, -1f, 4f);
+//			}
 		}
 			yield return StartCoroutine(targetDoor.GetComponent<Doors> ().Open ());
 			if (pathIndex == 0) {
@@ -1044,13 +1044,12 @@ public class ShoplifterScript : MonoBehaviour {
 
 	void UpdateFirstEnvironments ()
 	{
-		if (ExperimentSettings.env == ExperimentSettings.Environment.Cybercity) {
-			environments [0] = cybercityEnv;
-			environments [1] = spaceStationEnv;
-		} else {
-			environments [0] = spaceStationEnv;
-			environments [1] = cybercityEnv;
-		}
+//		if (ExperimentSettings.env == ExperimentSettings.Environment.Cybercity) {
+//			environments [0] = cybercityEnv;
+//			environments [1] = spaceStationEnv;
+//		} else {
+//			environments [0] = spaceStationEnv;
+//		}
 	}
 
 	IEnumerator AskSoloPreference(int prefIndex)
@@ -1121,13 +1120,15 @@ public class ShoplifterScript : MonoBehaviour {
 
 	IEnumerator PickEnvironment(int blockCount)
 	{
-//		envIndex = 2;
-		envIndex = Random.Range (0, environments.Count);
+//		envIndex = 3;
+		envIndex = ExperimentSettings.envDropdownIndex;
+//		envIndex = Random.Range (0, environments.Count);
 
 		//first turn off all environments
 		for (int i = 0; i<environments.Count; i++) {
 			environments [i].SetActive (false);
 		}
+		camVehicle.GetComponent<CapsuleCollider> ().height = 3.2f;
 		Debug.Log ("picking environment");
 		environments [envIndex].SetActive (true);
 		if (environments [envIndex].name == "SpaceStation") {
@@ -1137,6 +1138,7 @@ public class ShoplifterScript : MonoBehaviour {
 			camVehicle.transform.GetChild (0).GetChild (1).gameObject.SetActive (true);
 			camVehicle.transform.GetChild (0).GetChild (2).gameObject.SetActive (false);
 			camVehicle.transform.GetChild (0).GetChild (3).gameObject.SetActive (false);
+			camVehicle.transform.GetChild (0).GetChild (4).gameObject.SetActive (false);
 			directionEnv = -1;
 		} else if (environments [envIndex].name == "WesternTown") { //western town, for now
 			Debug.Log ("chosen western town");
@@ -1145,15 +1147,40 @@ public class ShoplifterScript : MonoBehaviour {
 			camVehicle.transform.GetChild (0).GetChild (1).gameObject.SetActive (false);
 			camVehicle.transform.GetChild (0).GetChild (2).gameObject.SetActive (true);
 			camVehicle.transform.GetChild (0).GetChild (3).gameObject.SetActive (false);
+			camVehicle.transform.GetChild (0).GetChild (4).gameObject.SetActive (false);
+			camVehicle.GetComponent<CapsuleCollider> ().height =2f;
 			directionEnv = 1;
 		}
-		else if (environments [envIndex].name == "VikingVillage") { //viking village, for now
-			Debug.Log ("chosen viking village");
-			ExperimentSettings.env = ExperimentSettings.Environment.VikingVillage;
-			camVehicle.transform.localEulerAngles = new Vector3 (0f, 0f, 0f);
+//		else if (environments [envIndex].name == "VikingVillage") { //viking village, for now
+//			Debug.Log ("chosen viking village");
+//			ExperimentSettings.env = ExperimentSettings.Environment.VikingVillage;
+//			camVehicle.transform.localEulerAngles = new Vector3 (0f, 0f, 0f);
+//			camVehicle.transform.GetChild (0).GetChild (1).gameObject.SetActive (false);
+//			camVehicle.transform.GetChild (0).GetChild (2).gameObject.SetActive (false);
+//			camVehicle.transform.GetChild (0).GetChild (3).gameObject.SetActive (true);
+//			camVehicle.transform.GetChild (0).GetChild (4).gameObject.SetActive (false);
+//			directionEnv = -1;
+//		}
+		else if (environments [envIndex].name == "Office") { //office
+			Debug.Log ("chosen office");
+			ExperimentSettings.env = ExperimentSettings.Environment.Office;
+			camVehicle.transform.localEulerAngles = new Vector3 (0f, 180f, 0f);
 			camVehicle.transform.GetChild (0).GetChild (1).gameObject.SetActive (false);
 			camVehicle.transform.GetChild (0).GetChild (2).gameObject.SetActive (false);
-			camVehicle.transform.GetChild (0).GetChild (3).gameObject.SetActive (true);
+			camVehicle.transform.GetChild (0).GetChild (3).gameObject.SetActive (false);
+			camVehicle.transform.GetChild (0).GetChild (4).gameObject.SetActive (true);
+			camVehicle.GetComponent<CapsuleCollider> ().height = 1.6f;
+			directionEnv = -1;
+		}
+		else if (environments [envIndex].name == "Apartment") { //office
+			Debug.Log ("chosen office");
+			ExperimentSettings.env = ExperimentSettings.Environment.Apartment;
+			camVehicle.transform.localEulerAngles = new Vector3 (0f, 180f, 0f);
+			camVehicle.transform.GetChild (0).GetChild (1).gameObject.SetActive (false);
+			camVehicle.transform.GetChild (0).GetChild (2).gameObject.SetActive (false);
+			camVehicle.transform.GetChild (0).GetChild (3).gameObject.SetActive (false);
+			camVehicle.transform.GetChild (0).GetChild (4).gameObject.SetActive (true);
+			camVehicle.GetComponent<CapsuleCollider> ().height = 1.6f;
 			directionEnv = -1;
 		}
 		else
@@ -1162,6 +1189,7 @@ public class ShoplifterScript : MonoBehaviour {
 			camVehicle.transform.GetChild (0).GetChild (1).gameObject.SetActive (true);
 			camVehicle.transform.GetChild (0).GetChild (2).gameObject.SetActive (false);
 			camVehicle.transform.GetChild (0).GetChild (3).gameObject.SetActive (false);
+			camVehicle.transform.GetChild (0).GetChild (4).gameObject.SetActive (false);
 			directionEnv = -1;
 		}
 		envManager = environments [envIndex].GetComponent<EnvironmentManager> ();
@@ -1394,9 +1422,9 @@ public class ShoplifterScript : MonoBehaviour {
 
 		GameObject coinShowerObj = Instantiate(coinShower,((pathIndex==0) ?  register_L.transform.position : register_R.transform.position ) + (new Vector3(0f,0.2f,directionEnv) * 2f), Quaternion.identity) as GameObject;		
 
-		if (activeEnvLabel == "Cybercity") {
-			coinShowerObj.transform.GetChild (0).transform.localPosition = Vector3.zero;
-		}
+//		if (activeEnvLabel == "Cybercity") {
+//			coinShowerObj.transform.GetChild (0).transform.localPosition = Vector3.zero;
+//		}
 		System.Random rand = new System.Random ();
 		int reward = Mathf.CeilToInt(NextGaussian (rand, registerVals [choiceOutput], 1));
 		rewardScore.enabled = true;
@@ -1460,14 +1488,22 @@ public class ShoplifterScript : MonoBehaviour {
 
 	public void RandomizeSpeed()
 	{
-		if (suggestedSpeed != 0f) {
-			Debug.Log ("set speed to suggested speed: " + suggestedSpeed.ToString ());
-
-			currentSpeed = Mathf.Clamp (suggestedSpeed, minSpeed, maxSpeed);
-		}
-		else
-		currentSpeed = Random.Range (minSpeed, maxSpeed);
+		Debug.Log ("randomizing speed");
+		suggestedSpeed = Random.Range (minSpeed, maxSpeed);
+		StartCoroutine ("UpdateSpeed", suggestedSpeed);
 //		Debug.Log ("randomized speed to: " + currentSpeed.ToString ());
+	}
+
+	IEnumerator UpdateSpeed(float suggestedSpeed)
+	{
+		Debug.Log ("updating speed to: " + suggestedSpeed.ToString ());
+		float timer = 0f;
+		while (timer < 1f) {
+			timer += Time.deltaTime;
+			currentSpeed = Mathf.Lerp (currentSpeed, suggestedSpeed, timer);
+			yield return 0;
+		}
+		yield return null;
 	}
 
     void ToggleMouseLook(bool shouldActivate)
@@ -1556,8 +1592,6 @@ public class ShoplifterScript : MonoBehaviour {
 //			Debug.Log ("velocity : " + camVehicle.GetComponent<Rigidbody> ().velocity.ToString ());
 			camVehicle.GetComponent<Rigidbody>().velocity = moveDir * currentSpeed;
 			distanceLeft = Vector3.Distance (camVehicle.transform.position, endPos);
-			if(factor > timer + 0.1f)
-				suggestedSpeed = distanceLeft / (factor - timer);
 			yield return 0;
 		}
 //		Debug.Log ("stopping the player");

@@ -19,6 +19,7 @@ public class CameraZone : MonoBehaviour {
 	public GameObject binoculars;
 	public GameObject securityCam;
 	public GameObject magnifyingGlass;
+	public GameObject wirelessCam;
 
 	// Use this for initialization
 	void OnEnable () {
@@ -26,23 +27,19 @@ public class CameraZone : MonoBehaviour {
 		securityCam.SetActive (false);
 		binoculars.SetActive(false);
 		magnifyingGlass.SetActive (false);
+		wirelessCam.SetActive (false);
 
 		hasSneaked = false;
 		pressCount = 0;
 		if (firstTime) {
 			if (ExperimentSettings.env == ExperimentSettings.Environment.SpaceStation) {
 				securityCam.SetActive (true);
-				binoculars.SetActive (false);
-				magnifyingGlass.SetActive (false);
-
 			} else if (ExperimentSettings.env == ExperimentSettings.Environment.WesternTown) {
-				securityCam.SetActive (false);
 				binoculars.SetActive (true);
-				magnifyingGlass.SetActive (false);
 			}else if (ExperimentSettings.env == ExperimentSettings.Environment.VikingVillage) {
-				securityCam.SetActive (false);
-				binoculars.SetActive (false);
 				magnifyingGlass.SetActive (true);
+			}else if (ExperimentSettings.env == ExperimentSettings.Environment.Office || ExperimentSettings.env == ExperimentSettings.Environment.Apartment) {
+				wirelessCam.SetActive (true);
 			}
 		}
 	}
