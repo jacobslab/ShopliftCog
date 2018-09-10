@@ -7,6 +7,7 @@ public class PrefSoloSetup : MonoBehaviour {
 
 	public Slider prefSlider;
 	public RawImage focusImg;
+	public RawImage negativeFocusImg;
 
 	public List<Texture> imgGroup;
 	private bool active=false;
@@ -28,15 +29,18 @@ public class PrefSoloSetup : MonoBehaviour {
 
 	public void UpdateSlider()
 	{
-		Experiment.Instance.shopLiftLog.LogSliderValue (1, prefSlider.value);
+		Experiment.Instance.shopLiftLog.LogSliderValue ("SOLO", prefSlider.value);
 	}
 
 	public void SetupPrefs(int prefIndex)
 	{
 		List<Texture> targetGroup = new List<Texture> ();
 		prefSlider.value = 0.5f;
-		Experiment.Instance.shopLiftLog.LogSoloPrefImage (prefIndex);
+		Experiment.Instance.shopLiftLog.LogSoloPrefImage (imgGroup[prefIndex].name);
 		focusImg.texture = imgGroup [prefIndex];
+		if (negativeFocusImg != null) {
+			negativeFocusImg.texture = imgGroup [prefIndex];
+		}
 
 	}
 

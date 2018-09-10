@@ -70,6 +70,7 @@ public class EnvironmentManager : MonoBehaviour {
 	//for comparative and solo sliders
 	public List<Texture> groupOne;
 	public List<Texture> groupTwo;
+	public List<Texture> groupThree;
 
 	public Material envSkybox;
 

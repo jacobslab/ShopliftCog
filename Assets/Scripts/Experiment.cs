@@ -25,6 +25,19 @@ public class Experiment : MonoBehaviour {
 	//state enum
 	public ExperimentState currentState = ExperimentState.instructionsState;
 
+	//checkpoint
+	public static bool shouldCheckpoint=false;
+	public string[] checkpointData;
+	public int checkpointedEnvIndex = 0;
+	public string checkpointedPhaseName = "NONE";
+	public int checkpointedReevalIndex = 0;
+	public string leftRoomName="";
+	public int leftReward=0;
+	public string rightRoomName="";
+	public int rightReward=0;
+	public static bool loadFromCheckpoint = false;
+
+
 	public SubjectSelectionController subjectController;
 	private string wordsLogged="";
 	public enum ExperimentState
@@ -66,10 +79,11 @@ public class Experiment : MonoBehaviour {
 //		}
 
 	}
+
+
 	
 	//TODO: move to logger_threading perhaps?
 	void InitLogging(){
-		
 		string subjectDirectory = ExperimentSettings.defaultLoggingPath + ExperimentSettings.currentSubject.name + "/";
 		sessionDirectory = subjectDirectory + "session_0" + "/";
 		
@@ -84,9 +98,28 @@ public class Experiment : MonoBehaviour {
 			sessionID++;
 			
 			sessionIDString = "_" + sessionID.ToString();
-			
+			//check if the session crashed
+			if (loadFromCheckpoint) {
+				string checkpointFilePath = sessionDirectory + "checkpoint.txt";
+				checkpointData = new string[8];
+				if (File.Exists (checkpointFilePath)) {
+					string checkpointText = File.ReadAllText (checkpointFilePath);
+					if (checkpointText.Contains ("ONGOING")) {
+						Debug.Log ("previous session crashed; use checkpoint details to resume that session");
+						checkpointData = checkpointText.Split ("\t" [0]);
+						shouldCheckpoint = true;
+					}
+					for (int i = 0; i < checkpointData.Length; i++) {
+						Debug.Log (checkpointData [i]);
+					}
+					UpdateCheckpointedVariables (checkpointData);
+
+				}
+			}
 			sessionDirectory = subjectDirectory + "session" + sessionIDString + "/";
 		}
+
+		Debug.Log ("current session is: " + sessionID.ToString ());
 
 
 		//delete old files.
@@ -107,7 +140,7 @@ public class Experiment : MonoBehaviour {
 
 	//In order to increment the session, this file must be present. Otherwise, the session has not actually started.
 	//This accounts for when we don't successfully connect to hardware -- wouldn't want new session folders.
-	//Gets created in TrialController after any hardware has connected.
+	//Gets created in ShoplifterScript when the task is run.
 	public void CreateSessionStartedFile(){
 		StreamWriter newSR = new StreamWriter (sessionDirectory + sessionStartedFileName);
 	}
@@ -135,6 +168,46 @@ public class Experiment : MonoBehaviour {
 //			}
 //
 //		}
+	}
+
+	public void UpdateCheckpointedVariables(string[] checkpointData)
+	{
+		checkpointedEnvIndex = int.Parse(checkpointData [1]);
+		checkpointedPhaseName = checkpointData [2];
+		checkpointedReevalIndex = int.Parse(checkpointData [3]);
+		leftRoomName = checkpointData [4];
+		leftReward = int.Parse (checkpointData [5]);
+		rightRoomName = checkpointData [6];
+		rightReward = int.Parse (checkpointData [7]);
+
+		switch (checkpointedPhaseName) {
+		case "TRAINING":
+			//no action needed, assuming all the flags point to true, as they do by default
+			break;
+		case "LEARNING":
+			ExperimentSettings.isTraining = false;
+			break;
+		case "REEVALUATION":
+			ExperimentSettings.isTraining = false;
+			ExperimentSettings.isLearning = false;
+			break;
+		case "TESTING":
+			ExperimentSettings.isTraining = false;
+			ExperimentSettings.isLearning = false;
+			ExperimentSettings.isReeval = false;
+			break;
+		case "POST-TEST":
+			ExperimentSettings.isTraining = false;
+			ExperimentSettings.isLearning = false;
+			ExperimentSettings.isReeval = false;
+			ExperimentSettings.isTesting = false;
+			break;
+		case "NONE":
+			//do nothing
+		default:
+			//do nothing
+			break;
+		}
 	}
 
 	public IEnumerator RunOutOfTrials(){

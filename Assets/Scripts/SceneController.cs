@@ -47,12 +47,37 @@ public class SceneController : MonoBehaviour { //there can be a separate scene c
 		Application.LoadLevel(0);
 	}
 
+	public void CheckForPreviousSessions()
+	{
+		if(Experiment.Instance != null){
+			Experiment.Instance.OnExit();
+		}
+		ExperimentSettings.Instance.subjectSelectionController.SendMessage("AddNewSubject");
+		if (ExperimentSettings.currentSubject != null) {
+			ExperimentSettings.Instance.UpdateCheckpointStatus ();
+		} else
+			Debug.Log ("SUBJECT DOES NOT EXIST");
+	}
+
+	public void LoadFromCheckpoint()
+	{
+		//should be no new data to record for the subject
+		if(Experiment.Instance != null){
+			Experiment.Instance.OnExit();
+		}
+		Experiment.loadFromCheckpoint = true;
+		ExperimentSettings.Instance.subjectSelectionController.SendMessage("AddNewSubject");
+		if(ExperimentSettings.currentSubject != null){
+			LoadExperimentLevel();
+		}
+	}
+
 	public void LoadExperiment(){
 		//should be no new data to record for the subject
 		if(Experiment.Instance != null){
 			Experiment.Instance.OnExit();
 		}
-
+			
 			ExperimentSettings.Instance.subjectSelectionController.SendMessage("AddNewSubject");
 			if(ExperimentSettings.currentSubject != null){
 				LoadExperimentLevel();

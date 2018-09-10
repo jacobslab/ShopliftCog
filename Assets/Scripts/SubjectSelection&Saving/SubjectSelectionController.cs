@@ -69,6 +69,8 @@ public class SubjectSelectionController : MonoBehaviour {
 					SubjectReaderWriter.subjectDict.Add( newSubject.name, newSubject );
 				}
 
+				Debug.Log ("NEW SUBJ NAME:  " + newSubject.name);
+
 					subjectReaderWriter.WriteNewSubject( newSubject.name );
 
 					//now get rid of input text

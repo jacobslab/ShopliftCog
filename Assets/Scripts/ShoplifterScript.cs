@@ -6,6 +6,7 @@ using UnityStandardAssets.CrossPlatformInput;
 using UnityStandardAssets.Characters.FirstPerson;
 using UnityEngine.SceneManagement;
 using System.Linq;
+using System.IO;
 public class ShoplifterScript : MonoBehaviour {
 
     public GameObject camVehicle;
@@ -92,6 +93,8 @@ public class ShoplifterScript : MonoBehaviour {
 
 	private string activeEnvLabel = "";
 
+	public GameObject instructionVideo;
+
 	public List<GameObject> environments;
 	private EnvironmentManager envManager;
 
@@ -118,6 +121,8 @@ public class ShoplifterScript : MonoBehaviour {
 
 	bool firstTime=true;
 
+	string currentPhaseName="NONE";
+
     //ui
 	public CanvasGroup introInstructionGroup;
 	public CanvasGroup instructionGroup;
@@ -135,6 +140,7 @@ public class ShoplifterScript : MonoBehaviour {
 	public CanvasGroup warningFeedbackGroup;
 	public CanvasGroup prefSolo;
 	public CanvasGroup prefGroup;
+	public CanvasGroup multipleChoiceGroup;
 	public CanvasGroup imagineGroup;
 	public CanvasGroup imageryQualityGroup;
 
@@ -193,8 +199,27 @@ public class ShoplifterScript : MonoBehaviour {
 
 	public GameObject testFloor;
 
+
+	public class CoroutineWithData {
+		public Coroutine coroutine { get; private set; }
+		public object result;
+		private IEnumerator target;
+		public CoroutineWithData(MonoBehaviour owner, IEnumerator target) {
+			this.target = target;
+			this.coroutine = owner.StartCoroutine(Run());
+		}
+
+		private IEnumerator Run() {
+			while(target.MoveNext()) {
+				result = target.Current;
+				yield return result;
+			}
+		}
+	}
+
 	void Awake()
 	{
+		instructionVideo.SetActive(false);
 		EnablePlayerCam (false);
 		Application.targetFrameRate = 60;
 	}
@@ -260,6 +285,16 @@ public class ShoplifterScript : MonoBehaviour {
 				leftSuitcase = suitcases [1];
 				rightSuitcase = suitcases [0];
 			}
+	}
+
+	void CheckpointSession(int blockCount,bool isOngoing)
+	{
+		string separator = "\t";
+		int currentBlockCount = blockCount;
+		//environment + phase + reeval type + leftroom + leftreward + rightroom +  rightreward
+		string line = ((isOngoing)? "ONGOING" : "FINISHED") + separator + envIndex.ToString() + separator +  currentPhaseName + separator + reevalConditions[currentBlockCount].ToString() + separator + leftRoom.name + separator + registerVals[0].ToString() + separator + rightRoom.name + separator + registerVals[1].ToString();
+
+		System.IO.File.WriteAllText(Experiment.Instance.sessionDirectory+"checkpoint.txt", line);
 	}
 
 	void RandomizeSpeedChangeZones()
@@ -541,13 +576,36 @@ public class ShoplifterScript : MonoBehaviour {
 		Debug.Log ("starting cam training phase");
 		CameraZone.isTraining = true;
 
+		//inst video
+		instructionVideo.SetActive(true);
+		yield return new WaitForSeconds (1f);
+		EnablePlayerCam (true);
+		float timer = 0f;
+		float maxTimer = 148f;
+		while (!Input.GetButtonDown ("Action Button") && timer < 148f) {
+			timer += Time.deltaTime;
+			yield return 0;
+		}
+		instructionVideo.SetActive(false);
+
+
+
 		introInstructionGroup.alpha = 1f;
-		yield return StartCoroutine (WaitForButtonPress (10000f));
+		yield return StartCoroutine (WaitForButtonPress (10000f,didPress =>
+			{
+				Debug.Log("did press: " + didPress);
+			}
+		));
 		introInstructionGroup.alpha = 0f;
 
 		trainingInstructionsGroup.alpha = 1f;
-		yield return StartCoroutine(WaitForButtonPress (10000f));
+		yield return StartCoroutine(WaitForButtonPress (10000f,didPress =>
+			{
+				Debug.Log("did press: " + didPress);
+			}
+		));
 		trainingInstructionsGroup.alpha = 0f;
+
 		trainingPeriodGroup.alpha = 1f;
 		bool isLeft = false;
 		int numTraining = 0;
@@ -750,6 +808,9 @@ public class ShoplifterScript : MonoBehaviour {
 				Debug.Log ("NOT WESTERN TOWN");
 				suitcaseObj.transform.eulerAngles = (directionEnv == 1) ? new Vector3 (-90f, 0f, 0f) : new Vector3 (-90f, 0f, 180f);
 //				suitcaseObj = suitcaseObj.transform.GetChild (0).gameObject;
+			} else if (ExperimentSettings.env == ExperimentSettings.Environment.Office) {
+				suitcaseObj.transform.eulerAngles = new Vector3 (0f, 90f, 0f);
+				
 			}
 
 //			if (ExperimentSettings.env == ExperimentSettings.Environment.VikingVillage) {
@@ -989,33 +1050,43 @@ public class ShoplifterScript : MonoBehaviour {
 				yield return StartCoroutine (RunPhaseOne (0, false, -1, true));
 				yield return StartCoroutine (RunImaginePeriod (15f));
 				yield return StartCoroutine (AskSoloPreference (0));
-				yield return StartCoroutine (AskImageryQualityRating (0));
+//				yield return StartCoroutine (AskImageryQualityRating (0));
 				yield return StartCoroutine (RunRestPeriod (2f));
 				break;
 			case 1:
 				yield return StartCoroutine(RunPhaseOne (1, false, -1, true));
 				yield return StartCoroutine (RunImaginePeriod (15f));
 				yield return StartCoroutine (AskSoloPreference (1));
-				yield return StartCoroutine (AskImageryQualityRating (1));
+//				yield return StartCoroutine (AskImageryQualityRating (1));
 				yield return StartCoroutine (RunRestPeriod (2f));
 				break;
 			case 2:
 				yield return StartCoroutine(RunPhaseOne (0, false, -1, true));
 				yield return StartCoroutine (RunImaginePeriod (15f));
 				yield return StartCoroutine (AskSoloPreference (0));
-				yield return StartCoroutine (AskImageryQualityRating (0));
+//				yield return StartCoroutine (AskImageryQualityRating (0));
 				yield return StartCoroutine (RunRestPeriod (2f));
 				break;
 			case 3:
 				yield return StartCoroutine(RunPhaseOne (1, false, -1, true));
 				yield return StartCoroutine (RunImaginePeriod (15f));
 				yield return StartCoroutine (AskSoloPreference (1));
-				yield return StartCoroutine (AskImageryQualityRating (1));
+//				yield return StartCoroutine (AskImageryQualityRating (1));
 				yield return StartCoroutine (RunRestPeriod (2f));
 				break;
 			}
 		}
-
+		List<int> multipleChoiceSequence = new List<int> ();
+		for (int i = 0; i < 4; i++) {
+			multipleChoiceSequence.Add (i);
+			
+		}
+		multipleChoiceSequence = ShuffleList (multipleChoiceSequence);
+		for (int i = 0; i < 4; i++) {
+			int randIndex = Random.Range (0, multipleChoiceSequence.Count);
+			yield return StartCoroutine (AskMultipleChoice (multipleChoiceSequence [randIndex]));
+			multipleChoiceSequence.RemoveAt (randIndex);
+		}
 		Experiment.Instance.shopLiftLog.LogPhaseEvent (3, false);
 		yield return null;
 	}
@@ -1052,7 +1123,12 @@ public class ShoplifterScript : MonoBehaviour {
 		EnablePlayerCam (false);
 		imageryQualityGroup.gameObject.SetActive (true);
 		imageryQualityGroup.GetComponent<PrefSoloSetup> ().SetupPrefs (prefIndex);
-		yield return StartCoroutine (WaitForButtonPress (15f));
+		yield return StartCoroutine (WaitForButtonPress (15f,didPress =>
+			{
+				Debug.Log("did press: " + didPress);
+			}
+		));
+		Experiment.Instance.shopLiftLog.LogFinalSliderValue ("IMAGERY_QUALITY", imageryQualityGroup.GetComponent<PrefSoloSetup> ().prefSlider.value,true);
 		imageryQualityGroup.gameObject.SetActive (false);
 		Cursor.visible = false;
 
@@ -1069,9 +1145,36 @@ public class ShoplifterScript : MonoBehaviour {
 		prefSolo.gameObject.SetActive (true);
 		prefSolo.GetComponent<PrefSoloSetup> ().SetupPrefs (prefIndex);
 
-		yield return StartCoroutine (WaitForButtonPress (10f));
+		bool pressed = false;
+		yield return StartCoroutine (WaitForButtonPress (10f,didPress =>
+			{
+				pressed=didPress;
+			}
+		));
 
+		Experiment.Instance.shopLiftLog.LogFinalSliderValue ("SOLO", prefSolo.GetComponent<PrefSoloSetup> ().prefSlider.value, pressed);
 		prefSolo.gameObject.SetActive (false);
+		Cursor.visible = false;
+
+		yield return null;
+	}
+
+	IEnumerator AskMultipleChoice(int prefIndex)
+	{
+
+		EnablePlayerCam (false);
+		multipleChoiceGroup.gameObject.SetActive (true);
+		multipleChoiceGroup.GetComponent<MultipleChoiceGroup> ().SetupMultipleChoice (prefIndex);
+
+		bool pressed = false;
+		yield return StartCoroutine (WaitForButtonPress (15f,didPress =>
+			{
+				pressed=didPress;
+			}
+		));
+
+		Experiment.Instance.shopLiftLog.LogFinalSliderValue ("MULTIPLE_CHOICE", multipleChoiceGroup.GetComponent<AnswerSelector> ().ReturnSelectorPosition(), pressed);
+		multipleChoiceGroup.gameObject.SetActive (false);
 		Cursor.visible = false;
 
 		yield return null;
@@ -1097,13 +1200,23 @@ public class ShoplifterScript : MonoBehaviour {
 			break;
 			
 		}
+		bool pressed = false;
 		if (firstTime) {
-			yield return StartCoroutine (WaitForButtonPress (20f));
+			yield return StartCoroutine (WaitForButtonPress (20f,didPress =>
+				{
+					pressed=didPress;
+				}
+			));
 			firstTime = false;
 		}
 		else
-			yield return StartCoroutine (WaitForButtonPress (10f));
+			yield return StartCoroutine (WaitForButtonPress (10f,didPress =>
+				{
+					pressed=didPress;
+				}
+			));
 
+		Experiment.Instance.shopLiftLog.LogFinalSliderValue ("COMPARATIVE", prefGroup.GetComponent<PrefGroupSetup> ().prefSlider.value, pressed);
 		prefGroup.gameObject.SetActive (false);
 
 		Cursor.visible = false;
@@ -1115,23 +1228,30 @@ public class ShoplifterScript : MonoBehaviour {
 		infoText.text = text;
 		infoGroup.alpha = 1f;
 		Experiment.Instance.shopLiftLog.LogWaitEvent("DOOR",true);
-		yield return StartCoroutine (WaitForButtonPress (5f));
+		yield return StartCoroutine (WaitForButtonPress (5f,didPress =>
+			{
+				Debug.Log("did press: " + didPress);
+			}
+		));
 		Experiment.Instance.shopLiftLog.LogWaitEvent("DOOR",false);
 		infoGroup.alpha = 0f;
 		yield return null;
 	}
 
-	IEnumerator WaitForButtonPress(float maxWaitTime)
+	IEnumerator WaitForButtonPress(float maxWaitTime,System.Action<bool> didPress)
 	{
 		float timer = 0f;
 		while (!Input.GetButtonDown ("Action Button") && timer < maxWaitTime) {
 			timer += Time.deltaTime;
 			yield return 0;
 		}
-		if (timer < maxWaitTime)
+		if (timer < maxWaitTime) {
 			Experiment.Instance.shopLiftLog.LogButtonPress ();
-		else
+			didPress (true);
+		} else {
 			Experiment.Instance.shopLiftLog.LogTimeout (maxWaitTime);
+			didPress (false);
+		}
 		yield return null;
 	}
 
@@ -1140,6 +1260,7 @@ public class ShoplifterScript : MonoBehaviour {
 //		envIndex = 3;
 //		envIndex = ExperimentSettings.envDropdownIndex;
 //		envIndex = Random.Range (0, environments.Count);
+//		envIndex=blockCount;
 		envIndex=blockCount;
 
 		//reset first time
@@ -1263,6 +1384,15 @@ public class ShoplifterScript : MonoBehaviour {
 		prefSolo.gameObject.GetComponent<PrefSoloSetup> ().imgGroup [0] = envManager.groupOne [0];
 		prefSolo.gameObject.GetComponent<PrefSoloSetup> ().imgGroup [1] = envManager.groupOne [1];
 
+		//for multiple choice
+		Debug.Log("ADDED MULTIPLE CHOICE ROOMTEXTURES");
+		multipleChoiceGroup.gameObject.GetComponent<MultipleChoiceGroup>().roomTextureList[0] = envManager.groupOne[0];
+		multipleChoiceGroup.gameObject.GetComponent<MultipleChoiceGroup>().roomTextureList[1] = envManager.groupOne[1];
+		multipleChoiceGroup.gameObject.GetComponent<MultipleChoiceGroup>().roomTextureList[2] = envManager.groupTwo[0];
+		multipleChoiceGroup.gameObject.GetComponent<MultipleChoiceGroup>().roomTextureList[3] = envManager.groupTwo[1];
+		multipleChoiceGroup.gameObject.GetComponent<MultipleChoiceGroup>().roomTextureList[4] = envManager.groupThree[0];
+		multipleChoiceGroup.gameObject.GetComponent<MultipleChoiceGroup>().roomTextureList[5] = envManager.groupThree[1];
+
 		skyboxMat = envManager.envSkybox;
 		RenderSettings.skybox = skyboxMat;
 
@@ -1286,7 +1416,7 @@ public class ShoplifterScript : MonoBehaviour {
     IEnumerator RunTask()
     {
 		stageIndex = 1;
-
+		Experiment.Instance.CreateSessionStartedFile ();
 
 //		yield return StartCoroutine(PickRegisterValues());
 
@@ -1298,50 +1428,76 @@ public class ShoplifterScript : MonoBehaviour {
 		} else
 			isTransition = false;
 		
-		for (int i = 0; i < totalEnvCount; i++) {
+		int startingIndex = 0;
+
+		if (Experiment.shouldCheckpoint) {
+			startingIndex = Experiment.Instance.checkpointedEnvIndex;
+			
+		}
+		
+		for (int i = startingIndex; i < totalEnvCount; i++) {
 			numTrials_Learning = 0;
 			numTrials = 0;
 			currentReevalCondition = reevalConditions [i];
 
 			yield return StartCoroutine (PickEnvironment (i));
 
-			yield return StartCoroutine(PickRegisterValues()); //new reg values to be picked for each environment
+			if(!Experiment.shouldCheckpoint)
+			{
+				AssignRooms ();
+				RandomizeSuitcases();
+				yield return StartCoroutine(PickRegisterValues()); //new reg values to be picked for each environment
+			}
 
 			isTransition = !isTransition; //flip the transition condition before the next round
 
-
+			currentPhaseName = "TRAINING";
 			if (ExperimentSettings.isTraining)
 				yield return StartCoroutine (RunCamTrainingPhase ());
+			
 
 			//randomize rooms and cam zones again
-			AssignRooms ();
+//			AssignRooms ();
 //			yield return StartCoroutine(RandomizeCameraZones (i)); //we randomize cameras when picking environment now
-			RandomizeSuitcases();
 
 			//learning phase
+
+			currentPhaseName = "LEARNING";
+			CheckpointSession (i,true);
 			if (ExperimentSettings.isLearning)
 				yield return StartCoroutine (RunLearningPhase (false,maxTrials_Learning));
+
 
 			//shuffle rewards
 //		ReassignRooms ();
 //			ShuffleRegisterRewards ();
 
 			//re-evaluation phase
+			currentPhaseName = "REEVALUATION";
+			CheckpointSession (i,true);
 			if (ExperimentSettings.isReeval)
 				yield return StartCoroutine (RunReevaluationPhase (currentReevalCondition));
 
+
 			//testing phase
+			currentPhaseName = "TESTING";
+			CheckpointSession (i,true);
 			if (ExperimentSettings.isTesting)
 				yield return StartCoroutine (RunTestingPhase ());
+
 
 			//if transition phase, play 10-trial additional learning
 			if (currentReevalCondition==2) {
 				Debug.Log ("RUNNING ADDITIONAL LEARN PHASE");
+				currentPhaseName = "POST-TEST";
 				yield return StartCoroutine (RunLearningPhase (true,maxTrials_PostTest));
 			}
 			Debug.Log ("about to end session");
 			//show end session screen
 			yield return StartCoroutine (ShowEndEnvironmentStageScreen ());
+
+			CheckpointSession (i,true);
+
 //			SceneManager.LoadScene (0); //load main menu
 //			SceneManager.UnloadSceneAsync (1); //then destroy all objects of the current scene
 			yield return null;
@@ -1351,6 +1507,7 @@ public class ShoplifterScript : MonoBehaviour {
 			environments.RemoveAt (envIndex);
 		}
 
+		CheckpointSession (totalEnvCount,false);
 		yield return StartCoroutine (ShowEndSessionScreen());
 		yield return null;
 	}

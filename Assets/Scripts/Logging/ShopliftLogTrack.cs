@@ -28,6 +28,16 @@ public class ShopliftLogTrack : LogTrack {
 		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "WAITING_FOR_"+waitCause+"_PRESS" + separator + ((hasBegun == true) ? "STARTED" : "ENDED"));
 	}
 
+	public void LogLEDOn()
+	{
+		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "PHOTODIODE_SQUARE" + separator + "ON");
+	}
+
+	public void LogLEDOff()
+	{
+		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "PHOTODIODE_SQUARE" + separator + "OFF");
+	}
+
 	public void LogTimeout(float maxTime)
 	{
 		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "TIMED_OUT " + separator  + maxTime.ToString());
@@ -69,21 +79,29 @@ public class ShopliftLogTrack : LogTrack {
 			subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "DECISION_EVENT" + separator + isActive.ToString ());
 	}
 
-	public void LogSoloPrefImage(int prefImageIndex)
+	public void LogSoloPrefImage(string prefImageName)
 	{
-		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "SOLO_PREF_SLIDER_IMAGE" + separator + prefImageIndex.ToString ());
+		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "SOLO_PREF_SLIDER_IMAGE" + separator + prefImageName);
 	}
 
-	public void LogComparativePrefImage(int prefGroup, int leftImageIndex,int rightImageIndex)
+	public void LogComparativePrefImage(int prefGroup, string leftImageName,string rightImageName)
 	{
-		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "COMPARATIVE_PREF_SLIDER" + separator + ((prefGroup==0) ? "FIRST_GROUP" : "SECOND_GROUP") + separator + "LEFT_IMAGE" + separator + leftImageIndex.ToString () + separator + "COMPARATIVE_PREF_SLIDER_RIGHT_IMAGE" + separator + rightImageIndex.ToString());
+		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "COMPARATIVE_PREF_SLIDER" + separator + "LEFT_IMAGE" + separator + leftImageName + separator + "RIGHT_IMAGE" + separator + rightImageName);
 	}
 
-	public void LogSliderValue(int sliderType, float sliderVal)
+	public void LogSliderValue(string sliderType, float sliderVal)
 	{
-		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "PREF_SLIDER" + separator + ((sliderType==0) ? "COMPARATIVE" : "SOLO") + separator + "VALUE" + separator + sliderVal.ToString());
+		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "PREF_SLIDER" + separator + sliderType + separator + "VALUE" + separator + sliderVal.ToString());
 	}
 
+	public void LogFinalSliderValue(string sliderType,float chosenValue,bool isChosen)
+	{
+		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "FINAL_SLIDER_VALUE" + separator + sliderType + separator + "VALUE" + separator + chosenValue + separator + ((isChosen) ? "CHOSEN" : "TIMED_OUT"));
+	}
+	public void LogSelectorPosition(int positionIndex,string roomName)
+	{
+		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "ANSWER_SELECTOR" + separator + "POSITION" + separator + positionIndex.ToString() + separator  + "ROOM" +  separator + roomName);
+	}
 	public void LogRegisterReward(int registerReward, int pathIndex)
 	{
 		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "REGISTER_REWARD" + separator + registerReward.ToString () + separator  + ((pathIndex==0) ? "LEFT" : "RIGHT"));

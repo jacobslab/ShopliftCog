@@ -65,9 +65,9 @@ public class ExperimentSettings : MonoBehaviour {
 	public Dropdown sessionType;
 
 	public static bool isTraining=true;
-	public static bool isTesting=true;
-	public static bool isReeval=true;
 	public static bool isLearning=true;
+	public static bool isReeval=true;
+	public static bool isTesting=true;
 
 	public static bool isRewardReeval = false;
 	public static bool isTransitionReeval = false;
@@ -79,6 +79,13 @@ public class ExperimentSettings : MonoBehaviour {
 
 	public Dropdown firstEnvDropdown;
 	public Dropdown reevalDropdown;
+
+
+	public InputField subjectName;
+	public Button checkpointButton;
+	public Button resumeFromCheckpointButton;
+	public Text checkpointDataText;
+	public bool checkpointExists = false;
 
 	public static int envIndex= 0;
 
@@ -101,6 +108,8 @@ public class ExperimentSettings : MonoBehaviour {
 			return;
 		}
 		_instance = this;
+		checkpointButton.gameObject.SetActive(true);
+		resumeFromCheckpointButton.gameObject.SetActive(false);
 //		DoMicTest ();
 //		if(Application.loadedLevel==0)
 //			InitMainMenuLabels ();
@@ -118,6 +127,57 @@ public class ExperimentSettings : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		
+	}
+
+	public void UpdateCheckpointStatus()
+	{
+		string subjName = subjectName.text;
+		checkpointExists=CheckSubjectFolderForCheckpoints (subjName);
+		if (checkpointExists) {
+
+			checkpointButton.gameObject.SetActive(false);
+			resumeFromCheckpointButton.gameObject.SetActive(true);
+		}
+		else
+			checkpointDataText.text = "No checkpoint data found!";
+	}
+	public bool CheckSubjectFolderForCheckpoints(string subjName)
+	{
+
+		string subjectDirectory = ExperimentSettings.defaultLoggingPath + ExperimentSettings.currentSubject.name + "/";
+		Debug.Log ("subject dir: " + subjectDirectory.ToString ());
+		string tempDir = subjectDirectory + "session_0" + "/";
+		string sessionStartedFileName= "sessionStarted.txt";
+		int sessionID = 0;
+		string sessionIDString = "_0";
+		string[] checkpointData = new string[8];
+		bool shouldBreak = false;
+		bool hasCheckpoint = false;
+		while (File.Exists(tempDir + sessionStartedFileName) && !shouldBreak){
+			sessionID++;
+
+			sessionIDString = "_" + sessionID.ToString();
+			//check if the session crashed
+			string checkpointFilePath = tempDir + "checkpoint.txt";
+
+			checkpointData = new string[8];
+			if (File.Exists (checkpointFilePath)) {
+				string checkpointText = File.ReadAllText (checkpointFilePath);
+				if (checkpointText.Contains ("ONGOING")) {
+					checkpointData = checkpointText.Split ("\t" [0]);
+					hasCheckpoint = true;
+					shouldBreak = true;
+					checkpointDataText.text = string.Format("Status: {0} \nEnv Index: {1} \n Phase Index: {2} ", checkpointData[0],checkpointData[1],checkpointData[2]);
+				}
+				if (sessionID >= 5) {
+					checkpointDataText.text = "No checkpoint data found!";
+					shouldBreak = true;
+				}
+			}
+			else
+				checkpointDataText.text = "No checkpoint data found!";
+		}
+		return hasCheckpoint;
 	}
 
 	public void SetSessionType()
