@@ -73,13 +73,12 @@ public class ShoplifterScript : MonoBehaviour {
 	private int maxTrials_Learning = 24;
 
 	//stage 2 reevaulation variables
-	private int maxTrials_Reeval = 4;
-	private int maxBlocks_Reeval = 3;
+	private int maxTrials_Reeval = 3;
+	private int maxBlocks_Reeval = 4;
 
 	private int envIndex =0;
 
 	private List<float> camZoneFactors;
-
 
 	//stage 4 post-test variables
 	private int maxTrials_PostTest = 10;
@@ -123,6 +122,12 @@ public class ShoplifterScript : MonoBehaviour {
 
 	string currentPhaseName="NONE";
 
+
+	//tip metrics
+	private int consecutiveIncorrectCameraPresses=0; //activated when >=4
+	private bool didTimeout = false; //activated after a timeout during slider event
+	private bool afterSlider=false; //activated immediately after a slider event
+
     //ui
 	public CanvasGroup introInstructionGroup;
 	public CanvasGroup instructionGroup;
@@ -143,6 +148,8 @@ public class ShoplifterScript : MonoBehaviour {
 	public CanvasGroup multipleChoiceGroup;
 	public CanvasGroup imagineGroup;
 	public CanvasGroup imageryQualityGroup;
+	public CanvasGroup tipsGroup;
+	public Text tipsText;
 
 
 	private GameObject roomOne;
@@ -192,6 +199,12 @@ public class ShoplifterScript : MonoBehaviour {
 	private List<GameObject> suitcases;
 
 	public List<int> reevalConditions;
+
+
+	//for baseline music sequence at the end
+	private List<AudioClip> completeAudioList;
+	public AudioSource musicBaselinePlayer;
+	public float musicBaselinePlayTime = 30f;
 
 
 	private GameObject suitcasePrefab;
@@ -620,7 +633,7 @@ public class ShoplifterScript : MonoBehaviour {
 			Debug.Log("about to run phase 3");
 			yield return StartCoroutine(RunPhaseThree((isLeft) ? 0:1,false,false));
 			if (numTrials < maxTrials - 1)
-				yield return StartCoroutine (ShowEndTrialScreen (true));
+				yield return StartCoroutine (ShowEndTrialScreen (true,ShouldShowTips()));
 			numTraining++;
 			yield return 0;
 		}
@@ -883,6 +896,16 @@ public class ShoplifterScript : MonoBehaviour {
 		yield return null;
 	}
 
+	public bool ShouldShowTips()
+	{
+		if (consecutiveIncorrectCameraPresses >= 4 || didTimeout || afterSlider) {
+			afterSlider = false;
+			return true;
+		} else
+			return false;
+		
+	}
+
 
 	IEnumerator RunLearningPhase(bool isPostTest, int maxTrials)
 	{
@@ -901,7 +924,7 @@ public class ShoplifterScript : MonoBehaviour {
 		bool isLeft = (Random.value < 0.5f) ? true: false;
 		bool showOneTwo = false;
 
-		int[] sliderTrials = new int[] { 3,11,15,maxTrials-1 };
+		int[] sliderTrials = new int[] { 3,7,11,15,19,maxTrials-1 };
 
 		int trialsToNextSlider = sliderTrials [sliderCount] - (numTrials_Learning-1); //should be 4 in the beginning
 		List<int> randOrder = new List<int>();
@@ -930,7 +953,7 @@ public class ShoplifterScript : MonoBehaviour {
 //				=sliderTrials ==3 || numTrials_Learning==11 || numTrials_Learning ==15 || numTrials_Learning==maxTrials-1) 
 				{
 				showOneTwo = !showOneTwo;
-				if (sliderCount <= 5) {
+				if (sliderCount <= 7) {
 					if (showOneTwo) {
 						yield return StartCoroutine (AskPreference (0));
 					} else
@@ -946,7 +969,7 @@ public class ShoplifterScript : MonoBehaviour {
 				}
 			}
 			if (numTrials_Learning < maxTrials - 1)
-				yield return StartCoroutine (ShowEndTrialScreen (false));
+				yield return StartCoroutine (ShowEndTrialScreen (false,ShouldShowTips()));
 			else if(!isPostTest)
 				yield return StartCoroutine (ShowNextStageScreen ());
 			numTrials_Learning++;
@@ -991,7 +1014,7 @@ public class ShoplifterScript : MonoBehaviour {
 				yield return StartCoroutine(RunPhaseThree((leftChoice) ? 0:1,false,true));
 //				TurnOffRooms ();
 				if(numTrials_Reeval < maxTrials_Reeval-1)
-					yield return StartCoroutine (ShowEndTrialScreen (false));
+					yield return StartCoroutine (ShowEndTrialScreen (false,ShouldShowTips()));
 				numTrials_Reeval++;
 				yield return 0;
 			}
@@ -1027,18 +1050,20 @@ public class ShoplifterScript : MonoBehaviour {
 		bool leftChoice = false;
 
 		Experiment.Instance.shopLiftLog.LogPhaseEvent (3, true);
-		//run two instances of comp slider  + 2sec resting phase
-		for (int i = 0; i < 2; i++) {
+		//run one instances of comp slider  + 2sec resting phase
 			yield return StartCoroutine (AskPreference (0));
-			yield return StartCoroutine (RunRestPeriod (2f));
-		}
+		yield return StartCoroutine (RunRestPeriod (2f));
 		List<int> caseOrder = new List<int> ();
 		for (int i = 0; i < 4; i++) {
 			caseOrder.Add(i);
 		}
 
 		for (int i = 0; i < 4; i++) {
-
+			if (i == 2) {
+				//another instance of comp 1-2 slider
+				yield return StartCoroutine (AskPreference (0));
+				yield return StartCoroutine (RunRestPeriod (2f));
+			}
 			int randIndex = Random.Range (0, caseOrder.Count);
 			int chosenIndex = caseOrder [randIndex];
 			caseOrder.RemoveAt (randIndex);
@@ -1076,6 +1101,11 @@ public class ShoplifterScript : MonoBehaviour {
 				break;
 			}
 		}
+
+		//another instance of comp 1-2 slider
+		yield return StartCoroutine (AskPreference (0));
+		yield return StartCoroutine (RunRestPeriod (2f));
+
 		List<int> multipleChoiceSequence = new List<int> ();
 		for (int i = 0; i < 4; i++) {
 			multipleChoiceSequence.Add (i);
@@ -1088,6 +1118,21 @@ public class ShoplifterScript : MonoBehaviour {
 			multipleChoiceSequence.RemoveAt (randIndex);
 		}
 		Experiment.Instance.shopLiftLog.LogPhaseEvent (3, false);
+		yield return null;
+	}
+
+	IEnumerator RunMusicBaseline()
+	{
+		yield return StartCoroutine (MakeCompleteAudioList ());
+		int totalAudioLength = completeAudioList.Count;
+		for (int i = 0; i < totalAudioLength; i++) {
+			restGroup.alpha = 1f;
+			int randIndex = Random.Range (0, completeAudioList.Count);
+			musicBaselinePlayer.PlayOneShot(completeAudioList [randIndex]);
+			yield return new WaitForSeconds (musicBaselinePlayTime);
+			musicBaselinePlayer.Stop ();
+			completeAudioList.RemoveAt (randIndex);
+		}
 		yield return null;
 	}
 
@@ -1218,7 +1263,7 @@ public class ShoplifterScript : MonoBehaviour {
 
 		Experiment.Instance.shopLiftLog.LogFinalSliderValue ("COMPARATIVE", prefGroup.GetComponent<PrefGroupSetup> ().prefSlider.value, pressed);
 		prefGroup.gameObject.SetActive (false);
-
+		afterSlider = true;
 		Cursor.visible = false;
 		yield return null;
 	}
@@ -1249,8 +1294,25 @@ public class ShoplifterScript : MonoBehaviour {
 			Experiment.Instance.shopLiftLog.LogButtonPress ();
 			didPress (true);
 		} else {
+			didTimeout = true;
 			Experiment.Instance.shopLiftLog.LogTimeout (maxWaitTime);
 			didPress (false);
+		}
+		yield return null;
+	}
+
+	IEnumerator MakeCompleteAudioList()
+	{
+		completeAudioList = new List<AudioClip> ();
+		EnvironmentManager tempEnv;
+		for (int i = 0; i<environments.Count; i++) {
+			tempEnv = environments [envIndex].GetComponent<EnvironmentManager> ();
+			completeAudioList.Add (tempEnv.one_L_Audio.clip);
+			completeAudioList.Add (tempEnv.one_R_Audio.clip);
+			completeAudioList.Add (tempEnv.two_L_Audio.clip);
+			completeAudioList.Add (tempEnv.two_R_Audio.clip);
+			completeAudioList.Add (tempEnv.three_L_Audio.clip);
+			completeAudioList.Add (tempEnv.three_R_Audio.clip);
 		}
 		yield return null;
 	}
@@ -1268,7 +1330,7 @@ public class ShoplifterScript : MonoBehaviour {
 
 		//first turn off all environments
 		for (int i = 0; i<environments.Count; i++) {
-			environments [i].SetActive (false);
+			envManager = environments [envIndex].GetComponent<EnvironmentManager> ();
 		}
 		camVehicle.GetComponent<CapsuleCollider> ().height = 3.2f;
 		Debug.Log ("picking environment");
@@ -1332,7 +1394,6 @@ public class ShoplifterScript : MonoBehaviour {
 		phase1End_R =envManager.phase1End_R;
 
 		phase1Door_L = envManager.phase1Door_L;
-		Debug.Log ("phase 1door " + phase1Door_L.ToString ());
 		phase1Door_R = envManager.phase1Door_R;
 		phase2Door_L = envManager.phase2Door_L;
 		phase2Door_R = envManager.phase2Door_R;
@@ -1432,7 +1493,10 @@ public class ShoplifterScript : MonoBehaviour {
 
 		if (Experiment.shouldCheckpoint) {
 			startingIndex = Experiment.Instance.checkpointedEnvIndex;
-			
+			registerVals=new List<int>();
+			registerVals.Add(Experiment.Instance.leftReward);
+			registerVals.Add(Experiment.Instance.rightReward);
+
 		}
 		
 		for (int i = startingIndex; i < totalEnvCount; i++) {
@@ -1442,10 +1506,10 @@ public class ShoplifterScript : MonoBehaviour {
 
 			yield return StartCoroutine (PickEnvironment (i));
 
+			RandomizeSuitcases();
 			if(!Experiment.shouldCheckpoint)
 			{
 				AssignRooms ();
-				RandomizeSuitcases();
 				yield return StartCoroutine(PickRegisterValues()); //new reg values to be picked for each environment
 			}
 
@@ -1508,6 +1572,7 @@ public class ShoplifterScript : MonoBehaviour {
 		}
 
 		CheckpointSession (totalEnvCount,false);
+		yield return StartCoroutine(RunMusicBaseline());
 		yield return StartCoroutine (ShowEndSessionScreen());
 		yield return null;
 	}
@@ -1532,6 +1597,7 @@ public class ShoplifterScript : MonoBehaviour {
 		yield return new WaitForSeconds (1f);
 //		Debug.Log ("turning it off");
 		positiveFeedbackGroup.alpha = 0f;
+		consecutiveIncorrectCameraPresses = 0;
 		yield return null;
 	}
 	public IEnumerator ShowNegativeFeedback()
@@ -1542,6 +1608,7 @@ public class ShoplifterScript : MonoBehaviour {
 //		Debug.Log ("about to wait for 1 second");
 		yield return new WaitForSeconds (1f);
 
+		consecutiveIncorrectCameraPresses +=1;
 		negativeFeedbackGroup.gameObject.GetComponent<AudioSource> ().Stop ();
 //		Debug.Log ("turning it off");
 		negativeFeedbackGroup.alpha = 0f;
@@ -1624,7 +1691,7 @@ public class ShoplifterScript : MonoBehaviour {
 		yield return null;
 	}
 
-	IEnumerator ShowEndTrialScreen(bool isTraining)
+	IEnumerator ShowEndTrialScreen(bool isTraining,bool hasTips)
     {
 
 		EnablePlayerCam (false);
@@ -1635,7 +1702,23 @@ public class ShoplifterScript : MonoBehaviour {
 			intertrialText.text = "Starting next practice trial...";
 		}
 		Experiment.Instance.shopLiftLog.LogEndTrial ();
-        yield return new WaitForSeconds(2f);
+		if (hasTips) {
+			if (consecutiveIncorrectCameraPresses >= 4) {
+				tipsText.text = "TIPS:\nPlease pay attention to the camera location and press (X)";
+				consecutiveIncorrectCameraPresses = 0;
+			} else if (didTimeout) {
+				tipsText.text = "TIPS:\nPlease press the (X) button quicker next time";
+				didTimeout = false;
+			} else {
+				tipsText.text = "TIPS:\nPlease keep in mind the structure of rooms and rewards when responding";
+				afterSlider = false;
+			}
+			tipsGroup.alpha = 1f;
+			yield return new WaitForSeconds (6f);
+		} else {
+			tipsGroup.alpha = 0f;
+			yield return new WaitForSeconds(2f);
+		}
         intertrialGroup.alpha = 0f;
         yield return null;
     }

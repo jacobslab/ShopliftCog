@@ -39,7 +39,7 @@ public class CameraZone : MonoBehaviour {
 			}else if (ExperimentSettings.env == ExperimentSettings.Environment.VikingVillage) {
 				magnifyingGlass.SetActive (true);
 			}else if (ExperimentSettings.env == ExperimentSettings.Environment.Office || ExperimentSettings.env == ExperimentSettings.Environment.Apartment) {
-				wirelessCam.SetActive (true);
+				securityCam.SetActive (true);
 			}
 		}
 	}

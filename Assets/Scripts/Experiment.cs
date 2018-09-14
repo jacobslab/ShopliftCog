@@ -172,6 +172,7 @@ public class Experiment : MonoBehaviour {
 
 	public void UpdateCheckpointedVariables(string[] checkpointData)
 	{
+		Debug.Log ("checkpoint " + checkpointData [3].ToString ());
 		checkpointedEnvIndex = int.Parse(checkpointData [1]);
 		checkpointedPhaseName = checkpointData [2];
 		checkpointedReevalIndex = int.Parse(checkpointData [3]);
