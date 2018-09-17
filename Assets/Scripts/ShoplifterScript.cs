@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using UnityStandardAssets.CrossPlatformInput;
 using UnityStandardAssets.Characters.FirstPerson;
 using UnityEngine.SceneManagement;
+using UnityEngine.Video;
 using System.Linq;
 using System.IO;
 public class ShoplifterScript : MonoBehaviour {
@@ -306,7 +307,7 @@ public class ShoplifterScript : MonoBehaviour {
 		int currentBlockCount = blockCount;
 		//environment + phase + reeval type + leftroom + leftreward + rightroom +  rightreward
 		string line = ((isOngoing)? "ONGOING" : "FINISHED") + separator + envIndex.ToString() + separator +  currentPhaseName + separator + reevalConditions[currentBlockCount].ToString() + separator + leftRoom.name + separator + registerVals[0].ToString() + separator + rightRoom.name + separator + registerVals[1].ToString();
-
+		Debug.Log ("checkpointed line is: " + line);
 		System.IO.File.WriteAllText(Experiment.Instance.sessionDirectory+"checkpoint.txt", line);
 	}
 
@@ -595,10 +596,12 @@ public class ShoplifterScript : MonoBehaviour {
 		EnablePlayerCam (true);
 		float timer = 0f;
 		float maxTimer = 148f;
+		instructionVideo.GetComponent<VideoPlayer> ().Play ();
 		while (!Input.GetButtonDown ("Action Button") && timer < 148f) {
 			timer += Time.deltaTime;
 			yield return 0;
 		}
+		instructionVideo.GetComponent<VideoPlayer> ().Stop ();
 		instructionVideo.SetActive(false);
 
 
@@ -1128,6 +1131,7 @@ public class ShoplifterScript : MonoBehaviour {
 		for (int i = 0; i < totalAudioLength; i++) {
 			restGroup.alpha = 1f;
 			int randIndex = Random.Range (0, completeAudioList.Count);
+			Debug.Log ("now playing track no : " + randIndex.ToString ());
 			musicBaselinePlayer.PlayOneShot(completeAudioList [randIndex]);
 			yield return new WaitForSeconds (musicBaselinePlayTime);
 			musicBaselinePlayer.Stop ();
@@ -1568,10 +1572,10 @@ public class ShoplifterScript : MonoBehaviour {
 
 			environments [envIndex].SetActive (false);
 			//remove the environment
-			environments.RemoveAt (envIndex);
+//			environments.RemoveAt (envIndex);
 		}
 
-		CheckpointSession (totalEnvCount,false);
+		CheckpointSession (totalEnvCount-1,false);
 		yield return StartCoroutine(RunMusicBaseline());
 		yield return StartCoroutine (ShowEndSessionScreen());
 		yield return null;
