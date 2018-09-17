@@ -381,7 +381,7 @@ public class ShoplifterScript : MonoBehaviour {
 		phase3CamZone_R.transform.position = new Vector3(envManager.phase3Start_R.transform.position.x,envManager.phase3Start_R.transform.position.y,Mathf.Lerp (envManager.phase3Start_R.transform.position.z, envManager.phase3End_R.transform.position.z, randFactor));
 
 		if (directionEnv == 1) { //is western town
-			Debug.Log("turned cam zones");
+			// Debug.Log("turned cam zones");
 			phase1CamZone_L.transform.eulerAngles = new Vector3(0f,180f,0f);
 			phase1CamZone_R.transform.eulerAngles = new Vector3(0f,180f,0f);
 
@@ -597,7 +597,7 @@ public class ShoplifterScript : MonoBehaviour {
 		float timer = 0f;
 		float maxTimer = 148f;
 		instructionVideo.GetComponent<VideoPlayer> ().Play ();
-		while (!Input.GetButtonDown ("Action Button") && timer < 148f) {
+		while (!Input.GetButtonDown ("Action Button") && timer < maxTimer) {
 			timer += Time.deltaTime;
 			yield return 0;
 		}
