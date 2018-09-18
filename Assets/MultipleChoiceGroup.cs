@@ -21,8 +21,9 @@ public class MultipleChoiceGroup : MonoBehaviour {
 
 	public void SetupMultipleChoice(int focusIndex)
 	{
-		//first create a temp copy of the texture list
-		List<Texture> tempTextureList = new List<Texture> ();
+        gameObject.GetComponent<AnswerSelector>().ResetSelectorPosition();
+        //first create a temp copy of the texture list
+        List<Texture> tempTextureList = new List<Texture> ();
 		for (int i = 0; i < roomTextureList.Count; i++) {
 			tempTextureList.Add (roomTextureList [i]);
 		}

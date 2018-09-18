@@ -151,6 +151,7 @@ public class ShoplifterScript : MonoBehaviour {
 	public CanvasGroup imageryQualityGroup;
 	public CanvasGroup tipsGroup;
 	public Text tipsText;
+    public CanvasGroup blackScreen;
 
 
 	private GameObject roomOne;
@@ -231,8 +232,9 @@ public class ShoplifterScript : MonoBehaviour {
 		}
 	}
 
-	void Awake()
+    void Awake()
 	{
+        blackScreen.alpha = 1f;
 		instructionVideo.SetActive(false);
 		EnablePlayerCam (false);
 		Application.targetFrameRate = 60;
@@ -353,10 +355,12 @@ public class ShoplifterScript : MonoBehaviour {
 		System.Random rand = new System.Random ();
 		List<float> randList = new List<float> ();
 		for (int i = 0; i < randomCount; i++) {
-//			double mantissa = (rand.NextDouble() * 2.0) - 1.0;
-//			double exponent =System.Math.Pow(2.0, rand.Next(-126, 128));
-			float nextDouble = (float)rand.NextDouble();
-			nextDouble = Mathf.Clamp (nextDouble, 0.4f, 0.8f);
+            int randInt = rand.Next(50, 80);
+            Debug.Log("rand int is " + randInt.ToString());
+            float nextDouble = (float)randInt / 100f;
+            Debug.Log("next double is  " + nextDouble.ToString());
+			//float nextDouble = (float)rand.NextDouble();
+			nextDouble = Mathf.Clamp (nextDouble, 0.5f, 0.8f);
 			randList.Add((float)(nextDouble));
 			Debug.Log ("cam zone factor: " + randList [i]);
 		}
@@ -365,8 +369,7 @@ public class ShoplifterScript : MonoBehaviour {
 
 	IEnumerator RandomizeCameraZones(int blockCount)
 	{
-		float randFactor = camZoneFactors [blockCount];
-
+        float randFactor = camZoneFactors [blockCount];
 
 		Experiment.Instance.shopLiftLog.LogCameraLerpIndex (randFactor,blockCount);
 
@@ -589,14 +592,21 @@ public class ShoplifterScript : MonoBehaviour {
 		RandomizeSpeedChangeZones ();
 		Debug.Log ("starting cam training phase");
 		CameraZone.isTraining = true;
-
-		//inst video
+        //inst video
+        Debug.Log("set video");
 		instructionVideo.SetActive(true);
-		yield return new WaitForSeconds (1f);
-		EnablePlayerCam (true);
-		float timer = 0f;
-		float maxTimer = 148f;
-		instructionVideo.GetComponent<VideoPlayer> ().Play ();
+        EnablePlayerCam(true);
+        float timer = 0f;
+        float maxTimer = 148f;
+        instructionVideo.GetComponent<VideoPlayer>().Play();
+        instructionVideo.gameObject.GetComponent<AudioSource>().Play();
+        while(!instructionVideo.GetComponent<VideoPlayer>().isPrepared)
+        {
+            yield return 0;
+        }
+        yield return new WaitForSeconds (0.5f);
+        Debug.Log("enabled player cam");
+        blackScreen.alpha = 0f;
 		while (!Input.GetButtonDown ("Action Button") && timer < maxTimer) {
 			timer += Time.deltaTime;
 			yield return 0;
@@ -635,8 +645,10 @@ public class ShoplifterScript : MonoBehaviour {
 //			TurnOffRooms ();
 			Debug.Log("about to run phase 3");
 			yield return StartCoroutine(RunPhaseThree((isLeft) ? 0:1,false,false));
-			if (numTrials < maxTrials - 1)
-				yield return StartCoroutine (ShowEndTrialScreen (true,ShouldShowTips()));
+            if (numTraining < 3)
+                yield return StartCoroutine(ShowEndTrialScreen(true, ShouldShowTips()));
+            else
+                yield return StartCoroutine(ShowEndTrialScreen(false, ShouldShowTips()));
 			numTraining++;
 			yield return 0;
 		}
@@ -929,7 +941,7 @@ public class ShoplifterScript : MonoBehaviour {
 
 		int[] sliderTrials = new int[] { 3,7,11,15,19,maxTrials-1 };
 
-		int trialsToNextSlider = sliderTrials [sliderCount] - (numTrials_Learning-1); //should be 4 in the beginning
+		int trialsToNextSlider = 4; //should be 4 in the beginning
 		List<int> randOrder = new List<int>();
 		int randIndex = 0;
 		randOrder = GiveRandSequenceOfTwoInts(0,1,trialsToNextSlider);
@@ -951,25 +963,19 @@ public class ShoplifterScript : MonoBehaviour {
 
 			Debug.Log("about to run phase 3");
 			yield return StartCoroutine(RunPhaseThree((isLeft) ? 0:1,false,true));
-//			TurnOffRooms ();
-			if (sliderTrials.Contains(numTrials_Learning))
-//				=sliderTrials ==3 || numTrials_Learning==11 || numTrials_Learning ==15 || numTrials_Learning==maxTrials-1) 
-				{
+            //			TurnOffRooms ();
+            Debug.Log("num trials learning " + numTrials_Learning.ToString());
+            if((numTrials_Learning+1)%4==0 && numTrials_Learning >0)
+            {
 				showOneTwo = !showOneTwo;
-				if (sliderCount <= 7) {
 					if (showOneTwo) {
 						yield return StartCoroutine (AskPreference (0));
 					} else
 						yield return StartCoroutine (AskPreference (1));
-				}
-				sliderCount++;
-
-				//shuffle for next set
-				if (sliderCount < 4) {
 					randOrder.Clear ();
-					trialsToNextSlider = sliderTrials [sliderCount] - (numTrials_Learning - 1);
+					trialsToNextSlider = 4;
+                Debug.Log("got new order");
 					randOrder = GiveRandSequenceOfTwoInts (0, 1, trialsToNextSlider);
-				}
 			}
 			if (numTrials_Learning < maxTrials - 1)
 				yield return StartCoroutine (ShowEndTrialScreen (false,ShouldShowTips()));
@@ -1071,7 +1077,7 @@ public class ShoplifterScript : MonoBehaviour {
 			int chosenIndex = caseOrder [randIndex];
 			caseOrder.RemoveAt (randIndex);
 			imagineGroup.alpha = 1f;
-			yield return new WaitForSeconds (4f);
+			yield return new WaitForSeconds (8f);
 			imagineGroup.alpha = 0f;
 			switch (chosenIndex) {
 			case 0:
@@ -1117,8 +1123,9 @@ public class ShoplifterScript : MonoBehaviour {
 		multipleChoiceSequence = ShuffleList (multipleChoiceSequence);
 		for (int i = 0; i < 4; i++) {
 			int randIndex = Random.Range (0, multipleChoiceSequence.Count);
-			yield return StartCoroutine (AskMultipleChoice (multipleChoiceSequence [randIndex]));
+            yield return StartCoroutine(AskMultipleChoice(multipleChoiceSequence[randIndex]));
 			multipleChoiceSequence.RemoveAt (randIndex);
+            yield return StartCoroutine(RunRestPeriod(3f));
 		}
 		Experiment.Instance.shopLiftLog.LogPhaseEvent (3, false);
 		yield return null;
@@ -1195,7 +1202,7 @@ public class ShoplifterScript : MonoBehaviour {
 		prefSolo.GetComponent<PrefSoloSetup> ().SetupPrefs (prefIndex);
 
 		bool pressed = false;
-		yield return StartCoroutine (WaitForButtonPress (10f,didPress =>
+		yield return StartCoroutine (WaitForButtonPress (15f,didPress =>
 			{
 				pressed=didPress;
 			}
@@ -1251,7 +1258,7 @@ public class ShoplifterScript : MonoBehaviour {
 		}
 		bool pressed = false;
 		if (firstTime) {
-			yield return StartCoroutine (WaitForButtonPress (20f,didPress =>
+			yield return StartCoroutine (WaitForButtonPress (22f,didPress =>
 				{
 					pressed=didPress;
 				}
@@ -1259,7 +1266,7 @@ public class ShoplifterScript : MonoBehaviour {
 			firstTime = false;
 		}
 		else
-			yield return StartCoroutine (WaitForButtonPress (10f,didPress =>
+			yield return StartCoroutine (WaitForButtonPress (15f,didPress =>
 				{
 					pressed=didPress;
 				}
@@ -1411,8 +1418,7 @@ public class ShoplifterScript : MonoBehaviour {
 		phase3Start_R =envManager.phase3Start_R;
 		phase3End_L =envManager.phase3End_L;
 		phase3End_R =envManager.phase3End_R;
-
-		one_L_Audio = envManager.one_L_Audio;
+        one_L_Audio = envManager.one_L_Audio;
 		two_L_Audio = envManager.two_L_Audio;
 		three_L_Audio = envManager.three_L_Audio;
 
@@ -1498,7 +1504,8 @@ public class ShoplifterScript : MonoBehaviour {
 		if (Experiment.shouldCheckpoint) {
 			startingIndex = Experiment.Instance.checkpointedEnvIndex;
 			registerVals=new List<int>();
-			registerVals.Add(Experiment.Instance.leftReward);
+            blackScreen.alpha = 0f;
+            registerVals.Add(Experiment.Instance.leftReward);
 			registerVals.Add(Experiment.Instance.rightReward);
 
 		}
@@ -1522,8 +1529,8 @@ public class ShoplifterScript : MonoBehaviour {
 			currentPhaseName = "TRAINING";
 			if (ExperimentSettings.isTraining)
 				yield return StartCoroutine (RunCamTrainingPhase ());
-			
 
+            blackScreen.alpha = 0f;
 			//randomize rooms and cam zones again
 //			AssignRooms ();
 //			yield return StartCoroutine(RandomizeCameraZones (i)); //we randomize cameras when picking environment now

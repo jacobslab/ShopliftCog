@@ -51,7 +51,7 @@ public class AnswerSelector : MonoBehaviour {
 		}
 	}
 
-	void ResetSelectorPosition(){
+	public void ResetSelectorPosition(){
 		int resetIndex = 0; //first index
 		if (resetToRandomPosition) {
 			resetIndex = Random.Range(0, positions.Count);
