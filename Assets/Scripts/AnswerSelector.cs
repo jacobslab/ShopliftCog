@@ -58,8 +58,10 @@ public class AnswerSelector : MonoBehaviour {
 		}
 
 		if (positions.Count >= 0) {
-			selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(positions[currPositionIndex], selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D.y,selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D .z);
-			currPositionIndex = resetIndex;
+            currPositionIndex = resetIndex;
+            Debug.Log("Set the currposindex to resetindex");
+            selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(positions[currPositionIndex], selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D.y,selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D .z);
+			
 
 		}
 	}

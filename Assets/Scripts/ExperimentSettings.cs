@@ -146,23 +146,35 @@ public class ExperimentSettings : MonoBehaviour {
 
 		string subjectDirectory = ExperimentSettings.defaultLoggingPath + ExperimentSettings.currentSubject.name + "/";
 		Debug.Log ("subject dir: " + subjectDirectory.ToString ());
-		string tempDir = subjectDirectory + "session_0" + "/";
+
 		string sessionStartedFileName= "sessionStarted.txt";
 		int sessionID = 0;
-		string sessionIDString = "_0";
-		string[] checkpointData = new string[8];
+        string sessionIDString = "session_"+sessionID.ToString()+"/";
+        string tempDir = subjectDirectory + sessionIDString;
+        string[] checkpointData = new string[8];
 		bool shouldBreak = false;
 		bool hasCheckpoint = false;
-		while (File.Exists(tempDir + sessionStartedFileName) && !shouldBreak){
-			sessionID++;
+        string checkpointFilePath = "";
+        string chosenCheckpointFile = "";
+        while (File.Exists(tempDir + sessionStartedFileName) && !shouldBreak)
+        {
 
-			sessionIDString = "_" + sessionID.ToString();
-			//check if the session crashed
-			string checkpointFilePath = tempDir + "checkpoint.txt";
+            sessionIDString = "session_" + sessionID.ToString() + "/";
+            //check if the session crashed
+            checkpointFilePath = tempDir + "checkpoint.txt";
+            if(File.Exists(checkpointFilePath))
+            {
+                chosenCheckpointFile = checkpointFilePath;
+            }
+            //update tempdir now
+            tempDir = subjectDirectory + sessionIDString;
+            sessionID++;
+        }
 
-			checkpointData = new string[8];
-			if (File.Exists (checkpointFilePath)) {
-				string checkpointText = File.ReadAllText (checkpointFilePath);
+            Debug.Log("sanity checking " + checkpointFilePath);
+            checkpointData = new string[8];
+			if (File.Exists (chosenCheckpointFile)) {
+				string checkpointText = File.ReadAllText (chosenCheckpointFile);
 				if (checkpointText.Contains ("ONGOING")) {
 					checkpointData = checkpointText.Split ("\t" [0]);
 					hasCheckpoint = true;
@@ -176,7 +188,6 @@ public class ExperimentSettings : MonoBehaviour {
 			}
 			else
 				checkpointDataText.text = "No checkpoint data found!";
-		}
 		return hasCheckpoint;
 	}
 

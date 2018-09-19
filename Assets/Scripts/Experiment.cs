@@ -86,24 +86,33 @@ public class Experiment : MonoBehaviour {
 	void InitLogging(){
 		string subjectDirectory = ExperimentSettings.defaultLoggingPath + ExperimentSettings.currentSubject.name + "/";
 		sessionDirectory = subjectDirectory + "session_0" + "/";
-		
-		sessionID = 0;
+        string checkpointFilePath = "";
+        string chosenCheckpointFile = "";
+        sessionID = 0;
 		string sessionIDString = "_0";
 		
 		if(!Directory.Exists(subjectDirectory)){
 			Directory.CreateDirectory(subjectDirectory);
 		}
 		Debug.Log ("does " + sessionDirectory + "and" + sessionStartedFileName + " exist");
-		while (File.Exists(sessionDirectory + sessionStartedFileName)){
-			sessionID++;
-			
-			sessionIDString = "_" + sessionID.ToString();
-			//check if the session crashed
-			if (loadFromCheckpoint) {
-				string checkpointFilePath = sessionDirectory + "checkpoint.txt";
+        while (File.Exists(sessionDirectory + sessionStartedFileName))
+        {
+            sessionIDString = "_" + sessionID.ToString();
+            sessionDirectory = subjectDirectory + "session" + sessionIDString + "/";
+            checkpointFilePath = sessionDirectory + "checkpoint.txt";
+            if(File.Exists(checkpointFilePath))
+            {
+                chosenCheckpointFile = checkpointFilePath;
+                Debug.Log("chosen checkpoint file sess id " + sessionID.ToString());
+            }
+            sessionID++;
+        }
+            //check if the session crashed
+            if (loadFromCheckpoint) {
+            Debug.Log("sanity check for " + chosenCheckpointFile);
 				checkpointData = new string[8];
-				if (File.Exists (checkpointFilePath)) {
-					string checkpointText = File.ReadAllText (checkpointFilePath);
+            if (File.Exists (chosenCheckpointFile)) {
+					string checkpointText = File.ReadAllText (chosenCheckpointFile);
 					if (checkpointText.Contains ("ONGOING")) {
 						Debug.Log ("previous session crashed; use checkpoint details to resume that session");
 						checkpointData = checkpointText.Split ("\t" [0]);
@@ -116,8 +125,6 @@ public class Experiment : MonoBehaviour {
 
 				}
 			}
-			sessionDirectory = subjectDirectory + "session" + sessionIDString + "/";
-		}
 
 		Debug.Log ("current session is: " + sessionID.ToString ());
 

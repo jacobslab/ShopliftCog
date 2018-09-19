@@ -63,6 +63,8 @@ public class ShoplifterScript : MonoBehaviour {
 	public List<GameObject> phase3SpeedChangeZones_L;
 	public List<GameObject> phase3SpeedChangeZones_R;
 
+    private int correctResponses = 0;
+
 
 	public List<int> registerVal1;
 	public List<int> registerVal2;
@@ -511,6 +513,7 @@ public class ShoplifterScript : MonoBehaviour {
 
 	void ChangeCameraZoneVisibility(bool isVisible)
 	{
+        Debug.Log("changing cam zone visibility to " + isVisible.ToString());
 		phase1CamZone_L.GetComponent<Renderer>().enabled = isVisible;
 		phase1CamZone_R.GetComponent<Renderer>().enabled = isVisible;
 		phase2CamZone_L.GetComponent<Renderer> ().enabled = isVisible;
@@ -588,8 +591,8 @@ public class ShoplifterScript : MonoBehaviour {
 
 	IEnumerator RunCamTrainingPhase()
 	{
-
-		RandomizeSpeedChangeZones ();
+        blackScreen.alpha = 1f;
+        RandomizeSpeedChangeZones ();
 		Debug.Log ("starting cam training phase");
 		CameraZone.isTraining = true;
         //inst video
@@ -636,6 +639,15 @@ public class ShoplifterScript : MonoBehaviour {
 		bool isLeft = false;
 		int numTraining = 0;
 		while (numTraining < 4) {
+
+            //check correct responses and reset if it is less than 3
+            if (numTraining % 2 == 0)
+            {
+                if (correctResponses < 3)
+                {
+                    correctResponses = 0;
+                }
+            }
 			Debug.Log ("about to run phase 1");
 			isLeft = !isLeft;
 			yield return StartCoroutine (RunPhaseOne ((isLeft) ? 0:1,false,-1,false));
@@ -724,8 +736,13 @@ public class ShoplifterScript : MonoBehaviour {
 
 		baseAudio.time = delayOne;
 		baseAudio.Play ();
-		if (numTrials >= 1)
-			ChangeCameraZoneVisibility (false);
+
+        //if number of correct responses are greater than 3, then don't show camera in the next practice round
+        if (correctResponses >= 3)
+        {
+            Debug.Log("correct response is eq or above 3");
+            ChangeCameraZoneVisibility(false);
+        }
 
 		ChangeCamZoneFocus((pathIndex==0) ? 0:3);
 		ToggleMouseLook(false);
@@ -1504,6 +1521,7 @@ public class ShoplifterScript : MonoBehaviour {
 		if (Experiment.shouldCheckpoint) {
 			startingIndex = Experiment.Instance.checkpointedEnvIndex;
 			registerVals=new List<int>();
+            Debug.Log("TURNED OFF blackscreen");
             blackScreen.alpha = 0f;
             registerVals.Add(Experiment.Instance.leftReward);
 			registerVals.Add(Experiment.Instance.rightReward);
@@ -1607,8 +1625,10 @@ public class ShoplifterScript : MonoBehaviour {
 //		Debug.Log ("about to wait for 1 second");
 		yield return new WaitForSeconds (1f);
 //		Debug.Log ("turning it off");
-		positiveFeedbackGroup.alpha = 0f;
+		positiveFeedbackGroup.alpha = 0f; 
 		consecutiveIncorrectCameraPresses = 0;
+        correctResponses++; //increment correct responses
+        Debug.Log("CORRECT RESPONSES " + correctResponses.ToString());
 		yield return null;
 	}
 	public IEnumerator ShowNegativeFeedback()

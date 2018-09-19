@@ -38,9 +38,14 @@ public class CameraZone : MonoBehaviour {
 				binoculars.SetActive (true);
 			}else if (ExperimentSettings.env == ExperimentSettings.Environment.VikingVillage) {
 				magnifyingGlass.SetActive (true);
-			}else if (ExperimentSettings.env == ExperimentSettings.Environment.Office || ExperimentSettings.env == ExperimentSettings.Environment.Apartment) {
+			}else if (ExperimentSettings.env == ExperimentSettings.Environment.Office) {
 				securityCam.SetActive (true);
 			}
+            else if(ExperimentSettings.env == ExperimentSettings.Environment.Apartment)
+            {
+                securityCam.SetActive(true);
+                securityCam.transform.localEulerAngles = new Vector3(securityCam.transform.localEulerAngles.x, securityCam.transform.localEulerAngles.y + 180f, securityCam.transform.localEulerAngles.z);
+            }
 		}
 	}
 	
