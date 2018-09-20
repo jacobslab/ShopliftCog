@@ -5,7 +5,7 @@ using UnityEngine;
 public class CameraZone : MonoBehaviour {
 
 	private bool activateCam = false;
-	private bool firstTime = true;
+	public static bool firstTime = true;
 	public int camIndex = 0;
 	public static bool isTraining= false;
 	public bool isFocus = false;
@@ -121,7 +121,7 @@ public class CameraZone : MonoBehaviour {
 	void OnTriggerExit(Collider col)
 	{
 		if (col.gameObject.tag == "Player") {
-			firstTime = false;
+			//firstTime = false;
 			activateCam = false;
 			if (!hasSneaked && !alreadyShown) {
 				Debug.Log ("showing negative feedback on trigger exit");

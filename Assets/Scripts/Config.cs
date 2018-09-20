@@ -24,7 +24,7 @@ public class Config : MonoBehaviour {
 	public static bool isSystem3 = true;
 	public static bool isSyncbox=false;
 	#else
-	public static bool isSyncbox = false;
+	public static bool isSyncbox = true;
 	public static bool isSystem3=false;
 	#endif
 

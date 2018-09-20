@@ -154,7 +154,7 @@ public class ShoplifterScript : MonoBehaviour {
 	public CanvasGroup tipsGroup;
 	public Text tipsText;
     public CanvasGroup blackScreen;
-
+    public CanvasGroup pauseUI;
 
 	private GameObject roomOne;
 	private GameObject roomTwo;
@@ -203,6 +203,8 @@ public class ShoplifterScript : MonoBehaviour {
 	private List<GameObject> suitcases;
 
 	public List<int> reevalConditions;
+
+    public bool isPaused = false;
 
 
 	//for baseline music sequence at the end
@@ -530,6 +532,26 @@ public class ShoplifterScript : MonoBehaviour {
 //		}
 	}
 
+    public void TogglePause()
+    {
+        isPaused = !isPaused;
+        Experiment.Instance.shopLiftLog.LogPauseEvent(isPaused);
+
+        if (isPaused)
+        {
+            //exp.player.controls.Pause(true);
+            pauseUI.alpha = 1.0f;
+            Time.timeScale = 0.0f;
+        }
+        else
+        {
+            Time.timeScale = 1.0f;
+            //exp.player.controls.Pause(false);
+            //exp.player.controls.ShouldLockControls = false;
+            pauseUI.alpha = 0.0f;
+        }
+    }
+
     //for remapping
     void ReassignRooms()
     {
@@ -600,14 +622,15 @@ public class ShoplifterScript : MonoBehaviour {
 		instructionVideo.SetActive(true);
         EnablePlayerCam(true);
         float timer = 0f;
-        float maxTimer = 148f;
+        float maxTimer =(float)instructionVideo.GetComponent<VideoPlayer>().clip.length;
+        Debug.Log("the max timer is : " + maxTimer.ToString());
         instructionVideo.GetComponent<VideoPlayer>().Play();
         instructionVideo.gameObject.GetComponent<AudioSource>().Play();
         while(!instructionVideo.GetComponent<VideoPlayer>().isPrepared)
         {
             yield return 0;
         }
-        yield return new WaitForSeconds (0.5f);
+        yield return new WaitForSeconds (0.1f);
         Debug.Log("enabled player cam");
         blackScreen.alpha = 0f;
 		while (!Input.GetButtonDown ("Action Button") && timer < maxTimer) {
@@ -666,6 +689,8 @@ public class ShoplifterScript : MonoBehaviour {
 		}
 //		ResetCamZone ();
 		CameraZone.isTraining = false;
+        //make sure the cameras don't appear outside of training zone
+        CameraZone.firstTime = false;
 
 		trainingPeriodGroup.alpha = 0f;
 		yield return null;
@@ -741,7 +766,8 @@ public class ShoplifterScript : MonoBehaviour {
         if (correctResponses >= 3)
         {
             Debug.Log("correct response is eq or above 3");
-            ChangeCameraZoneVisibility(false);
+            CameraZone.firstTime = false;
+            ChangeCameraZoneVisibility(false); //doesn't actually turn off the gameobject, which is why we need to turn them off using the above line
         }
 
 		ChangeCamZoneFocus((pathIndex==0) ? 0:3);
@@ -1150,17 +1176,26 @@ public class ShoplifterScript : MonoBehaviour {
 
 	IEnumerator RunMusicBaseline()
 	{
-		yield return StartCoroutine (MakeCompleteAudioList ());
-		int totalAudioLength = completeAudioList.Count;
-		for (int i = 0; i < totalAudioLength; i++) {
-			restGroup.alpha = 1f;
-			int randIndex = Random.Range (0, completeAudioList.Count);
-			Debug.Log ("now playing track no : " + randIndex.ToString ());
-			musicBaselinePlayer.PlayOneShot(completeAudioList [randIndex]);
-			yield return new WaitForSeconds (musicBaselinePlayTime);
-			musicBaselinePlayer.Stop ();
-			completeAudioList.RemoveAt (randIndex);
-		}
+        //show music baseline instructions
+        intertrialGroup.alpha = 1f;
+        tipsGroup.alpha = 0f;
+        intertrialText.text = "In what follows you will hear music from the game.\n Please maintain your gaze at the fixation cross, relax, and pay attention to the music";
+        yield return new WaitForSeconds(5f);
+        intertrialGroup.alpha = 0f;
+
+        //play it twice
+            yield return StartCoroutine(MakeCompleteAudioList(2));
+            int totalAudioLength = completeAudioList.Count;
+            for (int i = 0; i < totalAudioLength; i++)
+            {
+                restGroup.alpha = 1f;
+                int randIndex = Random.Range(0, completeAudioList.Count);
+                Debug.Log("now playing track no : " + randIndex.ToString());
+                musicBaselinePlayer.PlayOneShot(completeAudioList[randIndex]);
+                yield return new WaitForSeconds(musicBaselinePlayTime);
+            musicBaselinePlayer.Stop();
+            completeAudioList.RemoveAt(randIndex);
+        }
 		yield return null;
 	}
 
@@ -1329,12 +1364,12 @@ public class ShoplifterScript : MonoBehaviour {
 		yield return null;
 	}
 
-	IEnumerator MakeCompleteAudioList()
+	IEnumerator MakeCompleteAudioList(int repeatCount)
 	{
 		completeAudioList = new List<AudioClip> ();
 		EnvironmentManager tempEnv;
-		for (int i = 0; i<environments.Count; i++) {
-			tempEnv = environments [envIndex].GetComponent<EnvironmentManager> ();
+        for (int i = 0; i<environments.Count*repeatCount; i++) {
+			tempEnv = environments [i%2].GetComponent<EnvironmentManager> ();
 			completeAudioList.Add (tempEnv.one_L_Audio.clip);
 			completeAudioList.Add (tempEnv.one_R_Audio.clip);
 			completeAudioList.Add (tempEnv.two_L_Audio.clip);
@@ -1342,6 +1377,11 @@ public class ShoplifterScript : MonoBehaviour {
 			completeAudioList.Add (tempEnv.three_L_Audio.clip);
 			completeAudioList.Add (tempEnv.three_R_Audio.clip);
 		}
+
+        for (int i = 0; i < completeAudioList.Count;i++)
+        {
+            Debug.Log("the name of the audio clip: " + completeAudioList[i].name);
+        }
 		yield return null;
 	}
 
@@ -1510,6 +1550,7 @@ public class ShoplifterScript : MonoBehaviour {
 
 		int totalEnvCount = environments.Count;
 		int currentReevalCondition = 0;
+
 
 		if (Random.value > 0.5f) {
 			isTransition = true;
@@ -1707,6 +1748,25 @@ public class ShoplifterScript : MonoBehaviour {
 		Destroy(coinShowerObj);
 		Destroy (suitcaseObj);
 //		camVehicle.GetComponent<RigidbodyFirstPersonController> ().enabled = true;
+        yield return null;
+    }
+
+    IEnumerator ShowInstructionScreen(string instText,bool needsButtonPress,bool showTips, float waitTime)
+    {
+        intertrialText.text = instText;
+        intertrialGroup.alpha = 1f;
+
+        tipsGroup.alpha = (showTips) ? 1f : 0f;
+
+        float timer = 0f;
+
+        while(timer<waitTime)
+        {
+            timer += Time.deltaTime;
+            yield return 0;
+        }
+
+
         yield return null;
     }
 

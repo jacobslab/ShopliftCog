@@ -79,7 +79,12 @@ public class ShopliftLogTrack : LogTrack {
 			subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "DECISION_EVENT" + separator + isActive.ToString ());
 	}
 
-	public void LogSoloPrefImage(string prefImageName)
+    public void LogPauseEvent(bool isPaused)
+    {
+        subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "GAME_PAUSED" + separator + isPaused.ToString());
+    }
+
+    public void LogSoloPrefImage(string prefImageName)
 	{
 		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "SOLO_PREF_SLIDER_IMAGE" + separator + prefImageName);
 	}

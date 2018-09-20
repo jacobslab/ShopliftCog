@@ -119,12 +119,12 @@ public class AnswerSelector : MonoBehaviour {
 		currPositionIndex += indicesToMove;
 
 		if (currPositionIndex < 0) {
-			currPositionIndex = 0;
-			isMoved = false;
+			currPositionIndex = positions.Count-1;
+			isMoved = true;
 		}
 		else if (currPositionIndex > positions.Count - 1){
-			currPositionIndex = positions.Count - 1;
-			isMoved = false;
+			currPositionIndex = 0;
+			isMoved = true;
 		}
 
 		//play audio if the selector moved
