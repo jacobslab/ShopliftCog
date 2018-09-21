@@ -13,8 +13,11 @@ public class AnswerSelector : MonoBehaviour {
 
 	public List<float> positions; //should be put in order of left to right
 	public GameObject selectorVisuals;
+    public float blankPosition;
 
-	public AudioSource selectionSwitchAudio;
+
+    public AudioSource selectionSwitchAudio;
+
 
 	int currPositionIndex = 0;
 
@@ -51,22 +54,29 @@ public class AnswerSelector : MonoBehaviour {
 		}
 	}
 
+    //this should reset the selector rect to the empty "not sure" box on the left
 	public void ResetSelectorPosition(){
-		int resetIndex = 0; //first index
-		if (resetToRandomPosition) {
-			resetIndex = Random.Range(0, positions.Count);
-		}
 
-		if (positions.Count >= 0) {
-            currPositionIndex = resetIndex;
-            Debug.Log("Set the currposindex to resetindex");
-            selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(positions[currPositionIndex], selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D.y,selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D .z);
-			
+        if (positions.Count >= 0)
+        {
+            currPositionIndex = -1; //reset it to move it to the blank option at the beginning
+            selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(blankPosition, selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D.y, selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D.z);
+        }
+        //int resetIndex = 0; //first index
+        //if (resetToRandomPosition) {
+        //	resetIndex = Random.Range(0, positions.Count);
+        //}
 
-		}
-	}
+        //if (positions.Count >= 0) {
+        //          currPositionIndex = resetIndex;
+        //          Debug.Log("Set the currposindex to resetindex");
+        //          selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(positions[currPositionIndex], selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D.y,selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D .z);
 
-	public int ReturnSelectorPosition()
+
+        //}
+    }
+
+    public int ReturnSelectorPosition()
 	{
 		return currPositionIndex;
 	}

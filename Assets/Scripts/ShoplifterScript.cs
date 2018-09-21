@@ -125,9 +125,12 @@ public class ShoplifterScript : MonoBehaviour {
 
 	string currentPhaseName="NONE";
 
+    private string pressToContinueInstruction = "Press (X) button to continue";
+    private string musicBaselineInstruction = "In what follows you will hear music from the game. \n Please maintain your gaze at the fixation cross, relax, and pay attention to the music.";
 
-	//tip metrics
-	private int consecutiveIncorrectCameraPresses=0; //activated when >=4
+
+    //tip metrics
+    private int consecutiveIncorrectCameraPresses=0; //activated when >=4
 	private bool didTimeout = false; //activated after a timeout during slider event
 	private bool afterSlider=false; //activated immediately after a slider event
 
@@ -1099,30 +1102,28 @@ public class ShoplifterScript : MonoBehaviour {
 	}
 	IEnumerator RunTestingPhase()
 	{
-		bool leftChoice = false;
 
 		Experiment.Instance.shopLiftLog.LogPhaseEvent (3, true);
 		//run one instances of comp slider  + 2sec resting phase
 			yield return StartCoroutine (AskPreference (0));
 		yield return StartCoroutine (RunRestPeriod (2f));
-		List<int> caseOrder = new List<int> ();
-		for (int i = 0; i < 4; i++) {
-			caseOrder.Add(i);
-		}
+        int caseOrder = 0;
+        if (Random.value > 0.5f)
+            caseOrder = 1;
+        else
+            caseOrder = 0;
 
 		for (int i = 0; i < 4; i++) {
 			if (i == 2) {
 				//another instance of comp 1-2 slider
 				yield return StartCoroutine (AskPreference (0));
 				yield return StartCoroutine (RunRestPeriod (2f));
-			}
-			int randIndex = Random.Range (0, caseOrder.Count);
-			int chosenIndex = caseOrder [randIndex];
-			caseOrder.RemoveAt (randIndex);
+            }
+            caseOrder = Mathf.Abs(caseOrder - 1);
 			imagineGroup.alpha = 1f;
 			yield return new WaitForSeconds (8f);
 			imagineGroup.alpha = 0f;
-			switch (chosenIndex) {
+            switch (caseOrder) {
 			case 0:
 				yield return StartCoroutine (RunPhaseOne (0, false, -1, true));
 				yield return StartCoroutine (RunImaginePeriod (15f));
@@ -1137,21 +1138,8 @@ public class ShoplifterScript : MonoBehaviour {
 //				yield return StartCoroutine (AskImageryQualityRating (1));
 				yield return StartCoroutine (RunRestPeriod (2f));
 				break;
-			case 2:
-				yield return StartCoroutine(RunPhaseOne (0, false, -1, true));
-				yield return StartCoroutine (RunImaginePeriod (15f));
-				yield return StartCoroutine (AskSoloPreference (0));
-//				yield return StartCoroutine (AskImageryQualityRating (0));
-				yield return StartCoroutine (RunRestPeriod (2f));
-				break;
-			case 3:
-				yield return StartCoroutine(RunPhaseOne (1, false, -1, true));
-				yield return StartCoroutine (RunImaginePeriod (15f));
-				yield return StartCoroutine (AskSoloPreference (1));
-//				yield return StartCoroutine (AskImageryQualityRating (1));
-				yield return StartCoroutine (RunRestPeriod (2f));
-				break;
 			}
+            yield return StartCoroutine(ShowInstructionScreen(pressToContinueInstruction, true, false, 10f));
 		}
 
 		//another instance of comp 1-2 slider
@@ -1179,7 +1167,7 @@ public class ShoplifterScript : MonoBehaviour {
         //show music baseline instructions
         intertrialGroup.alpha = 1f;
         tipsGroup.alpha = 0f;
-        intertrialText.text = "In what follows you will hear music from the game.\n Please maintain your gaze at the fixation cross, relax, and pay attention to the music";
+        intertrialText.text = musicBaselineInstruction;
         yield return new WaitForSeconds(5f);
         intertrialGroup.alpha = 0f;
 
@@ -1759,14 +1747,15 @@ public class ShoplifterScript : MonoBehaviour {
         tipsGroup.alpha = (showTips) ? 1f : 0f;
 
         float timer = 0f;
-
-        while(timer<waitTime)
+        Debug.Log("needsbuttonpress is  " + needsButtonPress.ToString());
+        while (timer < waitTime && !(needsButtonPress && Input.GetButtonDown("Action Button")))
         {
+            Debug.Log("the timer is " + timer.ToString());
             timer += Time.deltaTime;
             yield return 0;
         }
-
-
+        intertrialText.text = "";
+        intertrialGroup.alpha = 0f;
         yield return null;
     }
 
