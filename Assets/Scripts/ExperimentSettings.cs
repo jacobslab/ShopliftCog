@@ -76,6 +76,7 @@ public class ExperimentSettings : MonoBehaviour {
 	public Toggle learningToggle;
 	public Toggle reevalToggle;
 	public Toggle testingToggle;
+    public Toggle sys2Toggle;
 
 	public Dropdown firstEnvDropdown;
 	public Dropdown reevalDropdown;
@@ -118,9 +119,9 @@ public class ExperimentSettings : MonoBehaviour {
 //			AttachSceneController ();
 
 		ChangeFirstEnvironment ();
-//		ChangeReevalType ();
-
-		reevalType = ReevalType.Transition;
+        //		ChangeReevalType ();
+        ToggleSystem2();
+        reevalType = ReevalType.Transition;
 //		reevalType = ReevalType.Reward;
 //		}
 	}
@@ -310,6 +311,11 @@ public class ExperimentSettings : MonoBehaviour {
 			break;
 		}
 	}
+
+    public void ToggleSystem2()
+    {
+        Config.isSystem2 = sys2Toggle.isOn;
+    }
 
 	public void ChangeReevalType()
 	{

@@ -65,6 +65,9 @@ public class ShoplifterScript : MonoBehaviour {
 
     private int correctResponses = 0;
 
+    //SYSTEM2 Server
+    public TCPServer tcpServer;
+
 
 	public List<int> registerVal1;
 	public List<int> registerVal2;
@@ -158,8 +161,12 @@ public class ShoplifterScript : MonoBehaviour {
 	public Text tipsText;
     public CanvasGroup blackScreen;
     public CanvasGroup pauseUI;
+    public CanvasGroup sys2ConnectionGroup;
+    public Text sys2ConnectionText;
 
-	private GameObject roomOne;
+
+
+    private GameObject roomOne;
 	private GameObject roomTwo;
 
 	//instr strings
@@ -646,7 +653,9 @@ public class ShoplifterScript : MonoBehaviour {
 
 
 		introInstructionGroup.alpha = 1f;
-		yield return StartCoroutine (WaitForButtonPress (10000f,didPress =>
+        yield return new WaitForSeconds(0.5f);
+
+        yield return StartCoroutine (WaitForButtonPress (10000f,didPress =>
 			{
 				Debug.Log("did press: " + didPress);
 			}
@@ -1534,9 +1543,29 @@ public class ShoplifterScript : MonoBehaviour {
 		stageIndex = 1;
 		Experiment.Instance.CreateSessionStartedFile ();
 
-//		yield return StartCoroutine(PickRegisterValues());
+        //		yield return StartCoroutine(PickRegisterValues());
 
-		int totalEnvCount = environments.Count;
+        //only run if system2 is expected
+        if (Config.isSystem2)
+        {
+            sys2ConnectionGroup.alpha = 1f;
+
+            sys2ConnectionText.text = "Attempting to connect with server...";
+            //wait till the SYS2 Server connects
+            while (!tcpServer.isConnected)
+            {
+                yield return 0;
+            }
+            sys2ConnectionText.text = "Waiting for server to start...";
+            while (!tcpServer.canStartGame)
+            {
+                yield return 0;
+            }
+
+            sys2ConnectionGroup.alpha = 0f;
+        }
+
+        int totalEnvCount = environments.Count;
 		int currentReevalCondition = 0;
 
 
@@ -1804,8 +1833,9 @@ public class ShoplifterScript : MonoBehaviour {
     }
 	IEnumerator ShowEndEnvironmentStageScreen()
 	{ 	intertrialGroup.alpha = 1f;
-		intertrialText.text = "Congratulations! You finished one environment \n Now, take a short rest before teleporting to the next dimension!";
-		Experiment.Instance.shopLiftLog.LogEndEnvironmentStage();
+		intertrialText.text = "Congratulations!\n You have finished one environment! \n Have a brief rest!";
+
+        Experiment.Instance.shopLiftLog.LogEndEnvironmentStage();
 		yield return new WaitForSeconds(60f);
 		intertrialGroup.alpha = 0f;
 		yield return null;
@@ -1813,7 +1843,7 @@ public class ShoplifterScript : MonoBehaviour {
 	IEnumerator ShowEndSessionScreen()
 	{ 
 		intertrialGroup.alpha = 1f;
-		intertrialText.text = "Congratulations! You have completed your session!";
+        intertrialText.text = "Congratulations! You have completed your session! \n Press Escape to exit the application";
 		Experiment.Instance.shopLiftLog.LogEndSession();
 		yield return new WaitForSeconds(1000f);
 		intertrialGroup.alpha = 0f;

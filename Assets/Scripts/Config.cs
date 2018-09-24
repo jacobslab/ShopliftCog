@@ -5,7 +5,7 @@ public class Config : MonoBehaviour {
 
 	public enum Version
 	{
-		ShopliftCog
+		MAZE
 	}
 
 	public enum SessionType
@@ -15,16 +15,17 @@ public class Config : MonoBehaviour {
 	}
 
 	public static SessionType sessionType=SessionType.NonAdaptive;
-	public static Version BuildVersion = Version.ShopliftCog; //TODO: change this for your experiment!
+	public static Version BuildVersion = Version.MAZE; //TODO: change this for your experiment!
 	public static string VersionNumber = "0.1"; //TODO: change this for your experiment!
 
 	public static bool isGamified=false;
 
-	#if SYS3
+#if SYS3
 	public static bool isSystem3 = true;
 	public static bool isSyncbox=false;
-	#else
-	public static bool isSyncbox = true;
+#else
+    public static bool isSystem2 = true;
+    public static bool isSyncbox = false;
 	public static bool isSystem3=false;
 	#endif
 

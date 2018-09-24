@@ -320,7 +320,7 @@ GameObject:
   - component: {fileID: 222989172136268116}
   - component: {fileID: 114440162231482496}
   m_Layer: 5
-  m_Name: PrefInstruction
+  m_Name: NotSureText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -340,6 +340,23 @@ GameObject:
   - component: {fileID: 114059764516881396}
   m_Layer: 5
   m_Name: TrainingInstructionScreen
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!1 &1196256913483644
+GameObject:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 224060335885274952}
+  - component: {fileID: 222380400632609946}
+  - component: {fileID: 114073468432808562}
+  m_Layer: 5
+  m_Name: IntertrialText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -473,7 +490,7 @@ GameObject:
   - component: {fileID: 225398799151178170}
   - component: {fileID: 114749199711634112}
   m_Layer: 5
-  m_Name: ImagineGroup
+  m_Name: SYS2ConnectionMessage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -979,6 +996,23 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!1 &1600619713656960
+GameObject:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 224850834902255892}
+  - component: {fileID: 222176975177121342}
+  - component: {fileID: 114361942094206798}
+  m_Layer: 5
+  m_Name: PrefInstruction
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &1605240220510170
 GameObject:
   m_ObjectHideFlags: 1
@@ -1128,6 +1162,25 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!1 &1725767903282720
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 224196329799535080}
+  - component: {fileID: 222981138726585118}
+  - component: {fileID: 114991907469957854}
+  - component: {fileID: 225979548447223694}
+  - component: {fileID: 114290879500689280}
+  m_Layer: 5
+  m_Name: ImagineGroup
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &1730354800626960
 GameObject:
   m_ObjectHideFlags: 1
@@ -1222,7 +1275,7 @@ GameObject:
   - component: {fileID: 222841823389716946}
   - component: {fileID: 114206750512033648}
   m_Layer: 5
-  m_Name: LikeSlider
+  m_Name: PreferSlider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1307,7 +1360,7 @@ GameObject:
   - component: {fileID: 222572564434082328}
   - component: {fileID: 114512118615485372}
   m_Layer: 5
-  m_Name: DislikeSlider
+  m_Name: NotPreferSlider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1394,7 +1447,7 @@ GameObject:
   - component: {fileID: 222894689879833646}
   - component: {fileID: 114498955443457180}
   m_Layer: 5
-  m_Name: IntertrialText
+  m_Name: SYS2ConnectionText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1777,8 +1830,8 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "How much do you prefer going \nthrough this room to get a \nbigger cash
-    reward?"
+  m_Text: "In order to make the most cash, \nhow much would you prefer \ngoing through
+    this room?\n"
 --- !u!114 &114012839645258192
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1989,6 +2042,41 @@ MonoBehaviour:
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
+--- !u!114 &114073468432808562
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1196256913483644}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 708705254, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0, g: 0.6275863, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
+      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+  m_FontData:
+    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_FontSize: 28
+    m_FontStyle: 0
+    m_BestFit: 0
+    m_MinSize: 3
+    m_MaxSize: 40
+    m_Alignment: 4
+    m_AlignByGeometry: 0
+    m_RichText: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1
+  m_Text: "You will see a room next. \n\nImagine going through the room until the
+    briefcase, and collecting the cash!\n\nYou will then be asked how much you prefer
+    \nstarting your journey there\n\n"
 --- !u!114 &114077231534725974
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2271,7 +2359,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Like
+  m_Text: Prefer
 --- !u!114 &114225587824317392
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2417,9 +2505,11 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Use left joystick to move the slider towards your preferred choice
+  m_Text: 'Left joystick moves slider
 
-    and press (X) button to continue'
+    Press (X) to confirm
+
+'
 --- !u!114 &114288672814148802
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2453,6 +2543,17 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: Room A
+--- !u!114 &114290879500689280
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1725767903282720}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0883f8717be24a5b8cf35a0d175575e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &114299944980796236
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2701,8 +2802,10 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "Congratulations! \nYou finished one environment \n Now, take a short rest
-    before teleporting \nto the next dimension!"
+  m_Text: 'In what follows you will hear music from game.
+
+    Please maintain your gaze at the fixation cross, relax, and pay attention to the
+    music'
 --- !u!114 &114334283066595038
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2800,6 +2903,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0883f8717be24a5b8cf35a0d175575e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &114361942094206798
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1600619713656960}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 708705254, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0, g: 0.6275863, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
+      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+  m_FontData:
+    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_FontSize: 20
+    m_FontStyle: 0
+    m_BestFit: 0
+    m_MinSize: 2
+    m_MaxSize: 40
+    m_Alignment: 4
+    m_AlignByGeometry: 0
+    m_RichText: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1
+  m_Text: "Choose room with left joystick \nPress (X) to confirm\n"
 --- !u!114 &114383668527733496
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2832,7 +2968,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "Which room will lead you \nto a greater reward?"
+  m_Text: "Which room will lead you \nto more cash?"
 --- !u!114 &114401886190190690
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2973,7 +3109,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Select your chosen option and press (X) to continue
+  m_Text: Not Sure
 --- !u!114 &114443329073846890
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3166,8 +3302,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "Imagine going through this corridor \nuntil the briefcase, and receiving
-    the reward!\n\nHow much do you prefer starting your journey here?"
+  m_Text: Waiting to connect to server...
 --- !u!114 &114512118615485372
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3200,7 +3335,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Dislike
+  m_Text: Not Prefer
 --- !u!114 &114514716836585616
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3529,7 +3664,8 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Imagine going through this room to the briefcase at the end of the corridor
+  m_Text: Imagine going through this room to the briefcase at the end of the chain
+    of rooms
 --- !u!114 &114589464884388934
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3877,9 +4013,11 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Use left joystick to move the slider towards your preferred choice
+  m_Text: 'Left joystick moves slider
 
-    and press (X) button to continue'
+    Press (X) to confirm
+
+'
 --- !u!114 &114693074319644622
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4171,12 +4309,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   positions:
-  - -320
-  - -160
-  - 0
-  - 160
+  - -200
+  - -70
+  - 60
+  - 190
   - 320
   selectorVisuals: {fileID: 1216864908288032}
+  blankPosition: -330
   selectionSwitchAudio: {fileID: 82095017840588200}
 --- !u!114 &114795693938265382
 MonoBehaviour:
@@ -4638,6 +4777,33 @@ MonoBehaviour:
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
+--- !u!114 &114991907469957854
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1725767903282720}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_RaycastTarget: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
+      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
 --- !u!114 &114995088684804020
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4748,6 +4914,13 @@ CanvasRenderer:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1362216173432310}
   m_CullTransparentMesh: 0
+--- !u!222 &222176975177121342
+CanvasRenderer:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1600619713656960}
+  m_CullTransparentMesh: 0
 --- !u!222 &222192528262527860
 CanvasRenderer:
   m_ObjectHideFlags: 1
@@ -4817,6 +4990,13 @@ CanvasRenderer:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1533990902894974}
+  m_CullTransparentMesh: 0
+--- !u!222 &222380400632609946
+CanvasRenderer:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1196256913483644}
   m_CullTransparentMesh: 0
 --- !u!222 &222381098208200468
 CanvasRenderer:
@@ -5203,6 +5383,13 @@ CanvasRenderer:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1829943688920900}
   m_CullTransparentMesh: 0
+--- !u!222 &222981138726585118
+CanvasRenderer:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1725767903282720}
+  m_CullTransparentMesh: 0
 --- !u!222 &222984214755587346
 CanvasRenderer:
   m_ObjectHideFlags: 1
@@ -5352,6 +5539,24 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 500, y: 300}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!224 &224060335885274952
+RectTransform:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1196256913483644}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 224196329799535080}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0.0000076294}
+  m_SizeDelta: {x: 657.3, y: 258.6}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224085261007623316
 RectTransform:
   m_ObjectHideFlags: 1
@@ -5421,7 +5626,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.000091552734, y: -110.3}
+  m_AnchoredPosition: {x: -0.000091552734, y: -150.4}
   m_SizeDelta: {x: 795.8, y: 82}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224118241650311098
@@ -5532,7 +5737,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.000091552734, y: -110.3}
+  m_AnchoredPosition: {x: -0.000091552734, y: -140.3}
   m_SizeDelta: {x: 795.8, y: 82}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224186370390823192
@@ -5550,8 +5755,27 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -160, y: -59}
-  m_SizeDelta: {x: 131.3, y: 94.1}
+  m_AnchoredPosition: {x: -70, y: -59}
+  m_SizeDelta: {x: 110, y: 94.1}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!224 &224196329799535080
+RectTransform:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1725767903282720}
+  m_LocalRotation: {x: 0.1409013, y: 0, z: 0, w: 0.9900237}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.99999994, y: 0.99999994, z: 0.99999994}
+  m_Children:
+  - {fileID: 224060335885274952}
+  m_Father: {fileID: 224502553704297016}
+  m_RootOrder: 18
+  m_LocalEulerAnglesHint: {x: 16.2, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: -4.3999}
+  m_SizeDelta: {x: 0, y: 70.266}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224209969301870370
 RectTransform:
@@ -5568,8 +5792,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -58.054146}
-  m_SizeDelta: {x: 167.8, y: 127.5}
+  m_AnchoredPosition: {x: -330, y: -58.054146}
+  m_SizeDelta: {x: 130, y: 127.5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224218756207309968
 RectTransform:
@@ -5595,18 +5819,18 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1290474409808942}
-  m_LocalRotation: {x: 0.1409013, y: 0, z: 0, w: 0.9900237}
+  m_LocalRotation: {x: 0.1409013, y: -0, z: -0, w: 0.9900237}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.99999994, y: 0.99999994, z: 0.99999994}
+  m_LocalScale: {x: 1.0000001, y: 1.0000002, z: 1.0000002}
   m_Children:
   - {fileID: 224695648583586958}
   m_Father: {fileID: 224502553704297016}
-  m_RootOrder: 18
+  m_RootOrder: 20
   m_LocalEulerAnglesHint: {x: 16.2, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -4.3999}
-  m_SizeDelta: {x: 0, y: 70.266}
+  m_AnchoredPosition: {x: 0, y: -4.3999023}
+  m_SizeDelta: {x: 0, y: 70.26599}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224247083380818616
 RectTransform:
@@ -5710,7 +5934,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 320, y: -58.999996}
-  m_SizeDelta: {x: 131.3, y: 94.1}
+  m_SizeDelta: {x: 110, y: 94.1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224282205103989230
 RectTransform:
@@ -5826,8 +6050,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -58.999996}
-  m_SizeDelta: {x: 131.3, y: 94.1}
+  m_AnchoredPosition: {x: 60, y: -58.999996}
+  m_SizeDelta: {x: 110, y: 94.1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224339273256931640
 RectTransform:
@@ -6047,15 +6271,15 @@ RectTransform:
   m_GameObject: {fileID: 1179399709406000}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.0000001, y: 1.0000001, z: 1.0000001}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 224720959931530752}
-  m_RootOrder: 7
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.000091552734, y: -191.49292}
-  m_SizeDelta: {x: 795.8, y: 82}
+  m_AnchoredPosition: {x: -331.9, y: -59}
+  m_SizeDelta: {x: 91.6, y: 82}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224465869870413254
 RectTransform:
@@ -6103,8 +6327,9 @@ RectTransform:
   - {fileID: 224325483020419320}
   - {fileID: 224530530563889734}
   - {fileID: 224282205103989230}
-  - {fileID: 224219629899833418}
+  - {fileID: 224196329799535080}
   - {fileID: 224730141295133542}
+  - {fileID: 224219629899833418}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -6184,8 +6409,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 160, y: -59}
-  m_SizeDelta: {x: 131.3, y: 94.1}
+  m_AnchoredPosition: {x: 190, y: -59}
+  m_SizeDelta: {x: 110, y: 94.1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224588199575915980
 RectTransform:
@@ -6464,8 +6689,9 @@ RectTransform:
   - {fileID: 224325997276450420}
   - {fileID: 224566421203590218}
   - {fileID: 224281743317573966}
-  - {fileID: 224458723793218356}
+  - {fileID: 224850834902255892}
   - {fileID: 224209969301870370}
+  - {fileID: 224458723793218356}
   m_Father: {fileID: 224502553704297016}
   m_RootOrder: 13
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -6561,8 +6787,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -320, y: -59}
-  m_SizeDelta: {x: 131.3, y: 94.1}
+  m_AnchoredPosition: {x: -200, y: -59}
+  m_SizeDelta: {x: 110, y: 94.1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224756733522367396
 RectTransform:
@@ -6713,6 +6939,24 @@ RectTransform:
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 164}
   m_SizeDelta: {x: -52.6, y: -401.1}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!224 &224850834902255892
+RectTransform:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1600619713656960}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1.0000001, y: 1.0000001, z: 1.0000001}
+  m_Children: []
+  m_Father: {fileID: 224720959931530752}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -0.000091552734, y: -191.49292}
+  m_SizeDelta: {x: 795.8, y: 82}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224857594558470136
 RectTransform:
@@ -7105,6 +7349,17 @@ CanvasGroup:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1524331698641002}
+  m_Enabled: 1
+  m_Alpha: 0
+  m_Interactable: 1
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 0
+--- !u!225 &225979548447223694
+CanvasGroup:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1725767903282720}
   m_Enabled: 1
   m_Alpha: 0
   m_Interactable: 1
