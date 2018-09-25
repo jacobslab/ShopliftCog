@@ -43,7 +43,7 @@ public class SceneController : MonoBehaviour { //there can be a separate scene c
 		}
 
 		Debug.Log("loading main menu!");
-		SubjectReaderWriter.Instance.RecordSubjects();
+		//SubjectReaderWriter.Instance.RecordSubjects();
 		Application.LoadLevel(0);
 	}
 
@@ -105,14 +105,14 @@ public class SceneController : MonoBehaviour { //there can be a separate scene c
 			Experiment.Instance.OnExit();
 		}
 
-		SubjectReaderWriter.Instance.RecordSubjects();
+		//SubjectReaderWriter.Instance.RecordSubjects();
 		Debug.Log("loading end menu!");
 		Application.LoadLevel(2);
 	}
 
 	public void Quit(){
 #if !UNITY_WEBPLAYER
-		SubjectReaderWriter.Instance.RecordSubjects();
+		//SubjectReaderWriter.Instance.RecordSubjects();
 #endif
 		Application.Quit();
 	}
@@ -120,7 +120,7 @@ public class SceneController : MonoBehaviour { //there can be a separate scene c
 	void OnApplicationQuit(){
 		Debug.Log("On Application Quit!");
 #if !UNITY_WEBPLAYER
-		SubjectReaderWriter.Instance.RecordSubjects();
+		//SubjectReaderWriter.Instance.RecordSubjects();
 #endif
 	}
 }

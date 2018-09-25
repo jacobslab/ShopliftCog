@@ -621,34 +621,44 @@ public class ShoplifterScript : MonoBehaviour {
 		return vals;
 	}
 
-	IEnumerator RunCamTrainingPhase()
+	IEnumerator RunCamTrainingPhase(bool playVideo)
 	{
         blackScreen.alpha = 1f;
         RandomizeSpeedChangeZones ();
 		Debug.Log ("starting cam training phase");
 		CameraZone.isTraining = true;
         //inst video
-        Debug.Log("set video");
-		instructionVideo.SetActive(true);
-        EnablePlayerCam(true);
-        float timer = 0f;
-        float maxTimer =(float)instructionVideo.GetComponent<VideoPlayer>().clip.length;
-        Debug.Log("the max timer is : " + maxTimer.ToString());
-        instructionVideo.GetComponent<VideoPlayer>().Play();
-        instructionVideo.gameObject.GetComponent<AudioSource>().Play();
-        while(!instructionVideo.GetComponent<VideoPlayer>().isPrepared)
+        if (playVideo)
         {
-            yield return 0;
+            Debug.Log("set video");
+            instructionVideo.SetActive(true);
+
+            float timer = 0f;
+            float maxTimer = (float)instructionVideo.GetComponent<VideoPlayer>().clip.length;
+            Debug.Log("the max timer is : " + maxTimer.ToString());
+            while (!instructionVideo.GetComponent<VideoPlayer>().isPrepared)
+            {
+                yield return 0;
+            }
+            instructionVideo.GetComponent<VideoPlayer>().Play();
+            instructionVideo.gameObject.GetComponent<AudioSource>().Play();
+            yield return new WaitForSeconds(0.3f);
+            Debug.Log("enabled player cam");
+            blackScreen.alpha = 0f;
+            EnablePlayerCam(true);
+            while (!Input.GetButtonDown("Action Button") && timer < maxTimer)
+            {
+                timer += Time.deltaTime;
+                yield return 0;
+            }
+            instructionVideo.GetComponent<VideoPlayer>().Stop();
+            instructionVideo.SetActive(false);
         }
-        yield return new WaitForSeconds (0.1f);
-        Debug.Log("enabled player cam");
-        blackScreen.alpha = 0f;
-		while (!Input.GetButtonDown ("Action Button") && timer < maxTimer) {
-			timer += Time.deltaTime;
-			yield return 0;
-		}
-		instructionVideo.GetComponent<VideoPlayer> ().Stop ();
-		instructionVideo.SetActive(false);
+        else
+        {
+            blackScreen.alpha = 0f;
+            EnablePlayerCam(true);
+        }
 
 
 
@@ -775,7 +785,7 @@ public class ShoplifterScript : MonoBehaviour {
 		baseAudio.Play ();
 
         //if number of correct responses are greater than 3, then don't show camera in the next practice round
-        if (correctResponses >= 3)
+        if (correctResponses > 3)
         {
             Debug.Log("correct response is eq or above 3");
             CameraZone.firstTime = false;
@@ -1585,69 +1595,77 @@ public class ShoplifterScript : MonoBehaviour {
 			registerVals.Add(Experiment.Instance.rightReward);
 
 		}
-		
-		for (int i = startingIndex; i < totalEnvCount; i++) {
-			numTrials_Learning = 0;
-			numTrials = 0;
-			currentReevalCondition = reevalConditions [i];
 
-			yield return StartCoroutine (PickEnvironment (i));
+        for (int i = startingIndex; i < totalEnvCount; i++)
+        {
+            numTrials_Learning = 0;
+            numTrials = 0;
+            currentReevalCondition = reevalConditions[i];
 
-			RandomizeSuitcases();
-			if(!Experiment.shouldCheckpoint)
-			{
-				AssignRooms ();
-				yield return StartCoroutine(PickRegisterValues()); //new reg values to be picked for each environment
-			}
+            yield return StartCoroutine(PickEnvironment(i));
 
-			isTransition = !isTransition; //flip the transition condition before the next round
+            RandomizeSuitcases();
+            if (!Experiment.shouldCheckpoint)
+            {
+                AssignRooms();
+                yield return StartCoroutine(PickRegisterValues()); //new reg values to be picked for each environment
+            }
 
-			currentPhaseName = "TRAINING";
-			if (ExperimentSettings.isTraining)
-				yield return StartCoroutine (RunCamTrainingPhase ());
+            isTransition = !isTransition; //flip the transition condition before the next round
+
+            currentPhaseName = "TRAINING";
+            if (ExperimentSettings.isTraining)
+                yield return StartCoroutine(RunCamTrainingPhase((i==0) ? true : false));
 
             blackScreen.alpha = 0f;
-			//randomize rooms and cam zones again
-//			AssignRooms ();
-//			yield return StartCoroutine(RandomizeCameraZones (i)); //we randomize cameras when picking environment now
+            //randomize rooms and cam zones again
+            //			AssignRooms ();
+            //			yield return StartCoroutine(RandomizeCameraZones (i)); //we randomize cameras when picking environment now
 
-			//learning phase
+            //learning phase
 
-			currentPhaseName = "LEARNING";
-			CheckpointSession (i,true);
-			if (ExperimentSettings.isLearning)
-				yield return StartCoroutine (RunLearningPhase (false,maxTrials_Learning));
-
-
-			//shuffle rewards
-//		ReassignRooms ();
-//			ShuffleRegisterRewards ();
-
-			//re-evaluation phase
-			currentPhaseName = "REEVALUATION";
-			CheckpointSession (i,true);
-			if (ExperimentSettings.isReeval)
-				yield return StartCoroutine (RunReevaluationPhase (currentReevalCondition));
+            currentPhaseName = "LEARNING";
+            CheckpointSession(i, true);
+            if (ExperimentSettings.isLearning)
+                yield return StartCoroutine(RunLearningPhase(false, maxTrials_Learning));
 
 
-			//testing phase
-			currentPhaseName = "TESTING";
-			CheckpointSession (i,true);
-			if (ExperimentSettings.isTesting)
-				yield return StartCoroutine (RunTestingPhase ());
+            //shuffle rewards
+            //		ReassignRooms ();
+            //			ShuffleRegisterRewards ();
+
+            //re-evaluation phase
+            currentPhaseName = "REEVALUATION";
+            CheckpointSession(i, true);
+            if (ExperimentSettings.isReeval)
+                yield return StartCoroutine(RunReevaluationPhase(currentReevalCondition));
 
 
-			//if transition phase, play 10-trial additional learning
-			if (currentReevalCondition==2) {
-				Debug.Log ("RUNNING ADDITIONAL LEARN PHASE");
-				currentPhaseName = "POST-TEST";
-				yield return StartCoroutine (RunLearningPhase (true,maxTrials_PostTest));
-			}
-			Debug.Log ("about to end session");
-			//show end session screen
-			yield return StartCoroutine (ShowEndEnvironmentStageScreen ());
+            //testing phase
+            currentPhaseName = "TESTING";
+            CheckpointSession(i, true);
+            if (ExperimentSettings.isTesting)
+                yield return StartCoroutine(RunTestingPhase());
 
-			CheckpointSession (i,true);
+
+            //if transition phase, play 10-trial additional learning
+            if (currentReevalCondition == 2)
+            {
+                Debug.Log("RUNNING ADDITIONAL LEARN PHASE");
+                currentPhaseName = "POST-TEST";
+                yield return StartCoroutine(RunLearningPhase(true, maxTrials_PostTest));
+            }
+            Debug.Log("about to end session");
+            //show end session screen
+            yield return StartCoroutine(ShowEndEnvironmentStageScreen());
+
+            CheckpointSession(i, true);
+
+            //reset variables
+            if (Experiment.shouldCheckpoint)
+            {
+                ResetEnvironmentVariables();
+            }
 
 //			SceneManager.LoadScene (0); //load main menu
 //			SceneManager.UnloadSceneAsync (1); //then destroy all objects of the current scene
@@ -1663,6 +1681,16 @@ public class ShoplifterScript : MonoBehaviour {
 		yield return StartCoroutine (ShowEndSessionScreen());
 		yield return null;
 	}
+
+    void ResetEnvironmentVariables()
+    {
+        correctResponses = 0;
+        CameraZone.firstTime = true;
+        ExperimentSettings.isTraining = true;
+        ExperimentSettings.isLearning = true;
+        ExperimentSettings.isReeval = true;
+        ExperimentSettings.isTesting = true;
+    }
 
 	void TurnOffRooms()
 	{

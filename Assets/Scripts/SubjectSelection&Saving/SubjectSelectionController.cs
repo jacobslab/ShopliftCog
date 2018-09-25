@@ -71,7 +71,7 @@ public class SubjectSelectionController : MonoBehaviour {
 
 				Debug.Log ("NEW SUBJ NAME:  " + newSubject.name);
 
-					subjectReaderWriter.WriteNewSubject( newSubject.name );
+					//subjectReaderWriter.WriteNewSubject( newSubject.name );
 
 					//now get rid of input text
 					SubjectInputField.text = "";
