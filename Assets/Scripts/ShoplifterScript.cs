@@ -130,6 +130,7 @@ public class ShoplifterScript : MonoBehaviour {
 
     private string pressToContinueInstruction = "Press (X) button to continue";
     private string musicBaselineInstruction = "In what follows you will hear music from the game. \n Please maintain your gaze at the fixation cross, relax, and pay attention to the music.";
+    private string imageSlideshowInstruction = "In what follows you will see images from the game. \n Please maintain your gaze on the screen, relax, and pay attention to different images that appear on the screen.";
 
 
     //tip metrics
@@ -222,6 +223,11 @@ public class ShoplifterScript : MonoBehaviour {
 	public AudioSource musicBaselinePlayer;
 	public float musicBaselinePlayTime = 30f;
 
+    //for baseline image slideshow sequence at the end
+    private List<Texture> completeImageList;
+    public RawImage slideshowImage;
+    public float imageSlideshowPlaytime = 4f;
+
 
 	private GameObject suitcasePrefab;
 	private Material skyboxMat;
@@ -276,8 +282,9 @@ public class ShoplifterScript : MonoBehaviour {
 		trainingPeriodGroup.alpha = 0f;
 		prefSolo.gameObject.SetActive (false);
 		prefGroup.gameObject.SetActive (false);
+        slideshowImage.transform.parent.gameObject.GetComponent<CanvasGroup>().alpha = 0f;
 
-		suitcaseObj = null;
+        suitcaseObj = null;
 //        cartAnim.enabled = true;
         camVehicle.SetActive(true);
 //        animBody.SetActive(false);
@@ -636,6 +643,7 @@ public class ShoplifterScript : MonoBehaviour {
             float timer = 0f;
             float maxTimer = (float)instructionVideo.GetComponent<VideoPlayer>().clip.length;
             Debug.Log("the max timer is : " + maxTimer.ToString());
+            instructionVideo.GetComponent<VideoPlayer>().Prepare();
             while (!instructionVideo.GetComponent<VideoPlayer>().isPrepared)
             {
                 yield return 0;
@@ -1181,6 +1189,34 @@ public class ShoplifterScript : MonoBehaviour {
 		yield return null;
 	}
 
+    IEnumerator RunImageSlideshow()
+    {
+        //show image slideshow instructions
+        intertrialGroup.alpha = 1f;
+        tipsGroup.alpha = 0f;
+        intertrialText.text = imageSlideshowInstruction;
+        yield return new WaitForSeconds(5f);
+        intertrialGroup.alpha = 0f;
+
+        int totalSlideshowLength = completeImageList.Count;
+        for (int i = 0; i < totalSlideshowLength; i++)
+        {
+            slideshowImage.transform.parent.gameObject.GetComponent<CanvasGroup>().alpha = 1f;
+
+            int randIndex = Random.Range(0, completeImageList.Count);
+            slideshowImage.texture = completeImageList[randIndex];
+            yield return new WaitForSeconds(imageSlideshowPlaytime);
+
+            slideshowImage.transform.parent.gameObject.GetComponent<CanvasGroup>().alpha = 0f;
+            completeImageList.RemoveAt(randIndex); //remove the image
+            //run rest period in between the images
+            yield return StartCoroutine(RunRestPeriod(2f));
+
+        }
+
+        yield return null;
+    }
+
 	IEnumerator RunMusicBaseline()
 	{
         //show music baseline instructions
@@ -1190,8 +1226,6 @@ public class ShoplifterScript : MonoBehaviour {
         yield return new WaitForSeconds(5f);
         intertrialGroup.alpha = 0f;
 
-        //play it twice
-            yield return StartCoroutine(MakeCompleteAudioList(2));
             int totalAudioLength = completeAudioList.Count;
             for (int i = 0; i < totalAudioLength; i++)
             {
@@ -1371,10 +1405,14 @@ public class ShoplifterScript : MonoBehaviour {
 		yield return null;
 	}
 
-	IEnumerator MakeCompleteAudioList(int repeatCount)
+	IEnumerator MakeCompleteBaselineList(int repeatCount)
 	{
+        //for audio
 		completeAudioList = new List<AudioClip> ();
-		EnvironmentManager tempEnv;
+        //for images
+        completeImageList = new List<Texture>();
+
+        EnvironmentManager tempEnv;
         for (int i = 0; i<environments.Count*repeatCount; i++) {
 			tempEnv = environments [i%2].GetComponent<EnvironmentManager> ();
 			completeAudioList.Add (tempEnv.one_L_Audio.clip);
@@ -1383,14 +1421,21 @@ public class ShoplifterScript : MonoBehaviour {
 			completeAudioList.Add (tempEnv.two_R_Audio.clip);
 			completeAudioList.Add (tempEnv.three_L_Audio.clip);
 			completeAudioList.Add (tempEnv.three_R_Audio.clip);
-		}
 
-        for (int i = 0; i < completeAudioList.Count;i++)
-        {
-            Debug.Log("the name of the audio clip: " + completeAudioList[i].name);
+
+            //add images
+            for (int k = 0; k < 2; k++)
+            {
+                completeImageList.Add(tempEnv.groupOne[k]);
+                completeImageList.Add(tempEnv.groupTwo[k]);
+                completeImageList.Add(tempEnv.groupThree[k]);
+            }
+
         }
+
 		yield return null;
 	}
+
 
 	IEnumerator PickEnvironment(int blockCount)
 	{
@@ -1655,9 +1700,11 @@ public class ShoplifterScript : MonoBehaviour {
                 currentPhaseName = "POST-TEST";
                 yield return StartCoroutine(RunLearningPhase(true, maxTrials_PostTest));
             }
-            Debug.Log("about to end session");
-            //show end session screen
-            yield return StartCoroutine(ShowEndEnvironmentStageScreen());
+            //skip if it is the final environment
+            if (i == totalEnvCount - 1)
+            {
+                yield return StartCoroutine(ShowEndEnvironmentStageScreen());
+            }
 
             CheckpointSession(i, true);
 
@@ -1677,8 +1724,14 @@ public class ShoplifterScript : MonoBehaviour {
 		}
 
 		CheckpointSession (totalEnvCount-1,false);
+
+
+        yield return StartCoroutine(MakeCompleteBaselineList(2));
+
 		yield return StartCoroutine(RunMusicBaseline());
-		yield return StartCoroutine (ShowEndSessionScreen());
+
+        yield return StartCoroutine(RunImageSlideshow());
+        yield return StartCoroutine (ShowEndSessionScreen());
 		yield return null;
 	}
 
