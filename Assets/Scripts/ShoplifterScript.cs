@@ -63,6 +63,8 @@ public class ShoplifterScript : MonoBehaviour {
 	public List<GameObject> phase3SpeedChangeZones_L;
 	public List<GameObject> phase3SpeedChangeZones_R;
 
+    public AudioListener mainSceneListener;
+
     private int correctResponses = 0;
 
     //SYSTEM2 Server
@@ -1110,6 +1112,35 @@ public class ShoplifterScript : MonoBehaviour {
 		Experiment.Instance.shopLiftLog.LogPhaseEvent(2,false);
 		yield return null;
 	}
+
+
+    //part of the baseline, traverses through all the environments without any audio or chest
+    IEnumerator RunSilentTraversal()
+    {
+        bool isLeft = (Random.value >0.5f) ?  true : false;
+        for (int i = 0; i < environments.Count;i++)
+        {
+
+            yield return StartCoroutine(PickEnvironment(i)); //change environment
+            mainSceneListener.enabled = false; //turn off the main audio listener
+            for (int j = 0; j < 2; j++)
+            {   
+                Debug.Log("about to run phase 1");
+                isLeft = !isLeft; //flip the left right
+                yield return StartCoroutine(RunPhaseOne((isLeft) ? 0 : 1, false, -1, false));
+
+                Debug.Log("about to run phase 2");
+                yield return StartCoroutine(RunPhaseTwo((isLeft) ? 0 : 1, false, false, -1, false, false));
+                //          TurnOffRooms ();
+                Debug.Log("about to run phase 3");
+                yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, false, false));
+            }
+        }
+
+        mainSceneListener.enabled = true;
+
+        yield return null;
+    }
 	IEnumerator RunRestPeriod(float waitTime)
 	{
 		restGroup.alpha = 1f;
@@ -1725,12 +1756,13 @@ public class ShoplifterScript : MonoBehaviour {
 
 		CheckpointSession (totalEnvCount-1,false);
 
-
+        //run baseline
         yield return StartCoroutine(MakeCompleteBaselineList(2));
-
 		yield return StartCoroutine(RunMusicBaseline());
-
         yield return StartCoroutine(RunImageSlideshow());
+        yield return StartCoroutine(RunSilentTraversal());
+
+        //show the end session screen
         yield return StartCoroutine (ShowEndSessionScreen());
 		yield return null;
 	}
