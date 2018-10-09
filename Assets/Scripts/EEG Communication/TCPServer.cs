@@ -12,6 +12,9 @@ using System.Net;
 using System.Net.Sockets;
 using System.Diagnostics;
 
+using UnityEngine.Networking;
+using UnityEngine.Networking.NetworkSystem;
+
 using System.Threading;
 
 using LitJson;
@@ -21,6 +24,7 @@ public class TCPServer : MonoBehaviour {
 
 
 	ThreadedServer myServer;
+    public NetworkClient myClient;
 	public bool isConnected { get { return GetIsConnected(); } }
 	public bool canStartGame { get { return GetCanStartGame(); } }
 
@@ -53,6 +57,7 @@ public class TCPServer : MonoBehaviour {
 		if(Config.isSystem2){
 			RunServer ();
 		}
+        //myClient = SetupClient();
 	}
 
 	//test clock alignment, every x seconds
@@ -76,6 +81,7 @@ public class TCPServer : MonoBehaviour {
 	void RunServer () {
         UnityEngine.Debug.Log("creating threaded server");
 		myServer = new ThreadedServer ();
+        //SetupClient();
 		myServer.Start ();
 	}
 
@@ -83,7 +89,7 @@ public class TCPServer : MonoBehaviour {
 	void Update(){
 		if (myServer != null)
         {
-            UnityEngine.Debug.Log("attempting to connect");
+            //UnityEngine.Debug.Log("attempting to connect");
 
             if (isConnected && !startedAlignClocks) {
 				startedAlignClocks = true;
@@ -138,7 +144,20 @@ public class TCPServer : MonoBehaviour {
         }
         else
             return false;
-	}
+    }
+    // client function
+    public void OnConnected(NetworkMessage netMsg)
+    {
+        UnityEngine.Debug.Log("Connected to server");
+    }
+
+    void SetupClient()
+    {
+        myClient = new NetworkClient();
+        myClient.RegisterHandler(MsgType.Connect, OnConnected);
+        myClient.Connect(TCP_Config.HostIPAddress, TCP_Config.ConnectionPort);
+        myServer.isServerConnected = true;
+    }
 
 	void OnApplicationQuit(){
 		if(myServer != null){
@@ -177,6 +196,7 @@ public class ThreadedServer : ThreadedJob{
 
 	Socket s;
 	TcpListener myList;
+    NetworkClient myClient;
 
     int socketTimeoutMS = 500; // 500 milliseconds will be the time period within which socket messages will be exchanged
 		
@@ -260,24 +280,34 @@ public class ThreadedServer : ThreadedJob{
 		//wait for "STARTED" message to be received
 	}
 
-	void OpenConnections(){
+        void OpenConnections(){
+        UnityEngine.Debug.Log("IP Address is " + TCP_Config.HostIPAddress);
 		IPAddress ipAd = IPAddress.Parse(TCP_Config.HostIPAddress);
 
-		// use local m/c IP address, and 
-		// use the same in the client
-		
-		/* Initializes the Listener */
-		myList = new TcpListener(ipAd,TCP_Config.ConnectionPort);
-		
-		/* Start Listening at the specified port */        
-		myList.Start();
-		
-		UnityEngine.Debug.Log("The server is running at port" + TCP_Config.ConnectionPort + "...");    
+        // use local m/c IP address, and 
+        // use the same in the client
+
+        /* Initializes the Listener */
+
+        UnityEngine.Debug.Log("parsed IP Address is " + ipAd + " at port " + TCP_Config.ConnectionPort.ToString());
+        myList = new TcpListener(ipAd,TCP_Config.ConnectionPort);
+        //myClient = TCPServer.Instance.myClient;
+
+
+
+
+
+        /* Start Listening at the specified port */
+        myList.Start();
+
+        UnityEngine.Debug.Log("The server is running at port" + TCP_Config.ConnectionPort + "...");    
 		UnityEngine.Debug.Log("The local End point is  :" + myList.LocalEndpoint );
 		UnityEngine.Debug.Log("Waiting for a connection.....");
-		
+
+        UnityEngine.Debug.Log("trying to accept socket");
 		s = myList.AcceptSocket();
 
+        UnityEngine.Debug.Log("socket accepted");
         //uncheck if you want a NON-BLOCKING SOCKET
         s.Blocking = false;
 		isServerConnected = true;
@@ -291,9 +321,10 @@ public class ThreadedServer : ThreadedJob{
 	}
 	
 	void CleanupConnections(){
-		/* clean up */            
-		s.Close();
-		myList.Stop();
+        /* clean up */
+        //s.Close();
+        myClient.Disconnect();
+		//myList.Stop();
 		isServerConnected = false;
 	}
 

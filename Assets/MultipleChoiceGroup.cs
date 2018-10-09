@@ -30,11 +30,14 @@ public class MultipleChoiceGroup : MonoBehaviour {
 
 		//then, pick the focus index and remove it
 		focusImage.texture= tempTextureList[focusIndex];
+        Experiment.Instance.shopLiftLog.LogMultipleChoiceFocusImage(tempTextureList[focusIndex].name);
 		tempTextureList.RemoveAt (focusIndex);
 
 		//then, distribute rest of images as choice images
-		for (int i = 0; i < choiceImageList.Count; i++) {
-			choiceImageList [i].texture = tempTextureList [i];
+		for (int i = 0; i < choiceImageList.Count; i++)
+        {
+            Experiment.Instance.shopLiftLog.LogMultipleChoiceTexture(i, roomTextureList[i].name);
+            choiceImageList [i].texture = tempTextureList [i];
 		}
 
 	}

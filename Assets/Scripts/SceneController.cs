@@ -1,26 +1,40 @@
 using UnityEngine;
 using System.Collections;
 
-public class SceneController : MonoBehaviour { //there can be a separate scene controller in each scene
+public class SceneController : MonoBehaviour
+{ //there can be a separate scene controller in each scene
 
-	public GameObject menuObj;
-	public GameObject sceneObj;
-	//SINGLETON
-	private static SceneController _instance;
-	
-	public static SceneController Instance{
-		get{
-			return _instance;
-		}
-	}
-	
-	void Awake(){
-//		if (_instance != null) {
-//			Debug.Log("Instance already exists!");
-//			Destroy(transform.gameObject);
-//			return;
-//		}
-		_instance = this;
+    public GameObject menuObj;
+    public GameObject sceneObj;
+
+    public GameObject syncPulser;
+    public GameObject syncPulsingImage;
+    //SINGLETON
+    private static SceneController _instance;
+
+    public static SceneController Instance
+    {
+        get
+        {
+            return _instance;
+        }
+    }
+
+    void Awake()
+    {
+        //		if (_instance != null) {
+        //			Debug.Log("Instance already exists!");
+        //			Destroy(transform.gameObject);
+        //			return;
+        //		}
+#if PHOTOSYNC
+        syncPulser.SetActive(true);
+        syncPulsingImage.SetActive(true);
+#else
+        syncPulser.SetActive(false);
+        syncPulsingImage.SetActive(false);
+#endif
+        _instance = this;
 	}
 
 

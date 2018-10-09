@@ -23,11 +23,15 @@ public class Config : MonoBehaviour {
 #if SYS3
 	public static bool isSystem3 = true;
 	public static bool isSyncbox=false;
+#elif PHOTOSYNC
+    public static bool isSystem2 = false;
+    public static bool isSyncbox = true;
+	public static bool isSystem3=false;
 #else
     public static bool isSystem2 = true;
     public static bool isSyncbox = false;
-	public static bool isSystem3=false;
-	#endif
+    public static bool isSystem3 = false;
+#endif
 
     //recall
     public static int recallTime = 30;

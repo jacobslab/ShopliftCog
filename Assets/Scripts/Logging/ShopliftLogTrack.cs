@@ -52,11 +52,21 @@ public class ShopliftLogTrack : LogTrack {
 		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), (pathIndex==0) ? "LEFT_CORRIDOR" : "RIGHT_CORRIDOR");
 	}
 
-	public void LogPhaseEvent(int stageIndex, bool hasBegun)
-	{
-		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "PHASE_" + stageIndex.ToString () + separator + ((hasBegun == true) ? "STARTED" : "ENDED"));
-	}
-	public void LogReassignEvent()
+    public void LogInstructionVideoEvent(bool hasStarted)
+    {
+        subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "INSTRUCTION_VIDEO" + separator + ((hasStarted == true) ? "STARTED" : "ENDED"));
+    }
+
+    public void LogPhaseEvent(string phaseName,bool hasStarted)
+    {
+        subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), phaseName + separator + ((hasStarted == true) ? "STARTED" : "ENDED"));
+    }
+    public void LogTextInstructions(int instNumber, bool hasStarted)
+    {
+
+        subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), ((instNumber==1) ? "INTRO" : "TRAINING") + separator + ((hasStarted == true) ? "STARTED" : "ENDED"));
+    }
+    public void LogReassignEvent()
 	{
 		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "ROOMS_REASSIGNED");
 	}
@@ -107,7 +117,12 @@ public class ShopliftLogTrack : LogTrack {
 	{
 		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "ANSWER_SELECTOR" + separator + "POSITION" + separator + positionIndex.ToString() + separator  + "ROOM" +  separator + roomName);
 	}
-	public void LogRegisterReward(int registerReward, int pathIndex)
+    public void LogRegisterEvent(bool isShowing)
+    {
+        subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "REWARD_TEXT" + separator + ((isShowing) ? "ON" : "OFF"));
+    }
+
+    public void LogRegisterReward(int registerReward, int pathIndex)
 	{
 		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "REGISTER_REWARD" + separator + registerReward.ToString () + separator  + ((pathIndex==0) ? "LEFT" : "RIGHT"));
 	}
@@ -138,12 +153,33 @@ public class ShopliftLogTrack : LogTrack {
 		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "END_TRIAL");
 	}
 
-	public void LogEndEnvironmentStage()
+    public void LogEndTrialScreen(bool isActive, bool hasTips)
+    {
+        subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "END_TRIAL_SCREEN" + separator + ((isActive) ? "ON" : "OFF") + separator + "TIPS" + separator + ((hasTips) ? "TRUE" : "FALSE"));
+    }
+
+
+    //multiple choice
+    public void LogMultipleChoiceTexture(int index,string textureName)
+    {
+        subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(),"MULTIPLE_CHOICE_TEXTURE" + separator + index.ToString() + separator + textureName);
+    }
+    public void LogMultipleChoiceFocusImage(string focusImageName)
+    {
+        subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "MULTIPLE_CHOICE_FOCUS_IMAGE" + separator + focusImageName);
+    }
+    public void LogMultipleChoiceResponse(float chosenValue, bool isChosen)
+    {
+        subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "MULTIPLE_CHOICE_RESPONSE" + separator + chosenValue + separator + ((isChosen) ? "CHOSEN" : "TIMED_OUT"));
+    }
+
+
+    public void LogEndEnvironmentStage(bool isActive)
 	{
-		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "END_ENVIRONMENT_STAGE");
+        subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "END_ENVIRONMENT_STAGE" + separator + ((isActive) ? "ON": "OFF"));
 	}
-	public void LogEndSession()
+	public void LogEndSession(bool isActive)
 	{
-		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "END_SESSION");
-	}
+		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "END_SESSION" + separator + ((isActive) ? "ON" : "OFF"));
+    }
 }

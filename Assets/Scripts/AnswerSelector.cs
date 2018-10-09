@@ -60,6 +60,7 @@ public class AnswerSelector : MonoBehaviour {
         if (positions.Count >= 0)
         {
             currPositionIndex = -1; //reset it to move it to the blank option at the beginning
+            Experiment.Instance.shopLiftLog.LogSelectorPosition(-1, "BLANK");
             selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(blankPosition, selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D.y, selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D.z);
         }
         //int resetIndex = 0; //first index
