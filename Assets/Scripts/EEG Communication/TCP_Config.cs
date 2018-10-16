@@ -13,7 +13,7 @@ public class TCP_Config : MonoBehaviour
     //    public static string HostIPAddress { get { return GetLocalIPAddress(); } }
     //    public static int ConnectionPort = 8001; //8001 for Mac Pro Desktop communication
     //#else
-    public static string HostIPAddress = "192.168.137.194"; //"169.254.50.2" for Mac Pro Desktop.
+    public static string HostIPAddress = "192.168.137.200"; //"169.254.50.2" for Mac Pro Desktop.
     public static int ConnectionPort = 8888; //8001 for Mac Pro Desktop communication
     //public static string HostIPAddress = "127.0.0.1"; //"169.254.50.2" for Mac Pro Desktop.
     //public static int ConnectionPort = 8001; //8001 for Mac Pro Desktop communication

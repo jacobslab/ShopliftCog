@@ -3,17 +3,27 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PrefSoloSetup : MonoBehaviour {
+public class PrefSoloSetup : MonoBehaviour
+{
 
-	public Slider prefSlider;
-	public RawImage focusImg;
-	public RawImage negativeFocusImg;
+    public Slider prefSlider;
+    public RawImage focusImg;
+    public RawImage negativeFocusImg;
+    public Text instructionText;
 
-	public List<Texture> imgGroup;
-	private bool active=false;
-	// Use this for initialization
-	void OnEnable () {
-		active = true;
+    public List<Texture> imgGroup;
+    private bool active = false;
+    // Use this for initialization
+
+    void OnEnable () {
+
+#if KEYBOARD
+        instructionText.text = "Left and right arrow keys moves slider \nPress(X) to confirm";
+#else
+        instructionText.text = "Left joystick moves slider \nPress(X) to confirm";
+#endif
+
+        active = true;
 		//update on enable
 		if(Experiment.Instance!=null)
 			UpdateSlider ();

@@ -12,12 +12,18 @@ public class PrefGroupSetup : MonoBehaviour {
 	public List<Texture> firstGroup;
 	public List<Texture> secondGroup;
 
+    public Text instructionText;
+
 	private bool active=false;
 	// Use this for initialization
 	void OnEnable () {
-		//update on enable
-
-		active = true;
+        //update on enable
+#if KEYBOARD
+        instructionText.text = "Left and right arrow keys moves slider \nPress(X) to confirm";
+#else
+        instructionText.text = "Left joystick moves slider \nPress(X) to confirm";
+#endif
+        active = true;
 		if(Experiment.Instance!=null)
 			UpdateSlider ();
 	}

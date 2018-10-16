@@ -9,13 +9,19 @@ public class MultipleChoiceGroup : MonoBehaviour {
 
 	public RawImage focusImage;
 	public List<RawImage> choiceImageList;
+
+    public Text instructionText;
 	// Use this for initialization
 	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
+#if KEYBOARD
+        instructionText.text = "Choose room with left and right arrow keys";
+#else
+        instructionText.text = "Choose room with left joystick";
+#endif
+    }
+
+    // Update is called once per frame
+    void Update () {
 		
 	}
 

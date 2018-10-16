@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.Video;
 
 public class SceneController : MonoBehaviour
 { //there can be a separate scene controller in each scene
@@ -11,6 +12,14 @@ public class SceneController : MonoBehaviour
     public GameObject syncPulsingImage;
     //SINGLETON
     private static SceneController _instance;
+
+    public VideoClip keyboard_video;
+    public AudioClip keyboard_audio;
+
+    public VideoClip controller_video;
+    public AudioClip controller_audio;
+
+    public GameObject instructionVideoPlayer;
 
     public static SceneController Instance
     {
@@ -30,9 +39,20 @@ public class SceneController : MonoBehaviour
 #if PHOTOSYNC
         syncPulser.SetActive(true);
         syncPulsingImage.SetActive(true);
+
 #else
         syncPulser.SetActive(false);
         syncPulsingImage.SetActive(false);
+#endif
+
+#if KEYBOARD
+
+        instructionVideoPlayer.GetComponent<VideoPlayer>().clip = keyboard_video;
+        instructionVideoPlayer.GetComponent<AudioSource>().clip = keyboard_audio;
+#else
+        instructionVideoPlayer.GetComponent<VideoPlayer>().clip = controller_video;
+        instructionVideoPlayer.GetComponent<AudioSource>().clip = controller_audio;
+
 #endif
         _instance = this;
 	}
