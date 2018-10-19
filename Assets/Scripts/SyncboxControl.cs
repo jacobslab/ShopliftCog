@@ -73,17 +73,17 @@ public class SyncboxControl : MonoBehaviour {
 			yield return 0;
 		}
 		ShouldSyncPulse = true;
-		StartCoroutine ("CheckSyncboxConnection");
+		//StartCoroutine ("CheckSyncboxConnection");
 		StartCoroutine ("RunSyncPulseManual");
 		yield return null;
 	}
 
     public void LogSyncInfo(string info)
     {
-        using (StreamWriter outputFile = new StreamWriter(Application.dataPath + @"\syncboxInfo.txt"))
-        {
-            outputFile.WriteLine(info);
-        }
+        //using (StreamWriter outputFile = new StreamWriter(Application.dataPath + @"\syncboxInfo.txt"))
+        //{
+        //    outputFile.WriteLine(info);
+        //}
     }
 
 	// Update is called once per frame
@@ -101,33 +101,34 @@ public class SyncboxControl : MonoBehaviour {
 		//use this for debugging if you'd like
 	}
 
-	IEnumerator CheckSyncboxConnection()
-	{
-		while (ShouldSyncPulse) {
-			int syncStatus = CheckUSB ();
-            //LogSyncInfo("sync status is: " + syncStatus.ToString());
-          //  UnityEngine.Debug.Log ("sync status is: " + syncStatus.ToString ());
-			#if FREIBURG
-			if (syncStatus == 0) {
-               // LogSyncInfo("Syncbox connected");
-               // UnityEngine.Debug.Log ("Syncbox connected");
-			} 
-			#else
-			if (syncStatus == 1) {
-				UnityEngine.Debug.Log ("Syncbox connected");
-			} 
-			#endif
-			else {
-				isUSBOpen = false;
-               // LogSyncInfo("disconnected; initiating reconnection procedure");
-                //UnityEngine.Debug.Log ("disconnected; initiating reconnection procedure");
-				StartCoroutine (ReconnectSyncbox ());
-			}
-			yield return new WaitForSeconds (2f); //check every 2 seconds
-			yield return 0;
-		}
-		yield return null;
-	}
+	//IEnumerator CheckSyncboxConnection()
+	//{
+	//	while (ShouldSyncPulse) {
+	//		//int syncStatus = CheckUSB ();
+ //           //LogSyncInfo("sync status is: " + syncStatus.ToString());
+ //         //  UnityEngine.Debug.Log ("sync status is: " + syncStatus.ToString ());
+	//		#if FREIBURG
+	//		if (syncStatus == 0) {
+ //           int syncStatus = CheckUSB ();
+ //              // LogSyncInfo("Syncbox connected");
+ //              // UnityEngine.Debug.Log ("Syncbox connected");
+	//		} 
+	//		#else
+	//		if (syncStatus == 1) {
+	//			UnityEngine.Debug.Log ("Syncbox connected");
+	//		} 
+	//		#endif
+	//		else {
+	//			isUSBOpen = false;
+ //              // LogSyncInfo("disconnected; initiating reconnection procedure");
+ //               //UnityEngine.Debug.Log ("disconnected; initiating reconnection procedure");
+	//			StartCoroutine (ReconnectSyncbox ());
+	//		}
+	//		yield return new WaitForSeconds (2f); //check every 2 seconds
+	//		yield return 0;
+	//	}
+	//	yield return null;
+	//}
 
 	IEnumerator ReconnectSyncbox()
 	{

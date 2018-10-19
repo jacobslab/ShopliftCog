@@ -111,14 +111,16 @@ public class ExperimentSettings : MonoBehaviour {
 		_instance = this;
 		checkpointButton.gameObject.SetActive(true);
 		resumeFromCheckpointButton.gameObject.SetActive(false);
-//		DoMicTest ();
-//		if(Application.loadedLevel==0)
-//			InitMainMenuLabels ();
-//		CheckGamifiedStatus ();
-//		if (SceneManager.GetActiveScene ().name == "EndMenu") {
-//			AttachSceneController ();
-
-		ChangeFirstEnvironment ();
+        //		DoMicTest ();
+        //		if(Application.loadedLevel==0)
+        //			InitMainMenuLabels ();
+        //		CheckGamifiedStatus ();
+        //		if (SceneManager.GetActiveScene ().name == "EndMenu") {
+        //			AttachSceneController ();
+#if SYNCBOX
+        sys2Toggle.gameObject.SetActive(false);
+#endif
+        ChangeFirstEnvironment ();
         //		ChangeReevalType ();
         ToggleSystem2();
         reevalType = ReevalType.Transition;

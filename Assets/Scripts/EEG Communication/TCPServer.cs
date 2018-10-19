@@ -13,6 +13,7 @@ using System.Net.Sockets;
 using System.Diagnostics;
 
 using UnityEngine.Networking;
+
 using UnityEngine.Networking.NetworkSystem;
 
 using System.Threading;
@@ -194,7 +195,7 @@ public class ThreadedServer : ThreadedJob{
 	public string messagesToSend = "";
 	string incompleteMessage = "";
 
-	Socket s;
+    Socket s;
 	TcpListener myList;
     NetworkClient myClient;
 
@@ -305,7 +306,7 @@ public class ThreadedServer : ThreadedJob{
 		UnityEngine.Debug.Log("Waiting for a connection.....");
 
         UnityEngine.Debug.Log("trying to accept socket");
-		s = myList.AcceptSocket();
+        s = myList.AcceptSocket();
 
         UnityEngine.Debug.Log("socket accepted");
         //uncheck if you want a NON-BLOCKING SOCKET

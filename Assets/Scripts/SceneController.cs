@@ -41,7 +41,16 @@ public class SceneController : MonoBehaviour
         syncPulsingImage.SetActive(true);
 
 #else
-        syncPulser.SetActive(false);
+        if (!Config.isSyncbox)
+        {
+            syncPulser.SetActive(false);
+        }
+        else
+        {
+            syncPulser.SetActive(true);
+            syncPulser.GetComponent<SyncPulser>().enabled = false;
+            syncPulser.GetComponent<SyncboxControl>().enabled = true;
+        }
         syncPulsingImage.SetActive(false);
 #endif
 

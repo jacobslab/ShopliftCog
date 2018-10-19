@@ -643,7 +643,7 @@ public class ShoplifterScript : MonoBehaviour {
             instructionVideo.SetActive(true);
             Experiment.Instance.shopLiftLog.LogInstructionVideoEvent(true);
             float timer = 0f;
-            float maxTimer = (float)instructionVideo.GetComponent<VideoPlayer>().clip.length;
+            float maxTimer = instructionVideo.GetComponent<AudioSource>().clip.length;
             Debug.Log("the max timer is : " + maxTimer.ToString());
             instructionVideo.GetComponent<VideoPlayer>().Prepare();
             while (!instructionVideo.GetComponent<VideoPlayer>().isPrepared)
