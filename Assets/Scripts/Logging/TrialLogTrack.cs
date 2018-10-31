@@ -16,7 +16,7 @@ public class TrialLogTrack : LogTrack {
 //			LogBegin ();
 			//log session
 			LogSessionStart();
-			LogMicTest ();
+			//LogMicTest ();
 
 			firstLog = true;
 		}

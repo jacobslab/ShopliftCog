@@ -16,7 +16,7 @@ public class Config : MonoBehaviour {
 
 	public static SessionType sessionType=SessionType.NonAdaptive;
 	public static Version BuildVersion = Version.MAZE; //TODO: change this for your experiment!
-	public static string VersionNumber = "0.1"; //TODO: change this for your experiment!
+	public static string VersionNumber = "2.055"; //TODO: change this for your experiment!
 
 	public static bool isGamified=false;
 

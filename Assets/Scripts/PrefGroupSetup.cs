@@ -60,7 +60,7 @@ public class PrefGroupSetup : MonoBehaviour {
 		} else {
 			leftImg.texture = targetGroup [1];
 			rightImg.texture = targetGroup [0];
-			Experiment.Instance.shopLiftLog.LogComparativePrefImage (prefType,rightImg.texture.name,leftImg.texture.name);
+            Experiment.Instance.shopLiftLog.LogComparativePrefImage (prefType,leftImg.texture.name,rightImg.texture.name);
 		}
 
 	}

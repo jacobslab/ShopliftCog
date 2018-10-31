@@ -96,25 +96,25 @@ public class TCP_Config : MonoBehaviour
     //fill in how you see fit!
     public enum DefineStates
 	{
-		NAVIGATION,
-		STIM_NAVIGATION,
-		TREASURE_OPEN_SPECIAL,
-		TREASURE_OPEN_EMPTY,
-		TREASURE_1,
-		TREASURE_2,
-		TREASURE_3,
-		TREASURE_4,
-		RECALLCUE_1,
-		RECALLCUE_2,
-		RECALLCUE_3,
-		RECALLCHOOSE_1,
-		RECALLCHOOSE_2,
-		RECALLCHOOSE_3,
-		FEEDBACK,
-		SCORESCREEN,
-		BLOCKSCREEN,
-		DISTRACTOR,
-		PAUSED
+		INST_VIDEO,
+        TRAINING,
+        INSTRUCTIONS,
+        DOOR_OPEN,
+        SPEED_CHANGE,
+        REWARD_OPEN,
+        CAM_CORRECT_PRESS,
+        CAM_INCORRECT_PRESS,
+        LEARNING,
+        REEVALUATION,
+        TESTING,
+        POST_TEST,
+        COMP_SLIDER,
+        SOLO_SLIDER,
+        MULTIPLE_CHOICE,
+        MUSIC_BASELINE,
+        IMAGE_BASELINE,
+        SILENT_TRAVERSAL
+
 	}
 
 	public static List<string> GetDefineList(){

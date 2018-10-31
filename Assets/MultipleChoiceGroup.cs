@@ -28,21 +28,35 @@ public class MultipleChoiceGroup : MonoBehaviour {
 	public void SetupMultipleChoice(int focusIndex)
 	{
         gameObject.GetComponent<AnswerSelector>().ResetSelectorPosition();
-        //first create a temp copy of the texture list
-        List<Texture> tempTextureList = new List<Texture> ();
-		for (int i = 0; i < roomTextureList.Count; i++) {
-			tempTextureList.Add (roomTextureList [i]);
-		}
 
-		//then, pick the focus index and remove it
-		focusImage.texture= tempTextureList[focusIndex];
-        Experiment.Instance.shopLiftLog.LogMultipleChoiceFocusImage(tempTextureList[focusIndex].name);
-		tempTextureList.RemoveAt (focusIndex);
-
-		//then, distribute rest of images as choice images
-		for (int i = 0; i < choiceImageList.Count; i++)
+        List<int> intVals = new List<int>();
+        for (int i = 0; i < roomTextureList.Count;i++)
         {
-            Experiment.Instance.shopLiftLog.LogMultipleChoiceTexture(i, roomTextureList[i].name);
+            intVals.Add(i);
+        }
+
+        //shuffled indices
+        intVals = Experiment.Instance.shopLift.ShuffleList(intVals);
+
+
+		//first pick the focus index
+        focusImage.texture= roomTextureList[focusIndex];
+        Debug.Log("FOCUS IMAGE IS " + focusImage.texture.name);
+        Experiment.Instance.shopLiftLog.LogMultipleChoiceFocusImage(roomTextureList[focusIndex].name);
+
+        //then create a temp copy of the texture list using those shuffled indices
+        List<Texture> tempTextureList = new List<Texture>();
+        for (int i = 0; i < roomTextureList.Count; i++)
+        {
+            if(intVals[i]!=focusIndex)
+              tempTextureList.Add(roomTextureList[intVals[i]]);
+        }
+
+
+        //then, distribute rest of images as choice images
+        for (int i = 0; i < choiceImageList.Count; i++)
+        {
+            Experiment.Instance.shopLiftLog.LogMultipleChoiceTexture(i, tempTextureList[i].name);
             choiceImageList [i].texture = tempTextureList [i];
 		}
 

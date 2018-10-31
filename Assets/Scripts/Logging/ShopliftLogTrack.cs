@@ -121,7 +121,10 @@ public class ShopliftLogTrack : LogTrack {
     {
         subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "REWARD_TEXT" + separator + ((isShowing) ? "ON" : "OFF"));
     }
-
+    public void LogBaselineImage(string imageName)
+    {
+        subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "BASELINE_IMAGE" + separator + imageName);
+    }
     public void LogRegisterReward(int registerReward, int pathIndex)
 	{
 		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "REGISTER_REWARD" + separator + registerReward.ToString () + separator  + ((pathIndex==0) ? "LEFT" : "RIGHT"));

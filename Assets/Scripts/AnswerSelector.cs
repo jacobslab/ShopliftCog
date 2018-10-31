@@ -32,7 +32,7 @@ public class AnswerSelector : MonoBehaviour {
 
 	void OnEnable()
 	{
-		GetComponent<MultipleChoiceGroup> ().SetupMultipleChoice (Random.Range (0, 6));
+		//GetComponent<MultipleChoiceGroup> ().SetupMultipleChoice (Random.Range (0, 4)); // 5th and 6th rooms aren't valid to be the focus image
 		SetShouldCheckForInput (true);
 	}
 	void OnDisable()
