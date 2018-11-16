@@ -81,8 +81,8 @@ public class ShoplifterScript : MonoBehaviour {
 	private int maxTrials_Learning = 24;
 
 	//stage 2 reevaulation variables
-	private int maxTrials_Reeval = 3;
-	private int maxBlocks_Reeval = 4;
+	private int maxTrials_Reeval = 2;
+	private int maxBlocks_Reeval = 6;
 
 	private int envIndex =0;
 
@@ -111,7 +111,6 @@ public class ShoplifterScript : MonoBehaviour {
 	float suggestedSpeed = 0f;
 
 	float directionEnv = -1f; //-1 for space station, +1 for western town
-
     private int phase1Choice = 0;
     private int phase2Choice = 0;
     private int choiceOutput = 0;
@@ -908,7 +907,10 @@ public class ShoplifterScript : MonoBehaviour {
 			float delay = Random.Range (0f, currentAudio.clip.length);
 			currentAudio.time = delay;
 			currentAudio.Play ();
-		}
+            //we set this explicitly for re-evaluation as RunPhaseOne isn't run anymore so we have to log it here
+            Experiment.Instance.shopLiftLog.LogMoveEvent(2, true);
+
+        }
 		clearCameraZoneFlags = false;
 		Debug.Log ("running phase two");
 			camVehicle.transform.position = startPos;
@@ -1062,9 +1064,9 @@ public class ShoplifterScript : MonoBehaviour {
             {
 				showOneTwo = !showOneTwo;
 					if (showOneTwo) {
-						yield return StartCoroutine (AskPreference (0));
+						yield return StartCoroutine (AskPreference (0,true));
 					} else
-						yield return StartCoroutine (AskPreference (1));
+						yield return StartCoroutine (AskPreference (1,true));
 					randOrder.Clear ();
 					trialsToNextSlider = 4;
                 Debug.Log("got new order");
@@ -1127,7 +1129,7 @@ public class ShoplifterScript : MonoBehaviour {
 				numTrials_Reeval++;
 				yield return 0;
 			}
-			yield return StartCoroutine (AskPreference (1));
+			yield return StartCoroutine (AskPreference (1,true));
 //			yield return StartCoroutine (RunRestPeriod());
 			numTrials_Reeval = 0;
 			numBlocks_Reeval++;
@@ -1198,7 +1200,7 @@ public class ShoplifterScript : MonoBehaviour {
 
 		Experiment.Instance.shopLiftLog.LogPhaseEvent ("TESTING", true);
 		//run one instances of comp slider  + 2sec resting phase
-			yield return StartCoroutine (AskPreference (0));
+			yield return StartCoroutine (AskPreference (0,false));
 		yield return StartCoroutine (RunRestPeriod (2f));
         int caseOrder = 0;
         if (Random.value > 0.5f)
@@ -1207,10 +1209,11 @@ public class ShoplifterScript : MonoBehaviour {
             caseOrder = 0;
 
 		for (int i = 0; i < 4; i++) {
-			if (i == 2) {
-				//another instance of comp 1-2 slider
-				yield return StartCoroutine (AskPreference (0));
-				yield return StartCoroutine (RunRestPeriod (2f));
+            //another instance of comp 1-2 slider
+            if (i ==1  || i==3)
+            {
+                yield return StartCoroutine(AskPreference(0, false));
+                yield return StartCoroutine(RunRestPeriod(2f));
             }
             caseOrder = Mathf.Abs(caseOrder - 1);
 			imagineGroup.alpha = 1f;
@@ -1236,7 +1239,7 @@ public class ShoplifterScript : MonoBehaviour {
 		}
 
 		//another instance of comp 1-2 slider
-		yield return StartCoroutine (AskPreference (0));
+		yield return StartCoroutine (AskPreference (0,false));
 		yield return StartCoroutine (RunRestPeriod (2f));
 
 		List<int> multipleChoiceSequence = new List<int> ();
@@ -1375,11 +1378,23 @@ public class ShoplifterScript : MonoBehaviour {
 
         TCPServer.Instance.SetState(TCP_Config.DefineStates.SOLO_SLIDER, true);
 		bool pressed = false;
-		yield return StartCoroutine (WaitForButtonPress (15f,didPress =>
+		yield return StartCoroutine (WaitForButtonPress (20f,didPress =>
 			{
 				pressed=didPress;
 			}
 		));
+
+        infoText.text = "Please make a choice!";
+        infoGroup.alpha = 1f;
+        if(!pressed)
+        {
+            yield return StartCoroutine(WaitForButtonPress(100000f, didPress =>
+            {
+                pressed = didPress;
+            }));
+        }
+        infoText.text = "";
+        infoGroup.alpha = 0f;
 
 		Experiment.Instance.shopLiftLog.LogFinalSliderValue ("SOLO", prefSolo.GetComponent<PrefSoloSetup> ().prefSlider.value, pressed);
 		prefSolo.gameObject.SetActive (false);
@@ -1412,7 +1427,7 @@ public class ShoplifterScript : MonoBehaviour {
         yield return null;
 	}
 
-	IEnumerator AskPreference(int prefType)
+	IEnumerator AskPreference(int prefType, bool allowTimeouts)
 	{
 //		Cursor.visible = true;
 //		Cursor.lockState = CursorLockMode.None;
@@ -1434,21 +1449,45 @@ public class ShoplifterScript : MonoBehaviour {
 			
 		}
 		bool pressed = false;
-		if (firstTime) {
-			yield return StartCoroutine (WaitForButtonPress (22f,didPress =>
-				{
-					pressed=didPress;
-				}
-			));
-			firstTime = false;
-		}
-		else
-			yield return StartCoroutine (WaitForButtonPress (15f,didPress =>
-				{
-					pressed=didPress;
-				}
-			));
-
+        if (firstTime)
+        {
+            yield return StartCoroutine(WaitForButtonPress(22f, didPress =>
+               {
+                   pressed = didPress;
+               }
+            ));
+            firstTime = false;
+        }
+        else
+        {
+            if(allowTimeouts)
+            {
+            yield return StartCoroutine(WaitForButtonPress(15f, didPress =>
+               {
+                   pressed = didPress;
+               }
+            ));
+             }
+            else
+            {
+                yield return StartCoroutine(WaitForButtonPress(15f, didPress =>
+                {
+                    pressed = didPress;
+                }
+            ));
+                infoText.text = "Please make a choice!";
+                infoGroup.alpha = 1f;
+                if(!pressed)
+                {
+                    yield return StartCoroutine(WaitForButtonPress(100000f, didPress =>
+                    {
+                        pressed = didPress;
+                    }));
+                }
+                infoText.text = "";
+                infoGroup.alpha = 0f;
+            }
+        }
 		Experiment.Instance.shopLiftLog.LogFinalSliderValue ("COMPARATIVE", prefGroup.GetComponent<PrefGroupSetup> ().prefSlider.value, pressed);
 		prefGroup.gameObject.SetActive (false);
 		afterSlider = true;

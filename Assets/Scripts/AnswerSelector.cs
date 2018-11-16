@@ -144,10 +144,10 @@ public class AnswerSelector : MonoBehaviour {
 
 		}
 
-		Experiment.Instance.shopLiftLog.LogSelectorPosition (currPositionIndex,gameObject.GetComponent<MultipleChoiceGroup>().roomTextureList[currPositionIndex].name);
+        Experiment.Instance.shopLiftLog.LogSelectorPosition (currPositionIndex,gameObject.GetComponent<MultipleChoiceGroup>().choiceImageList[currPositionIndex].name);
 
 		//TODO: make nice smooth movement with a coroutine.
-		selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(positions[currPositionIndex], selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D.y,selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D .z);
+		selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(positions[currPositionIndex], selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D.y,selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D.z);
 
 
 	}
