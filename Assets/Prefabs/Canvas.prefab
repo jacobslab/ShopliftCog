@@ -38,6 +38,7 @@ GameObject:
   - component: {fileID: 224325997276450420}
   - component: {fileID: 222479554664115296}
   - component: {fileID: 114928179682777864}
+  - component: {fileID: 114922299780891704}
   m_Layer: 5
   m_Name: OptionC
   m_TagString: Untagged
@@ -161,6 +162,7 @@ GameObject:
   - component: {fileID: 224569547430745500}
   - component: {fileID: 222619041880108634}
   - component: {fileID: 114869600941782836}
+  - component: {fileID: 114224166699748454}
   m_Layer: 5
   m_Name: ImageSlide
   m_TagString: Untagged
@@ -195,6 +197,7 @@ GameObject:
   - component: {fileID: 224613366137071112}
   - component: {fileID: 222192528262527860}
   - component: {fileID: 114261756254682348}
+  - component: {fileID: 114271790917435066}
   m_Layer: 5
   m_Name: LeftImage
   m_TagString: Untagged
@@ -406,6 +409,7 @@ GameObject:
   - component: {fileID: 224566421203590218}
   - component: {fileID: 222538603806947820}
   - component: {fileID: 114160127234992782}
+  - component: {fileID: 114881807180937674}
   m_Layer: 5
   m_Name: OptionD
   m_TagString: Untagged
@@ -555,6 +559,7 @@ GameObject:
   - component: {fileID: 224884978827738692}
   - component: {fileID: 222490216763275846}
   - component: {fileID: 114769966717155646}
+  - component: {fileID: 114376949281768130}
   m_Layer: 5
   m_Name: FocusImage
   m_TagString: Untagged
@@ -610,6 +615,7 @@ GameObject:
   - component: {fileID: 224281743317573966}
   - component: {fileID: 222381098208200468}
   - component: {fileID: 114125232059221996}
+  - component: {fileID: 114087161659284820}
   m_Layer: 5
   m_Name: OptionE
   m_TagString: Untagged
@@ -646,6 +652,7 @@ GameObject:
   - component: {fileID: 224186370390823192}
   - component: {fileID: 222625749902645012}
   - component: {fileID: 114589464884388934}
+  - component: {fileID: 114410568394737866}
   m_Layer: 5
   m_Name: OptionB
   m_TagString: Untagged
@@ -989,6 +996,7 @@ GameObject:
   - component: {fileID: 224359272837104874}
   - component: {fileID: 222721392307793858}
   - component: {fileID: 114334283066595038}
+  - component: {fileID: 114425769345352412}
   m_Layer: 5
   m_Name: FocusImage
   m_TagString: Untagged
@@ -1172,6 +1180,7 @@ GameObject:
   - component: {fileID: 224750321010087070}
   - component: {fileID: 222573191333453916}
   - component: {fileID: 114694436004108452}
+  - component: {fileID: 114093259581788704}
   m_Layer: 5
   m_Name: OptionA
   m_TagString: Untagged
@@ -1393,6 +1402,7 @@ GameObject:
   - component: {fileID: 224859067318519642}
   - component: {fileID: 222976642871487628}
   - component: {fileID: 114444293816130026}
+  - component: {fileID: 114733033948531602}
   m_Layer: 5
   m_Name: RightImage
   m_TagString: Untagged
@@ -1866,8 +1876,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "In order to make the most cash, \nhow much would you prefer \ngoing through
-    this room?\n"
+  m_Text: "How confident are you that \nthis room leads to higher reward?"
 --- !u!114 &114012839645258192
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2147,6 +2156,28 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: Press (X) to deactivate the camera!
+--- !u!114 &114087161659284820
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1342732037894236}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a51e581a718884331864b3c50898508a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &114093259581788704
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1711647160923628}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a51e581a718884331864b3c50898508a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &114101415967196040
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2396,7 +2427,18 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Prefer
+  m_Text: Confident
+--- !u!114 &114224166699748454
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1076725747227492}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a51e581a718884331864b3c50898508a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &114225587824317392
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2526,6 +2568,17 @@ MonoBehaviour:
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
+--- !u!114 &114271790917435066
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1102600175591628}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a51e581a718884331864b3c50898508a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &114288106770525950
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3000,6 +3053,17 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: "Choose room with left joystick \nPress (X) to confirm\n"
+--- !u!114 &114376949281768130
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1323017127242520}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a51e581a718884331864b3c50898508a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &114383668527733496
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3071,6 +3135,17 @@ MonoBehaviour:
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
+--- !u!114 &114410568394737866
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1367503994798194}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a51e581a718884331864b3c50898508a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &114414108394347632
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3139,6 +3214,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f0883f8717be24a5b8cf35a0d175575e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &114425769345352412
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1558959339421162}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a51e581a718884331864b3c50898508a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &114440162231482496
@@ -3286,7 +3372,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Not Sure
+  m_Text: 
 --- !u!114 &114470001599558230
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3399,7 +3485,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Not Prefer
+  m_Text: Not Confident
 --- !u!114 &114514716836585616
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4297,6 +4383,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0883f8717be24a5b8cf35a0d175575e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &114733033948531602
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1829943688920900}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a51e581a718884331864b3c50898508a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &114749199711634112
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4609,6 +4706,17 @@ MonoBehaviour:
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
+--- !u!114 &114881807180937674
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1206053190039512}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a51e581a718884331864b3c50898508a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &114899024311438908
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4666,6 +4774,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 00efa13061a284aaa8eb581e1f84035a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &114922299780891704
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1002056200128380}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a51e581a718884331864b3c50898508a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &114928179682777864

@@ -1310,7 +1310,10 @@ public class ShoplifterScript : MonoBehaviour {
                 restGroup.alpha = 1f;
                 int randIndex = Random.Range(0, completeAudioList.Count);
                 Debug.Log("now playing track no : " + randIndex.ToString());
-                musicBaselinePlayer.PlayOneShot(completeAudioList[randIndex]);
+
+            musicBaselinePlayer.clip = completeAudioList[randIndex];
+            musicBaselinePlayer.Play();
+            //musicBaselinePlayer.PlayOneShot(completeAudioList[randIndex]);
                 yield return new WaitForSeconds(musicBaselinePlayTime);
             musicBaselinePlayer.Stop();
             completeAudioList.RemoveAt(randIndex);
@@ -1854,11 +1857,7 @@ public class ShoplifterScript : MonoBehaviour {
             CheckpointSession(i, true);
 
             //reset variables
-            if (Experiment.shouldCheckpoint)
-            {
-                ResetEnvironmentVariables();
-            }
-
+             ResetEnvironmentVariables();
 //			SceneManager.LoadScene (0); //load main menu
 //			SceneManager.UnloadSceneAsync (1); //then destroy all objects of the current scene
 			yield return null;
