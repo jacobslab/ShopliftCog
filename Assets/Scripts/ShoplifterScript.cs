@@ -1064,9 +1064,9 @@ public class ShoplifterScript : MonoBehaviour {
             {
 				showOneTwo = !showOneTwo;
 					if (showOneTwo) {
-						yield return StartCoroutine (AskPreference (0,true));
+						yield return StartCoroutine (AskPreference (0,false));
 					} else
-						yield return StartCoroutine (AskPreference (1,true));
+						yield return StartCoroutine (AskPreference (1,false));
 					randOrder.Clear ();
 					trialsToNextSlider = 4;
                 Debug.Log("got new order");
@@ -1129,7 +1129,7 @@ public class ShoplifterScript : MonoBehaviour {
 				numTrials_Reeval++;
 				yield return 0;
 			}
-			yield return StartCoroutine (AskPreference (1,true));
+			yield return StartCoroutine (AskPreference (1,false));
 //			yield return StartCoroutine (RunRestPeriod());
 			numTrials_Reeval = 0;
 			numBlocks_Reeval++;
@@ -1222,14 +1222,14 @@ public class ShoplifterScript : MonoBehaviour {
             switch (caseOrder) {
 			case 0:
 				yield return StartCoroutine (RunPhaseOne (0, false, -1, true));
-				yield return StartCoroutine (RunImaginePeriod (15f));
+				yield return StartCoroutine (RunImaginePeriod (5f));
 				yield return StartCoroutine (AskSoloPreference (0));
 //				yield return StartCoroutine (AskImageryQualityRating (0));
 				yield return StartCoroutine (RunRestPeriod (2f));
 				break;
 			case 1:
 				yield return StartCoroutine(RunPhaseOne (1, false, -1, true));
-				yield return StartCoroutine (RunImaginePeriod (15f));
+				yield return StartCoroutine (RunImaginePeriod (5f));
 				yield return StartCoroutine (AskSoloPreference (1));
 //				yield return StartCoroutine (AskImageryQualityRating (1));
 				yield return StartCoroutine (RunRestPeriod (2f));
@@ -1452,17 +1452,6 @@ public class ShoplifterScript : MonoBehaviour {
 			
 		}
 		bool pressed = false;
-        if (firstTime)
-        {
-            yield return StartCoroutine(WaitForButtonPress(22f, didPress =>
-               {
-                   pressed = didPress;
-               }
-            ));
-            firstTime = false;
-        }
-        else
-        {
             if(allowTimeouts)
             {
             yield return StartCoroutine(WaitForButtonPress(15f, didPress =>
@@ -1490,7 +1479,6 @@ public class ShoplifterScript : MonoBehaviour {
                 infoText.text = "";
                 infoGroup.alpha = 0f;
             }
-        }
 		Experiment.Instance.shopLiftLog.LogFinalSliderValue ("COMPARATIVE", prefGroup.GetComponent<PrefGroupSetup> ().prefSlider.value, pressed);
 		prefGroup.gameObject.SetActive (false);
 		afterSlider = true;
@@ -2055,10 +2043,10 @@ public class ShoplifterScript : MonoBehaviour {
 				afterSlider = false;
 			}
 			tipsGroup.alpha = 1f;
-			yield return new WaitForSeconds (6f);
+			yield return new WaitForSeconds (1f);
 		} else {
 			tipsGroup.alpha = 0f;
-			yield return new WaitForSeconds(2f);
+			yield return new WaitForSeconds(1f);
 		}
         intertrialGroup.alpha = 0f;
         Experiment.Instance.shopLiftLog.LogEndTrialScreen(false, hasTips);
