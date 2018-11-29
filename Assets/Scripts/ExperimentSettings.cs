@@ -291,7 +291,7 @@ public class ExperimentSettings : MonoBehaviour {
 //	}
 	public void ChangeFirstEnvironment()
 	{
-		Debug.Log("env dropdown val: " + firstEnvDropdown.value.ToString());
+		//Debug.Log("env dropdown val: " + firstEnvDropdown.value.ToString());
 		envIndex = firstEnvDropdown.value;
 		envDropdownIndex = firstEnvDropdown.value;
 		switch (firstEnvDropdown.value) {
