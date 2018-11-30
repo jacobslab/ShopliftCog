@@ -1108,10 +1108,6 @@ public class ShoplifterScript : MonoBehaviour {
 			Debug.Log ("IT'S TR");
 			SetupTransitionReeval ();
 			break;
-		default:
-			Debug.Log ("IT'S RR");
-			SetupRewardReeval ();
-			break;
 		}
 		Experiment.Instance.shopLiftLog.LogPhaseEvent("RE-EVALUATION",true);
 		while (numBlocks_Reeval < maxBlocks_Reeval) {
@@ -2057,7 +2053,7 @@ public class ShoplifterScript : MonoBehaviour {
 		intertrialText.text = "Congratulations!\n You have finished one environment! \n Have a brief rest!";
 
         Experiment.Instance.shopLiftLog.LogEndEnvironmentStage(true);
-		yield return new WaitForSeconds(60f);
+		yield return new WaitForSeconds(30f);
         Experiment.Instance.shopLiftLog.LogEndEnvironmentStage(false);
         intertrialGroup.alpha = 0f;
 		yield return null;
