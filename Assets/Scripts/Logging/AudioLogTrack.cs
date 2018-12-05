@@ -17,8 +17,16 @@ public class AudioLogTrack : LogTrack {
 			LogAudio ();
 		}
 	}
+    public void LogAudioClip(AudioClip audioClip)
+    {
+        subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), GetNameToLog() + separator + "AUDIO_PLAYING" + separator + audioSource.name + separator + audioClip.name + separator + "IS_LOOPING" + separator + audioSource.loop);
+    }
+    public void LogAudioStopped(AudioClip audioClip)
+    {
+        subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), GetNameToLog() + separator + "AUDIO_STOPPED" + separator + audioSource.name + separator + audioClip.name + separator + "IS_LOOPING" + separator + audioSource.loop);
 
-	void LogAudio(){
+    }
+        void LogAudio(){
 		//will only log when it changes from playing to not playing, or vice versa
 
 		if (!isAudioPlaying && audioSource.isPlaying) {

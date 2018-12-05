@@ -8,60 +8,61 @@ using UnityEngine.SceneManagement;
 using UnityEngine.Video;
 using System.Linq;
 using System.IO;
-public class ShoplifterScript : MonoBehaviour {
+public class ShoplifterScript : MonoBehaviour
+{
 
     public GameObject camVehicle;
-	public Camera mainCam;
+    public Camera mainCam;
     public GameObject animBody;
     private MouseLook mouseLook;
 
-	private float currentSpeed;
+    private float currentSpeed;
 
-	public float minSpeed = 25f;
-	public float maxSpeed  = 60f;
+    public float minSpeed = 25f;
+    public float maxSpeed = 60f;
 
-	//PHASE 1
-	private GameObject phase1Start_L;
-	private GameObject phase1End_L;
-	private GameObject phase1Start_R;
-	private GameObject phase1End_R;
+    //PHASE 1
+    private GameObject phase1Start_L;
+    private GameObject phase1End_L;
+    private GameObject phase1Start_R;
+    private GameObject phase1End_R;
 
 
-	//PHASE 2
-	private GameObject phase2Start_L;
-	private GameObject phase2End_L;
-	private GameObject phase2Start_R;
-	private GameObject phase2End_R;
+    //PHASE 2
+    private GameObject phase2Start_L;
+    private GameObject phase2End_L;
+    private GameObject phase2Start_R;
+    private GameObject phase2End_R;
 
-	//PHASE 3
-	private GameObject phase3Start_L;
-	private GameObject phase3End_L;
-	private GameObject phase3Start_R;
-	private GameObject phase3End_R;
+    //PHASE 3
+    private GameObject phase3Start_L;
+    private GameObject phase3End_L;
+    private GameObject phase3Start_R;
+    private GameObject phase3End_R;
 
-	//registers
-	private GameObject register_L;
-	private GameObject register_R;
+    //registers
+    private GameObject register_L;
+    private GameObject register_R;
 
-	//registerobj
-	private GameObject leftRegisterObj;
-	private GameObject rightRegisterObj;
+    //registerobj
+    private GameObject leftRegisterObj;
+    private GameObject rightRegisterObj;
 
-	//doors
-	private GameObject phase1Door_L;
-	private GameObject phase1Door_R;
-	private GameObject phase2Door_L;
-	private GameObject phase2Door_R;
-	private GameObject phase3Door_L;
-	private GameObject phase3Door_R;
+    //doors
+    private GameObject phase1Door_L;
+    private GameObject phase1Door_R;
+    private GameObject phase2Door_L;
+    private GameObject phase2Door_R;
+    private GameObject phase3Door_L;
+    private GameObject phase3Door_R;
 
-	//speed change zones
-	public List<GameObject> phase1SpeedChangeZones_L;
-	public List<GameObject> phase1SpeedChangeZones_R;
-	public List<GameObject> phase2SpeedChangeZones_L;
-	public List<GameObject> phase2SpeedChangeZones_R;
-	public List<GameObject> phase3SpeedChangeZones_L;
-	public List<GameObject> phase3SpeedChangeZones_R;
+    //speed change zones
+    public List<GameObject> phase1SpeedChangeZones_L;
+    public List<GameObject> phase1SpeedChangeZones_R;
+    public List<GameObject> phase2SpeedChangeZones_L;
+    public List<GameObject> phase2SpeedChangeZones_R;
+    public List<GameObject> phase3SpeedChangeZones_L;
+    public List<GameObject> phase3SpeedChangeZones_R;
 
     public AudioListener mainSceneListener;
 
@@ -71,46 +72,46 @@ public class ShoplifterScript : MonoBehaviour {
     public TCPServer tcpServer;
 
 
-	public List<int> registerVal1;
-	public List<int> registerVal2;
+    public List<int> registerVal1;
+    public List<int> registerVal2;
 
-	bool isTransition = false;
+    bool isTransition = false;
 
-	//stage 1 learning variables
-	private int numTrials_Learning = 0;
-	private int maxTrials_Learning = 24;
+    //stage 1 learning variables
+    private int numTrials_Learning = 0;
+    private int maxTrials_Learning = 24;
 
-	//stage 2 reevaulation variables
-	private int maxTrials_Reeval = 2;
-	private int maxBlocks_Reeval = 6;
+    //stage 2 reevaulation variables
+    private int maxTrials_Reeval = 2;
+    private int maxBlocks_Reeval = 6;
 
-	private int envIndex =0;
+    private int envIndex = 0;
 
-	private List<float> camZoneFactors;
+    private List<float> camZoneFactors;
 
-	//stage 4 post-test variables
-	private int maxTrials_PostTest = 10;
+    //stage 4 post-test variables
+    private int maxTrials_PostTest = 10;
 
     public GameObject leftDoorPos;
     public GameObject rightDoorPos;
     public float phase1Factor = 5f;
     public Animator cartAnim;
     private int playerChoice = -1; //0 for left and 1 for right
-	public List<int> registerVals; // 0-1 is L-R for toy , 2-3 is L-R for hardware
+    public List<int> registerVals; // 0-1 is L-R for toy , 2-3 is L-R for hardware
 
-	private string activeEnvLabel = "";
+    private string activeEnvLabel = "";
 
-	public GameObject instructionVideo;
+    public GameObject instructionVideo;
 
-	public List<GameObject> environments;
-	private EnvironmentManager envManager;
+    public List<GameObject> environments;
+    private EnvironmentManager envManager;
 
     private GameObject leftRoom;
     private GameObject rightRoom;
 
-	float suggestedSpeed = 0f;
+    float suggestedSpeed = 0f;
 
-	float directionEnv = -1f; //-1 for space station, +1 for western town
+    float directionEnv = -1f; //-1 for space station, +1 for western town
     private int phase1Choice = 0;
     private int phase2Choice = 0;
     private int choiceOutput = 0;
@@ -118,16 +119,16 @@ public class ShoplifterScript : MonoBehaviour {
     public Transform phase1Target;
     public Transform phase2Target;
 
-	private bool clearCameraZoneFlags = false;
+    private bool clearCameraZoneFlags = false;
 
     private Transform camTrans;
 
     private int numTrials = 0;
     private int maxTrials = 4;
 
-	bool firstTime=true;
+    bool firstTime = true;
 
-	string currentPhaseName="NONE";
+    string currentPhaseName = "NONE";
 
     private string pressToContinueInstruction = "Press (X) button to continue";
     private string musicBaselineInstruction = "In what follows you will hear music from the game. \n Please maintain your gaze at the fixation cross, relax, and pay attention to the music.";
@@ -135,32 +136,32 @@ public class ShoplifterScript : MonoBehaviour {
 
 
     //tip metrics
-    private int consecutiveIncorrectCameraPresses=0; //activated when >=4
-	private bool didTimeout = false; //activated after a timeout during slider event
-	private bool afterSlider=false; //activated immediately after a slider event
+    private int consecutiveIncorrectCameraPresses = 0; //activated when >=4
+    private bool didTimeout = false; //activated after a timeout during slider event
+    private bool afterSlider = false; //activated immediately after a slider event
 
     //ui
-	public CanvasGroup introInstructionGroup;
-	public CanvasGroup instructionGroup;
-	public CanvasGroup infoGroup;
+    public CanvasGroup introInstructionGroup;
+    public CanvasGroup instructionGroup;
+    public CanvasGroup infoGroup;
     public Text infoText;
     public CanvasGroup intertrialGroup;
-	public Text intertrialText;
-	public CanvasGroup positiveFeedbackGroup;
-	public CanvasGroup negativeFeedbackGroup;
-	public CanvasGroup trainingInstructionsGroup;
-	public CanvasGroup trainingPeriodGroup;
-	public CanvasGroup restGroup;
-	public CanvasGroup dotGroup;
-	public Text rewardScore;
-	public CanvasGroup warningFeedbackGroup;
-	public CanvasGroup prefSolo;
-	public CanvasGroup prefGroup;
-	public CanvasGroup multipleChoiceGroup;
-	public CanvasGroup imagineGroup;
-	public CanvasGroup imageryQualityGroup;
-	public CanvasGroup tipsGroup;
-	public Text tipsText;
+    public Text intertrialText;
+    public CanvasGroup positiveFeedbackGroup;
+    public CanvasGroup negativeFeedbackGroup;
+    public CanvasGroup trainingInstructionsGroup;
+    public CanvasGroup trainingPeriodGroup;
+    public CanvasGroup restGroup;
+    public CanvasGroup dotGroup;
+    public Text rewardScore;
+    public CanvasGroup warningFeedbackGroup;
+    public CanvasGroup prefSolo;
+    public CanvasGroup prefGroup;
+    public CanvasGroup multipleChoiceGroup;
+    public CanvasGroup imagineGroup;
+    public CanvasGroup imageryQualityGroup;
+    public CanvasGroup tipsGroup;
+    public Text tipsText;
     public CanvasGroup blackScreen;
     public CanvasGroup pauseUI;
     public CanvasGroup sys2ConnectionGroup;
@@ -169,60 +170,60 @@ public class ShoplifterScript : MonoBehaviour {
 
 
     private GameObject roomOne;
-	private GameObject roomTwo;
+    private GameObject roomTwo;
 
-	//instr strings
-	private string doorText = "Press (X) to open the door";
-	private string registerText = "Press (X) to open the suitcase!";
+    //instr strings
+    private string doorText = "Press (X) to open the door";
+    private string registerText = "Press (X) to open the suitcase!";
 
 
-	//audio
-	private AudioSource one_L_Audio;
-	private AudioSource two_L_Audio;
-	private AudioSource three_L_Audio;
-	private AudioSource one_R_Audio;
-	private AudioSource two_R_Audio;
-	private AudioSource three_R_Audio;
+    //audio
+    private AudioSource one_L_Audio;
+    private AudioSource two_L_Audio;
+    private AudioSource three_L_Audio;
+    private AudioSource one_R_Audio;
+    private AudioSource two_R_Audio;
+    private AudioSource three_R_Audio;
 
-	private AudioSource currentAudio;
+    private AudioSource currentAudio;
 
-	private Color leftRoomColor;
-	private Color rightRoomColor;
-	private Color roomOneColor;
-	private Color roomTwoColor;
+    private Color leftRoomColor;
+    private Color rightRoomColor;
+    private Color roomOneColor;
+    private Color roomTwoColor;
 
-	private GameObject suitcaseObj;
+    private GameObject suitcaseObj;
 
-	public GameObject coinShower;
+    public GameObject coinShower;
 
-	private List<int> registerLeft;
-	private int stageIndex  = 0;
+    private List<int> registerLeft;
+    private int stageIndex = 0;
 
-	//camera zone
-	private GameObject phase1CamZone_L;
-	private GameObject phase1CamZone_R;
-	private GameObject phase2CamZone_L;
-	private GameObject phase2CamZone_R;
-	private GameObject phase3CamZone_L;
-	private GameObject phase3CamZone_R;
+    //camera zone
+    private GameObject phase1CamZone_L;
+    private GameObject phase1CamZone_R;
+    private GameObject phase2CamZone_L;
+    private GameObject phase2CamZone_R;
+    private GameObject phase3CamZone_L;
+    private GameObject phase3CamZone_R;
 
-	private GameObject activeCamZone;
+    private GameObject activeCamZone;
 
-	public Text rigidStatusText;
+    public Text rigidStatusText;
 
-	private GameObject leftSuitcase;
-	private GameObject rightSuitcase;
-	private List<GameObject> suitcases;
+    private GameObject leftSuitcase;
+    private GameObject rightSuitcase;
+    private List<GameObject> suitcases;
 
-	public List<int> reevalConditions;
+    public List<int> reevalConditions;
 
     public bool isPaused = false;
 
 
-	//for baseline music sequence at the end
-	private List<AudioClip> completeAudioList;
-	public AudioSource musicBaselinePlayer;
-	public float musicBaselinePlayTime = 30f;
+    //for baseline music sequence at the end
+    private List<AudioClip> completeAudioList;
+    public AudioSource musicBaselinePlayer;
+    public float musicBaselinePlayTime = 15f;
 
     //for baseline image slideshow sequence at the end
     private List<Texture> completeImageList;
@@ -230,325 +231,361 @@ public class ShoplifterScript : MonoBehaviour {
     public float imageSlideshowPlaytime = 4f;
 
 
-	private GameObject suitcasePrefab;
-	private Material skyboxMat;
+    private GameObject suitcasePrefab;
+    private Material skyboxMat;
 
-	public GameObject testFloor;
+    public GameObject testFloor;
 
 
-	public class CoroutineWithData {
-		public Coroutine coroutine { get; private set; }
-		public object result;
-		private IEnumerator target;
-		public CoroutineWithData(MonoBehaviour owner, IEnumerator target) {
-			this.target = target;
-			this.coroutine = owner.StartCoroutine(Run());
-		}
-
-		private IEnumerator Run() {
-			while(target.MoveNext()) {
-				result = target.Current;
-				yield return result;
-			}
-		}
-	}
-
-    void Awake()
-	{
-        blackScreen.alpha = 1f;
-		instructionVideo.SetActive(false);
-		EnablePlayerCam (false);
-		Application.targetFrameRate = 60;
-	}
-
-	void EnablePlayerCam(bool shouldEnable)
-	{
-		mainCam.enabled = shouldEnable;
-	}
-
-    // Use this for initialization
-    void Start() {
-		camZoneFactors = new List<float> ();
-		camZoneFactors = GetRandomNumbers (environments.Count); //get as many unique random numbers as there are environments
-//		reevalConditions = new List<int>();
-//		reevalConditions= ShuffleReevalConditions();
-		introInstructionGroup.alpha = 0f;
-//		UpdateFirstEnvironments ();
-        infoGroup.alpha = 0f;
-		imagineGroup.alpha = 0f;
-		positiveFeedbackGroup.alpha = 0f;
-		negativeFeedbackGroup.alpha = 0f;
-        intertrialGroup.alpha = 0f;
-		trainingInstructionsGroup.alpha = 0f;
-		trainingPeriodGroup.alpha = 0f;
-		prefSolo.gameObject.SetActive (false);
-		prefGroup.gameObject.SetActive (false);
-        slideshowImage.transform.parent.gameObject.GetComponent<CanvasGroup>().alpha = 0f;
-
-        suitcaseObj = null;
-//        cartAnim.enabled = true;
-        camVehicle.SetActive(true);
-//        animBody.SetActive(false);
-
-//        cartAnim.Play("Phase1Start");
-        //camVehicle.transform.position = phase1Start.transform.position;
-//        mouseLook = camVehicle.GetComponent<RigidbodyFirstPersonController>().mouseLook;
-        camTrans = camVehicle.GetComponent<RigidbodyFirstPersonController>().cam.transform;
-		RandomizeSpeed ();
-//		RandomizeCameraZones ();
-		rewardScore.enabled=false;
-//		mouseLook.XSensitivity = 0f;
-
-		Cursor.visible = false;
-		//then start the task
-//		Debug.Log(ExperimentSettings.env.ToString());
-		StartCoroutine("RunTask");
-    }
-
-    // Update is called once per frame
-    void Update() {
-		
-        if(Input.GetKeyDown(KeyCode.Escape))
+    public class CoroutineWithData
+    {
+        public Coroutine coroutine { get; private set; }
+        public object result;
+        private IEnumerator target;
+        public CoroutineWithData(MonoBehaviour owner, IEnumerator target)
         {
-			Application.Quit ();
+            this.target = target;
+            this.coroutine = owner.StartCoroutine(Run());
+        }
+
+        private IEnumerator Run()
+        {
+            while (target.MoveNext())
+            {
+                result = target.Current;
+                yield return result;
+            }
         }
     }
 
-	void RandomizeSuitcases()
-	{
-			if (Random.value > 0.5f) {
-				leftSuitcase = suitcases [0];
-				rightSuitcase = suitcases [1];
-			} else {
-				leftSuitcase = suitcases [1];
-				rightSuitcase = suitcases [0];
-			}
-	}
+    void Awake()
+    {
+        blackScreen.alpha = 1f;
+        pauseUI.alpha = 0f;
+        instructionVideo.SetActive(false);
+        EnablePlayerCam(false);
+        Application.targetFrameRate = 60;
+    }
 
-	void CheckpointSession(int blockCount,bool isOngoing)
-	{
-		string separator = "\t";
-		int currentBlockCount = blockCount;
-		//environment + phase + reeval type + leftroom + leftreward + rightroom +  rightreward
-		string line = ((isOngoing)? "ONGOING" : "FINISHED") + separator + envIndex.ToString() + separator +  currentPhaseName + separator + reevalConditions[currentBlockCount].ToString() + separator + leftRoom.name + separator + registerVals[0].ToString() + separator + rightRoom.name + separator + registerVals[1].ToString();
-		Debug.Log ("checkpointed line is: " + line);
-		System.IO.File.WriteAllText(Experiment.Instance.sessionDirectory+"checkpoint.txt", line);
-	}
+    void EnablePlayerCam(bool shouldEnable)
+    {
+        mainCam.enabled = shouldEnable;
+    }
 
-	void RandomizeSpeedChangeZones()
-	{
-		Debug.Log ("randomized speed change zones");
-		phase1SpeedChangeZones_L [0].transform.position = new Vector3(phase1Start_L.transform.position.x,phase1Start_L.transform.position.y,Random.Range(phase1Start_L.transform.position.z,Vector3.Lerp (phase1Start_L.transform.position, phase1End_L.transform.position, 0.5f).z));
-		phase1SpeedChangeZones_L [1].transform.position = new Vector3(phase1Start_L.transform.position.x,phase1Start_L.transform.position.y,Random.Range(Vector3.Lerp (phase1Start_L.transform.position, phase1End_L.transform.position, 0.5f).z,phase1End_L.transform.position.z));
+    // Use this for initialization
+    void Start()
+    {
+        camZoneFactors = new List<float>();
+        camZoneFactors = GetRandomNumbers(environments.Count); //get as many unique random numbers as there are environments
+                                                               //		reevalConditions = new List<int>();
+                                                               //		reevalConditions= ShuffleReevalConditions();
+        introInstructionGroup.alpha = 0f;
+        //		UpdateFirstEnvironments ();
+        infoGroup.alpha = 0f;
+        imagineGroup.alpha = 0f;
+        positiveFeedbackGroup.alpha = 0f;
+        negativeFeedbackGroup.alpha = 0f;
+        intertrialGroup.alpha = 0f;
+        trainingInstructionsGroup.alpha = 0f;
+        trainingPeriodGroup.alpha = 0f;
+        prefSolo.gameObject.SetActive(false);
+        prefGroup.gameObject.SetActive(false);
+        slideshowImage.transform.parent.gameObject.GetComponent<CanvasGroup>().alpha = 0f;
 
-		phase1SpeedChangeZones_R [0].transform.position = new Vector3(phase1Start_R.transform.position.x,phase1Start_R.transform.position.y,Random.Range(phase1Start_R.transform.position.z,Vector3.Lerp (phase1Start_R.transform.position, phase1End_R.transform.position, 0.5f).z));
-		phase1SpeedChangeZones_R [1].transform.position = new Vector3(phase1Start_R.transform.position.x,phase1Start_R.transform.position.y,Random.Range(Vector3.Lerp (phase1Start_R.transform.position, phase1End_R.transform.position, 0.5f).z,phase1End_R.transform.position.z));
+        suitcaseObj = null;
+        //        cartAnim.enabled = true;
+        camVehicle.SetActive(true);
+        //        animBody.SetActive(false);
 
-		phase2SpeedChangeZones_L[0].transform.position = new Vector3(envManager.phase2Start_L.transform.position.x,phase2Start_L.transform.position.y,Random.Range(envManager.phase2Start_L.transform.position.z,Vector3.Lerp (envManager.phase2Start_L.transform.position, envManager.phase2End_L.transform.position, 0.5f).z));
-		phase2SpeedChangeZones_L[1].transform.position = new Vector3(envManager.phase2Start_L.transform.position.x,phase2Start_L.transform.position.y,Random.Range(Vector3.Lerp (envManager.phase2Start_L.transform.position, envManager.phase2End_L.transform.position, 0.5f).z,envManager.phase2End_L.transform.position.z));
+        //        cartAnim.Play("Phase1Start");
+        //camVehicle.transform.position = phase1Start.transform.position;
+        //        mouseLook = camVehicle.GetComponent<RigidbodyFirstPersonController>().mouseLook;
+        camTrans = camVehicle.GetComponent<RigidbodyFirstPersonController>().cam.transform;
+        RandomizeSpeed();
+        //		RandomizeCameraZones ();
+        rewardScore.enabled = false;
+        //		mouseLook.XSensitivity = 0f;
 
-		phase2SpeedChangeZones_R[0].transform.position = new Vector3(envManager.phase2Start_R.transform.position.x,phase2Start_R.transform.position.y,Random.Range(envManager.phase2Start_R.transform.position.z,Vector3.Lerp (envManager.phase2Start_R.transform.position, envManager.phase2End_R.transform.position, 0.5f).z));
-		phase2SpeedChangeZones_R[1].transform.position = new Vector3(envManager.phase2Start_R.transform.position.x,phase2Start_R.transform.position.y,Random.Range(Vector3.Lerp (envManager.phase2Start_R.transform.position, envManager.phase2End_R.transform.position, 0.5f).z,envManager.phase2End_R.transform.position.z));
+        Cursor.visible = false;
+        //then start the task
+        //		Debug.Log(ExperimentSettings.env.ToString());
+        StartCoroutine("RunTask");
+    }
 
-		phase3SpeedChangeZones_L[0].transform.position = new Vector3(envManager.phase3Start_L.transform.position.x,phase3Start_L.transform.position.y,Random.Range(envManager.phase3Start_L.transform.position.z,Vector3.Lerp (envManager.phase3Start_L.transform.position, envManager.phase3End_L.transform.position, 0.5f).z));
-		phase3SpeedChangeZones_L[1].transform.position = new Vector3(envManager.phase3Start_L.transform.position.x,phase3Start_L.transform.position.y,Random.Range(Vector3.Lerp (envManager.phase3Start_L.transform.position, envManager.phase3End_L.transform.position, 0.5f).z,envManager.phase3End_L.transform.position.z));
+    // Update is called once per frame
+    void Update()
+    {
 
-		phase3SpeedChangeZones_R[0].transform.position = new Vector3(envManager.phase3Start_R.transform.position.x,phase3Start_R.transform.position.y,Random.Range(envManager.phase3Start_R.transform.position.z,Vector3.Lerp (envManager.phase3Start_R.transform.position, envManager.phase3End_R.transform.position, 0.5f).z));
-		phase3SpeedChangeZones_R[1].transform.position = new Vector3(envManager.phase3Start_R.transform.position.x,phase3Start_R.transform.position.y,Random.Range(Vector3.Lerp (envManager.phase3Start_R.transform.position, envManager.phase3End_R.transform.position, 0.5f).z,envManager.phase3End_R.transform.position.z));
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
+        GetPauseInput();
+    }
 
-	}
+    void RandomizeSuitcases()
+    {
+        if (Random.value > 0.5f)
+        {
+            leftSuitcase = suitcases[0];
+            rightSuitcase = suitcases[1];
+        }
+        else
+        {
+            leftSuitcase = suitcases[1];
+            rightSuitcase = suitcases[0];
+        }
+    }
 
-	List<int> ShuffleReevalConditions()
-	{
-		List<int> tempList = new List<int> ();
-		for (int i = 0; i < environments.Count; i++) {
-			tempList.Add (i);
-		}
-		tempList=ShuffleList (tempList);
-		for(int i=0;i<tempList.Count;i++)
-		{
-			Debug.Log ("reeval condition: " + tempList [i].ToString());
-		}
-		return tempList;
-	}
+    void CheckpointSession(int blockCount, bool isOngoing)
+    {
+        string separator = "\t";
+        int currentBlockCount = blockCount;
+        //environment + phase + reeval type + leftroom + leftreward + rightroom +  rightreward
+        string line = ((isOngoing) ? "ONGOING" : "FINISHED") + separator + envIndex.ToString() + separator + currentPhaseName + separator + reevalConditions[currentBlockCount].ToString() + separator + leftRoom.name + separator + registerVals[0].ToString() + separator + rightRoom.name + separator + registerVals[1].ToString();
+        Debug.Log("checkpointed line is: " + line);
+        System.IO.File.WriteAllText(Experiment.Instance.sessionDirectory + "checkpoint.txt", line);
+    }
 
-	List<float> GetRandomNumbers(int randomCount)
-	{
-		System.Random rand = new System.Random ();
-		List<float> randList = new List<float> ();
-		for (int i = 0; i < randomCount; i++) {
+    void RandomizeSpeedChangeZones()
+    {
+        Debug.Log("randomized speed change zones");
+        phase1SpeedChangeZones_L[0].transform.position = new Vector3(phase1Start_L.transform.position.x, phase1Start_L.transform.position.y, Random.Range(phase1Start_L.transform.position.z, Vector3.Lerp(phase1Start_L.transform.position, phase1End_L.transform.position, 0.5f).z));
+        phase1SpeedChangeZones_L[1].transform.position = new Vector3(phase1Start_L.transform.position.x, phase1Start_L.transform.position.y, Random.Range(Vector3.Lerp(phase1Start_L.transform.position, phase1End_L.transform.position, 0.5f).z, phase1End_L.transform.position.z));
+
+        phase1SpeedChangeZones_R[0].transform.position = new Vector3(phase1Start_R.transform.position.x, phase1Start_R.transform.position.y, Random.Range(phase1Start_R.transform.position.z, Vector3.Lerp(phase1Start_R.transform.position, phase1End_R.transform.position, 0.5f).z));
+        phase1SpeedChangeZones_R[1].transform.position = new Vector3(phase1Start_R.transform.position.x, phase1Start_R.transform.position.y, Random.Range(Vector3.Lerp(phase1Start_R.transform.position, phase1End_R.transform.position, 0.5f).z, phase1End_R.transform.position.z));
+
+        phase2SpeedChangeZones_L[0].transform.position = new Vector3(envManager.phase2Start_L.transform.position.x, phase2Start_L.transform.position.y, Random.Range(envManager.phase2Start_L.transform.position.z, Vector3.Lerp(envManager.phase2Start_L.transform.position, envManager.phase2End_L.transform.position, 0.5f).z));
+        phase2SpeedChangeZones_L[1].transform.position = new Vector3(envManager.phase2Start_L.transform.position.x, phase2Start_L.transform.position.y, Random.Range(Vector3.Lerp(envManager.phase2Start_L.transform.position, envManager.phase2End_L.transform.position, 0.5f).z, envManager.phase2End_L.transform.position.z));
+
+        phase2SpeedChangeZones_R[0].transform.position = new Vector3(envManager.phase2Start_R.transform.position.x, phase2Start_R.transform.position.y, Random.Range(envManager.phase2Start_R.transform.position.z, Vector3.Lerp(envManager.phase2Start_R.transform.position, envManager.phase2End_R.transform.position, 0.5f).z));
+        phase2SpeedChangeZones_R[1].transform.position = new Vector3(envManager.phase2Start_R.transform.position.x, phase2Start_R.transform.position.y, Random.Range(Vector3.Lerp(envManager.phase2Start_R.transform.position, envManager.phase2End_R.transform.position, 0.5f).z, envManager.phase2End_R.transform.position.z));
+
+        phase3SpeedChangeZones_L[0].transform.position = new Vector3(envManager.phase3Start_L.transform.position.x, phase3Start_L.transform.position.y, Random.Range(envManager.phase3Start_L.transform.position.z, Vector3.Lerp(envManager.phase3Start_L.transform.position, envManager.phase3End_L.transform.position, 0.5f).z));
+        phase3SpeedChangeZones_L[1].transform.position = new Vector3(envManager.phase3Start_L.transform.position.x, phase3Start_L.transform.position.y, Random.Range(Vector3.Lerp(envManager.phase3Start_L.transform.position, envManager.phase3End_L.transform.position, 0.5f).z, envManager.phase3End_L.transform.position.z));
+
+        phase3SpeedChangeZones_R[0].transform.position = new Vector3(envManager.phase3Start_R.transform.position.x, phase3Start_R.transform.position.y, Random.Range(envManager.phase3Start_R.transform.position.z, Vector3.Lerp(envManager.phase3Start_R.transform.position, envManager.phase3End_R.transform.position, 0.5f).z));
+        phase3SpeedChangeZones_R[1].transform.position = new Vector3(envManager.phase3Start_R.transform.position.x, phase3Start_R.transform.position.y, Random.Range(Vector3.Lerp(envManager.phase3Start_R.transform.position, envManager.phase3End_R.transform.position, 0.5f).z, envManager.phase3End_R.transform.position.z));
+
+    }
+
+    List<int> ShuffleReevalConditions()
+    {
+        List<int> tempList = new List<int>();
+        for (int i = 0; i < environments.Count; i++)
+        {
+            tempList.Add(i);
+        }
+        tempList = ShuffleList(tempList);
+        for (int i = 0; i < tempList.Count; i++)
+        {
+            Debug.Log("reeval condition: " + tempList[i].ToString());
+        }
+        return tempList;
+    }
+
+    List<float> GetRandomNumbers(int randomCount)
+    {
+        System.Random rand = new System.Random();
+        List<float> randList = new List<float>();
+        for (int i = 0; i < randomCount; i++)
+        {
             int randInt = rand.Next(50, 80);
             Debug.Log("rand int is " + randInt.ToString());
             float nextDouble = (float)randInt / 100f;
             Debug.Log("next double is  " + nextDouble.ToString());
-			//float nextDouble = (float)rand.NextDouble();
-			nextDouble = Mathf.Clamp (nextDouble, 0.5f, 0.8f);
-			randList.Add((float)(nextDouble));
-			Debug.Log ("cam zone factor: " + randList [i]);
-		}
-		return randList;
-	}
+            //float nextDouble = (float)rand.NextDouble();
+            nextDouble = Mathf.Clamp(nextDouble, 0.5f, 0.8f);
+            randList.Add((float)(nextDouble));
+            Debug.Log("cam zone factor: " + randList[i]);
+        }
+        return randList;
+    }
 
-	IEnumerator RandomizeCameraZones(int blockCount)
-	{
-        float randFactor = camZoneFactors [blockCount];
+    IEnumerator RandomizeCameraZones(int blockCount)
+    {
+        float randFactor = camZoneFactors[blockCount];
 
-		Experiment.Instance.shopLiftLog.LogCameraLerpIndex (randFactor,blockCount);
+        Experiment.Instance.shopLiftLog.LogCameraLerpIndex(randFactor, blockCount);
 
-		phase1CamZone_L.transform.position = new Vector3(envManager.phase1Start_L.transform.position.x,envManager.phase1Start_L.transform.position.y,Mathf.Lerp (envManager.phase1Start_L.transform.position.z, envManager.phase1End_L.transform.position.z, randFactor));
-		phase1CamZone_R.transform.position =new Vector3(envManager.phase1Start_R.transform.position.x,envManager.phase1Start_R.transform.position.y, Mathf.Lerp (envManager.phase1Start_R.transform.position.z, envManager.phase1End_R.transform.position.z, randFactor));
+        phase1CamZone_L.transform.position = new Vector3(envManager.phase1Start_L.transform.position.x, envManager.phase1Start_L.transform.position.y, Mathf.Lerp(envManager.phase1Start_L.transform.position.z, envManager.phase1End_L.transform.position.z, randFactor));
+        phase1CamZone_R.transform.position = new Vector3(envManager.phase1Start_R.transform.position.x, envManager.phase1Start_R.transform.position.y, Mathf.Lerp(envManager.phase1Start_R.transform.position.z, envManager.phase1End_R.transform.position.z, randFactor));
 
 
-		phase2CamZone_L.transform.position = new Vector3(envManager.phase2Start_L.transform.position.x,envManager.phase2Start_L.transform.position.y,Mathf.Lerp (envManager.phase2Start_L.transform.position.z, envManager.phase2End_L.transform.position.z, randFactor));
-		phase2CamZone_R.transform.position = new Vector3(envManager.phase2Start_R.transform.position.x,envManager.phase2Start_R.transform.position.y,Mathf.Lerp (envManager.phase2Start_R.transform.position.z, envManager.phase2End_R.transform.position.z, randFactor));
+        phase2CamZone_L.transform.position = new Vector3(envManager.phase2Start_L.transform.position.x, envManager.phase2Start_L.transform.position.y, Mathf.Lerp(envManager.phase2Start_L.transform.position.z, envManager.phase2End_L.transform.position.z, randFactor));
+        phase2CamZone_R.transform.position = new Vector3(envManager.phase2Start_R.transform.position.x, envManager.phase2Start_R.transform.position.y, Mathf.Lerp(envManager.phase2Start_R.transform.position.z, envManager.phase2End_R.transform.position.z, randFactor));
 
-		phase3CamZone_L.transform.position = new Vector3(envManager.phase3Start_L.transform.position.x,envManager.phase3Start_L.transform.position.y,Mathf.Lerp (envManager.phase3Start_L.transform.position.z, envManager.phase3End_L.transform.position.z, randFactor));
-		phase3CamZone_R.transform.position = new Vector3(envManager.phase3Start_R.transform.position.x,envManager.phase3Start_R.transform.position.y,Mathf.Lerp (envManager.phase3Start_R.transform.position.z, envManager.phase3End_R.transform.position.z, randFactor));
+        phase3CamZone_L.transform.position = new Vector3(envManager.phase3Start_L.transform.position.x, envManager.phase3Start_L.transform.position.y, Mathf.Lerp(envManager.phase3Start_L.transform.position.z, envManager.phase3End_L.transform.position.z, randFactor));
+        phase3CamZone_R.transform.position = new Vector3(envManager.phase3Start_R.transform.position.x, envManager.phase3Start_R.transform.position.y, Mathf.Lerp(envManager.phase3Start_R.transform.position.z, envManager.phase3End_R.transform.position.z, randFactor));
 
-		if (directionEnv == 1) { //is western town
-			// Debug.Log("turned cam zones");
-			phase1CamZone_L.transform.eulerAngles = new Vector3(0f,180f,0f);
-			phase1CamZone_R.transform.eulerAngles = new Vector3(0f,180f,0f);
+        if (directionEnv == 1)
+        { //is western town
+          // Debug.Log("turned cam zones");
+            phase1CamZone_L.transform.eulerAngles = new Vector3(0f, 180f, 0f);
+            phase1CamZone_R.transform.eulerAngles = new Vector3(0f, 180f, 0f);
 
-			phase2CamZone_L.transform.eulerAngles = new Vector3(0f,180f,0f);
-			phase2CamZone_R.transform.eulerAngles = new Vector3(0f,180f,0f);
+            phase2CamZone_L.transform.eulerAngles = new Vector3(0f, 180f, 0f);
+            phase2CamZone_R.transform.eulerAngles = new Vector3(0f, 180f, 0f);
 
-			phase3CamZone_L.transform.eulerAngles = new Vector3(0f,180f,0f);
-			phase3CamZone_R.transform.eulerAngles = new Vector3(0f,180f,0f);
+            phase3CamZone_L.transform.eulerAngles = new Vector3(0f, 180f, 0f);
+            phase3CamZone_R.transform.eulerAngles = new Vector3(0f, 180f, 0f);
 
-		}
-		ResetCamZone ();
-		phase1CamZone_L.SetActive (false);
-		phase1CamZone_R.SetActive (false);
-		phase2CamZone_L.SetActive (false);
-		phase2CamZone_R.SetActive (false);
-		phase3CamZone_L.SetActive (false);
-		phase3CamZone_R.SetActive (false);
-			yield return null;
-	}
+        }
+        ResetCamZone();
+        phase1CamZone_L.SetActive(false);
+        phase1CamZone_R.SetActive(false);
+        phase2CamZone_L.SetActive(false);
+        phase2CamZone_R.SetActive(false);
+        phase3CamZone_L.SetActive(false);
+        phase3CamZone_R.SetActive(false);
+        yield return null;
+    }
 
-	public void ChangeCamZoneFocus(int camIndex)
-	{
-		Debug.Log ("changing cam zone focus to " + camIndex.ToString ());
-		if (activeCamZone != null) {
-			activeCamZone.GetComponent<CameraZone> ().isFocus = false;
-			activeCamZone.SetActive (false);
-		}
-		switch (camIndex) {
-		case 0:
-			phase1CamZone_L.SetActive (true);
-			activeCamZone = phase1CamZone_L;
-			break;
-		case 1:
-			phase2CamZone_L.SetActive (true);
-			activeCamZone = phase2CamZone_L;
-			break;
-		case 2:
-			phase3CamZone_L.SetActive (true);
-			activeCamZone = phase3CamZone_L;
-			break;
-		case 3:
-			phase1CamZone_R.SetActive (true);
-			activeCamZone = phase1CamZone_R;
-			break;
-		case 4:
-			phase2CamZone_R.SetActive (true);
-			activeCamZone = phase2CamZone_R;
-			break;
-		case 5:
-			phase3CamZone_R.SetActive (true);
-			activeCamZone = phase3CamZone_R;
-			break;
-		default:
-			phase1CamZone_L.SetActive (true);
-			activeCamZone = phase1CamZone_L;
-			break;
-		}
-		activeCamZone.GetComponent<CameraZone> ().isFocus = true;
+    public void ChangeCamZoneFocus(int camIndex)
+    {
+        Debug.Log("changing cam zone focus to " + camIndex.ToString());
+        if (activeCamZone != null)
+        {
+            activeCamZone.GetComponent<CameraZone>().isFocus = false;
+            activeCamZone.SetActive(false);
+        }
+        switch (camIndex)
+        {
+            case 0:
+                phase1CamZone_L.SetActive(true);
+                activeCamZone = phase1CamZone_L;
+                break;
+            case 1:
+                phase2CamZone_L.SetActive(true);
+                activeCamZone = phase2CamZone_L;
+                break;
+            case 2:
+                phase3CamZone_L.SetActive(true);
+                activeCamZone = phase3CamZone_L;
+                break;
+            case 3:
+                phase1CamZone_R.SetActive(true);
+                activeCamZone = phase1CamZone_R;
+                break;
+            case 4:
+                phase2CamZone_R.SetActive(true);
+                activeCamZone = phase2CamZone_R;
+                break;
+            case 5:
+                phase3CamZone_R.SetActive(true);
+                activeCamZone = phase3CamZone_R;
+                break;
+            default:
+                phase1CamZone_L.SetActive(true);
+                activeCamZone = phase1CamZone_L;
+                break;
+        }
+        activeCamZone.GetComponent<CameraZone>().isFocus = true;
 
-//		Debug.Log ("cam index is: " + camIndex.ToString ());
-//		if (camIndex <= 1) {
-//			phase1CamZones [camIndex].GetComponent<CameraZone> ().isFocus = true;
-//			Debug.Log (phase1CamZone.gameObject.name + " is the new focus");
-//		} else {
-//			if (camIndex == 4) {
-//				phase1CamZone.GetComponent<CameraZone>().isFocus = true;
-//
-//				Debug.Log (phase1CamZone.gameObject.name + " is the new focus");
-//			}
-//			else
-//				phase2CamZones [camIndex - 2].GetComponent<CameraZone> ().isFocus = true;
-//
-//			Debug.Log (phase2CamZones [camIndex - 2].gameObject.name + " is the new focus");
-//		}
-	}
+        //		Debug.Log ("cam index is: " + camIndex.ToString ());
+        //		if (camIndex <= 1) {
+        //			phase1CamZones [camIndex].GetComponent<CameraZone> ().isFocus = true;
+        //			Debug.Log (phase1CamZone.gameObject.name + " is the new focus");
+        //		} else {
+        //			if (camIndex == 4) {
+        //				phase1CamZone.GetComponent<CameraZone>().isFocus = true;
+        //
+        //				Debug.Log (phase1CamZone.gameObject.name + " is the new focus");
+        //			}
+        //			else
+        //				phase2CamZones [camIndex - 2].GetComponent<CameraZone> ().isFocus = true;
+        //
+        //			Debug.Log (phase2CamZones [camIndex - 2].gameObject.name + " is the new focus");
+        //		}
+    }
 
     //for initial random assignment
     void AssignRooms()
     {
 
-		leftRegisterObj = envManager.leftRegisterObj;
-		rightRegisterObj = envManager.rightRegisterObj;
+        leftRegisterObj = envManager.leftRegisterObj;
+        rightRegisterObj = envManager.rightRegisterObj;
         if (Random.value < 0.5f)
         {
             leftRoom = roomOne;
-			three_L_Audio = envManager.three_L_Audio;
-			leftRoomColor = roomOneColor;
-			rightRoom = roomTwo;
-			three_R_Audio = envManager.three_R_Audio;
-			rightRoomColor = roomTwoColor;
+            three_L_Audio = envManager.three_L_Audio;
+            leftRoomColor = roomOneColor;
+            rightRoom = roomTwo;
+            three_R_Audio = envManager.three_R_Audio;
+            rightRoomColor = roomTwoColor;
 
 
-			Experiment.Instance.shopLiftLog.LogRooms (roomOne.name,roomTwo.name);
+            Experiment.Instance.shopLiftLog.LogRooms(roomOne.name, roomTwo.name);
         }
         else
         {
             leftRoom = roomTwo;
-			three_L_Audio = envManager.three_R_Audio;
-			leftRoomColor = roomTwoColor;
+            three_L_Audio = envManager.three_R_Audio;
+            leftRoomColor = roomTwoColor;
 
             rightRoom = roomOne;
-			three_R_Audio = envManager.three_L_Audio;
-			rightRoomColor = roomOneColor;
+            three_R_Audio = envManager.three_L_Audio;
+            rightRoomColor = roomOneColor;
 
 
-			Experiment.Instance.shopLiftLog.LogRooms  (roomTwo.name,roomOne.name);
+            Experiment.Instance.shopLiftLog.LogRooms(roomTwo.name, roomOne.name);
         }
 
-		leftRoom.transform.localPosition = envManager.leftRoomTransform.localPosition;
-		rightRoom.transform.localPosition = envManager.rightRoomTransform.localPosition;
-		Debug.Log ("set " + leftRoom.gameObject.name + " as left and " + rightRoom.gameObject.name + " as right");
+        leftRoom.transform.localPosition = envManager.leftRoomTransform.localPosition;
+        rightRoom.transform.localPosition = envManager.rightRoomTransform.localPosition;
+        Debug.Log("set " + leftRoom.gameObject.name + " as left and " + rightRoom.gameObject.name + " as right");
     }
 
-	void ResetCamZone()
-	{
+    void ResetCamZone()
+    {
 
-		phase1CamZone_L.GetComponent<CameraZone> ().Reset ();
-		phase2CamZone_L.GetComponent<CameraZone> ().Reset ();
-		phase3CamZone_L.GetComponent<CameraZone> ().Reset ();
-		phase1CamZone_R.GetComponent<CameraZone> ().Reset ();
-		phase2CamZone_R.GetComponent<CameraZone> ().Reset ();
-		phase3CamZone_R.GetComponent<CameraZone> ().Reset ();
-	}
+        phase1CamZone_L.GetComponent<CameraZone>().Reset();
+        phase2CamZone_L.GetComponent<CameraZone>().Reset();
+        phase3CamZone_L.GetComponent<CameraZone>().Reset();
+        phase1CamZone_R.GetComponent<CameraZone>().Reset();
+        phase2CamZone_R.GetComponent<CameraZone>().Reset();
+        phase3CamZone_R.GetComponent<CameraZone>().Reset();
+    }
 
-	void ChangeCameraZoneVisibility(bool isVisible)
-	{
+    void ChangeCameraZoneVisibility(bool isVisible)
+    {
         Debug.Log("changing cam zone visibility to " + isVisible.ToString());
-		phase1CamZone_L.GetComponent<Renderer>().enabled = isVisible;
-		phase1CamZone_R.GetComponent<Renderer>().enabled = isVisible;
-		phase2CamZone_L.GetComponent<Renderer> ().enabled = isVisible;
-		phase2CamZone_R.GetComponent<Renderer> ().enabled = isVisible;
-		phase3CamZone_L.GetComponent<Renderer> ().enabled = isVisible;
-		phase3CamZone_R.GetComponent<Renderer> ().enabled = isVisible;
-	}
+        phase1CamZone_L.GetComponent<Renderer>().enabled = isVisible;
+        phase1CamZone_R.GetComponent<Renderer>().enabled = isVisible;
+        phase2CamZone_L.GetComponent<Renderer>().enabled = isVisible;
+        phase2CamZone_R.GetComponent<Renderer>().enabled = isVisible;
+        phase3CamZone_L.GetComponent<Renderer>().enabled = isVisible;
+        phase3CamZone_R.GetComponent<Renderer>().enabled = isVisible;
+    }
 
-	void ChangeColors(Color newColor)
-	{
-//		for (int i = 0; i < phase2Walls.Length; i++) {
-//			Debug.Log ("new color is:  " + newColor.ToString ());
-//			phase2Walls [i].GetComponent<Renderer> ().material.color = newColor;
-//		}
-	}
+    void ChangeColors(Color newColor)
+    {
+        //		for (int i = 0; i < phase2Walls.Length; i++) {
+        //			Debug.Log ("new color is:  " + newColor.ToString ());
+        //			phase2Walls [i].GetComponent<Renderer> ().material.color = newColor;
+        //		}
+    }
+
+    bool isPauseButtonPressed = false;
+    void GetPauseInput()
+    {
+
+        if(Input.GetKeyDown(KeyCode.B) || Input.GetButtonDown("Pause Button"))
+        {//.GetAxis(Input.GetKeyDown(KeyCode.B) || Input.GetKey(KeyCode.JoystickButton2)){ //B JOYSTICK BUTTON TODO: move to input manager.
+            Debug.Log("PAUSE BUTTON PRESSED");
+            if (!isPauseButtonPressed)
+            {
+                isPauseButtonPressed = true;
+                Debug.Log("PAUSE OR UNPAUSE");
+                TogglePause(); //pause
+            }
+        }
+        else
+        {
+            isPauseButtonPressed = false;
+        }
+    }
 
     public void TogglePause()
     {
@@ -628,6 +665,8 @@ public class ShoplifterScript : MonoBehaviour {
 
 		return vals;
 	}
+
+
 
 	IEnumerator RunCamTrainingPhase(bool playVideo)
 	{
@@ -1309,9 +1348,11 @@ public class ShoplifterScript : MonoBehaviour {
 
             musicBaselinePlayer.clip = completeAudioList[randIndex];
             musicBaselinePlayer.Play();
+            musicBaselinePlayer.gameObject.GetComponent<AudioLogTrack>().LogAudioClip(completeAudioList[randIndex]);
             //musicBaselinePlayer.PlayOneShot(completeAudioList[randIndex]);
                 yield return new WaitForSeconds(musicBaselinePlayTime);
             musicBaselinePlayer.Stop();
+            musicBaselinePlayer.gameObject.GetComponent<AudioLogTrack>().LogAudioStopped(completeAudioList[randIndex]);
             completeAudioList.RemoveAt(randIndex);
         }
 
@@ -1377,7 +1418,7 @@ public class ShoplifterScript : MonoBehaviour {
 
         TCPServer.Instance.SetState(TCP_Config.DefineStates.SOLO_SLIDER, true);
 		bool pressed = false;
-		yield return StartCoroutine (WaitForButtonPress (20f,didPress =>
+		yield return StartCoroutine (WaitForButtonPress (10f,didPress =>
 			{
 				pressed=didPress;
 			}
@@ -1412,13 +1453,24 @@ public class ShoplifterScript : MonoBehaviour {
 
         TCPServer.Instance.SetState(TCP_Config.DefineStates.MULTIPLE_CHOICE, true);
 		bool pressed = false;
-		yield return StartCoroutine (WaitForButtonPress (15f,didPress =>
+		yield return StartCoroutine (WaitForButtonPress (10f,didPress =>
 			{
 				pressed=didPress;
 			}
 		));
-
-		Experiment.Instance.shopLiftLog.LogMultipleChoiceResponse (multipleChoiceGroup.GetComponent<AnswerSelector> ().ReturnSelectorPosition(), pressed);
+        Debug.Log("about to ask them to make a choice");
+        infoText.text = "Please make a choice!";
+        infoGroup.alpha = 1f;
+        if (!pressed)
+        {
+            yield return StartCoroutine(WaitForButtonPress(100000f, didPress =>
+            {
+                pressed = didPress;
+            }));
+        }
+        infoText.text = "";
+        infoGroup.alpha = 0f;
+        Experiment.Instance.shopLiftLog.LogMultipleChoiceResponse (multipleChoiceGroup.GetComponent<AnswerSelector> ().ReturnSelectorPosition(), pressed);
 		multipleChoiceGroup.gameObject.SetActive (false);
 		Cursor.visible = false;
         TCPServer.Instance.SetState(TCP_Config.DefineStates.MULTIPLE_CHOICE,false);
@@ -1458,11 +1510,12 @@ public class ShoplifterScript : MonoBehaviour {
              }
             else
             {
-                yield return StartCoroutine(WaitForButtonPress(15f, didPress =>
+                yield return StartCoroutine(WaitForButtonPress(10f, didPress =>
                 {
                     pressed = didPress;
                 }
             ));
+                Debug.Log("about to ask them to make a choice");
                 infoText.text = "Please make a choice!";
                 infoGroup.alpha = 1f;
                 if(!pressed)
@@ -2027,23 +2080,23 @@ public class ShoplifterScript : MonoBehaviour {
 		}
 		Experiment.Instance.shopLiftLog.LogEndTrial ();
         Experiment.Instance.shopLiftLog.LogEndTrialScreen(true,hasTips);
-		if (hasTips) {
-			if (consecutiveIncorrectCameraPresses >= 4) {
-				tipsText.text = "TIPS:\nPlease pay attention to the camera location and press (X)";
-				consecutiveIncorrectCameraPresses = 0;
-			} else if (didTimeout) {
-				tipsText.text = "TIPS:\nPlease press the (X) button quicker next time";
-				didTimeout = false;
-			} else {
-				tipsText.text = "TIPS:\nPlease keep in mind the structure of rooms and rewards when responding";
-				afterSlider = false;
-			}
-			tipsGroup.alpha = 1f;
-			yield return new WaitForSeconds (1f);
-		} else {
+		//if (false) {
+		//	if (consecutiveIncorrectCameraPresses >= 4) {
+		//		tipsText.text = "TIPS:\nPlease pay attention to the camera location and press (X)";
+		//		consecutiveIncorrectCameraPresses = 0;
+		//	} else if (didTimeout) {
+		//		tipsText.text = "TIPS:\nPlease press the (X) button quicker next time";
+		//		didTimeout = false;
+		//	} else {
+		//		tipsText.text = "TIPS:\nPlease keep in mind the structure of rooms and rewards when responding";
+		//		afterSlider = false;
+		//	}
+		//	tipsGroup.alpha = 1f;
+		//	yield return new WaitForSeconds (1f);
+		//} else {
 			tipsGroup.alpha = 0f;
 			yield return new WaitForSeconds(1f);
-		}
+		//}
         intertrialGroup.alpha = 0f;
         Experiment.Instance.shopLiftLog.LogEndTrialScreen(false, hasTips);
         yield return null;
