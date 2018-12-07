@@ -501,12 +501,13 @@ public class ShoplifterScript : MonoBehaviour
     }
 
     //for initial random assignment
-    void AssignRooms()
+    void AssignRooms(bool focusLeft)
     {
 
         leftRegisterObj = envManager.leftRegisterObj;
         rightRegisterObj = envManager.rightRegisterObj;
-        if (Random.value < 0.5f)
+        //if (Random.value < 0.5f)
+        if(focusLeft)
         {
             leftRoom = roomOne;
             three_L_Audio = envManager.three_L_Audio;
@@ -1752,7 +1753,15 @@ public class ShoplifterScript : MonoBehaviour
 
 
 		//after env has been selected and all necessary object references set, assign rooms and randomize cam zones
-		AssignRooms ();
+        if(blockCount==0)
+        {
+            AssignRooms(false);
+        }
+        else
+        {
+            AssignRooms(true);
+        }
+		//AssignRooms ();
 		RandomizeSpeedChangeZones ();
 		yield return StartCoroutine(RandomizeCameraZones (blockCount));
 
@@ -1822,8 +1831,18 @@ public class ShoplifterScript : MonoBehaviour
             RandomizeSuitcases();
             if (!Experiment.shouldCheckpoint)
             {
-                AssignRooms();
-                yield return StartCoroutine(PickRegisterValues()); //new reg values to be picked for each environment
+                //AssignRooms();
+                if (i == 0)
+                {
+                    registerVals[0] = 50;
+                    registerVals[1] = 20;
+                }
+                else if (i==1)
+                {
+                    registerVals[0] = 70;
+                    registerVals[1] = 30;
+                }
+                //yield return StartCoroutine(PickRegisterValues()); //new reg values to be picked for each environment
             }
 
             isTransition = !isTransition; //flip the transition condition before the next round
