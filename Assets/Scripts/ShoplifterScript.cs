@@ -1188,7 +1188,7 @@ public class ShoplifterScript : MonoBehaviour
         for (int i = 0; i < environments.Count;i++)
         {
 
-            yield return StartCoroutine(PickEnvironment(i)); //change environment
+            yield return StartCoroutine(PickEnvironment(i,false)); //change environment
             mainSceneListener.enabled = false; //turn off the main audio listener
             AudioListener.pause = true;
             AudioListener.volume = 0f;
@@ -1604,7 +1604,7 @@ public class ShoplifterScript : MonoBehaviour
 	}
 
 
-	IEnumerator PickEnvironment(int blockCount)
+	IEnumerator PickEnvironment(int blockCount, bool pickNew)
 	{
 //		envIndex = 3;
 //		envIndex = ExperimentSettings.envDropdownIndex;
@@ -1751,19 +1751,21 @@ public class ShoplifterScript : MonoBehaviour
 
 		Experiment.Instance.shopLiftLog.LogEnvironmentSelection(activeEnvLabel);
 
-
-		//after env has been selected and all necessary object references set, assign rooms and randomize cam zones
-        if(blockCount==0)
+        if (pickNew)
         {
-            AssignRooms(false);
+            //after env has been selected and all necessary object references set, assign rooms and randomize cam zones
+            if (blockCount == 0)
+            {
+                AssignRooms(false);
+            }
+            else
+            {
+                AssignRooms(false);
+            }
+            //AssignRooms ();
+            RandomizeSpeedChangeZones();
+            yield return StartCoroutine(RandomizeCameraZones(blockCount));
         }
-        else
-        {
-            AssignRooms(true);
-        }
-		//AssignRooms ();
-		RandomizeSpeedChangeZones ();
-		yield return StartCoroutine(RandomizeCameraZones (blockCount));
 
 		yield return null;
 	}
@@ -1826,7 +1828,7 @@ public class ShoplifterScript : MonoBehaviour
             numTrials = 0;
             currentReevalCondition = reevalConditions[i];
 
-            yield return StartCoroutine(PickEnvironment(i));
+            yield return StartCoroutine(PickEnvironment(i,true));
 
             RandomizeSuitcases();
             if (!Experiment.shouldCheckpoint)
@@ -1834,13 +1836,13 @@ public class ShoplifterScript : MonoBehaviour
                 //AssignRooms();
                 if (i == 0)
                 {
-                    registerVals[0] = 50;
-                    registerVals[1] = 20;
+                    registerVals[0] = 20;
+                    registerVals[1] = 50;
                 }
                 else if (i==1)
                 {
-                    registerVals[0] = 70;
-                    registerVals[1] = 30;
+                    registerVals[0] = 30;
+                    registerVals[1] = 70;
                 }
                 //yield return StartCoroutine(PickRegisterValues()); //new reg values to be picked for each environment
             }
