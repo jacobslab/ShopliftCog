@@ -1187,7 +1187,7 @@ public class ShoplifterScript : MonoBehaviour
         for (int i = 0; i < environments.Count;i++)
         {
 
-            yield return StartCoroutine(PickEnvironment(i)); //change environment
+            yield return StartCoroutine(PickEnvironment(i,false)); //change environment
             mainSceneListener.enabled = false; //turn off the main audio listener
             AudioListener.pause = true;
             AudioListener.volume = 0f;
@@ -1603,7 +1603,7 @@ public class ShoplifterScript : MonoBehaviour
 	}
 
 
-	IEnumerator PickEnvironment(int blockCount)
+	IEnumerator PickEnvironment(int blockCount, bool pickNew)
 	{
 //		envIndex = 3;
 //		envIndex = ExperimentSettings.envDropdownIndex;
@@ -1742,19 +1742,23 @@ public class ShoplifterScript : MonoBehaviour
 		skyboxMat = envManager.envSkybox;
 		RenderSettings.skybox = skyboxMat;
 
-		register_L = envManager.register_L;
-		register_R = envManager.register_R;
 
-		leftRegisterObj = envManager.leftRegisterObj;
-		rightRegisterObj = envManager.rightRegisterObj;
+        if (pickNew)
+        {
+            register_L = envManager.register_L;
+            register_R = envManager.register_R;
 
-		Experiment.Instance.shopLiftLog.LogEnvironmentSelection(activeEnvLabel);
+            leftRegisterObj = envManager.leftRegisterObj;
+            rightRegisterObj = envManager.rightRegisterObj;
+
+            Experiment.Instance.shopLiftLog.LogEnvironmentSelection(activeEnvLabel);
 
 
-		//after env has been selected and all necessary object references set, assign rooms and randomize cam zones
-		AssignRooms ();
-		RandomizeSpeedChangeZones ();
-		yield return StartCoroutine(RandomizeCameraZones (blockCount));
+            //after env has been selected and all necessary object references set, assign rooms and randomize cam zones
+            AssignRooms();
+            RandomizeSpeedChangeZones();
+            yield return StartCoroutine(RandomizeCameraZones(blockCount));
+        }
 
 		yield return null;
 	}
@@ -1817,7 +1821,7 @@ public class ShoplifterScript : MonoBehaviour
             numTrials = 0;
             currentReevalCondition = reevalConditions[i];
 
-            yield return StartCoroutine(PickEnvironment(i));
+            yield return StartCoroutine(PickEnvironment(i,true));
 
             RandomizeSuitcases();
             if (!Experiment.shouldCheckpoint)
