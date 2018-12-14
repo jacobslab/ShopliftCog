@@ -64,6 +64,13 @@ public class ShoplifterScript : MonoBehaviour
     public List<GameObject> phase3SpeedChangeZones_L;
     public List<GameObject> phase3SpeedChangeZones_R;
 
+
+    //learning bool
+    private bool hasLearned = false;
+
+    //deviation measure
+    public Queue<float> deviationQueue;
+
     public AudioListener mainSceneListener;
 
     private int correctResponses = 0;
@@ -80,6 +87,11 @@ public class ShoplifterScript : MonoBehaviour
     //stage 1 learning variables
     private int numTrials_Learning = 0;
     private int maxTrials_Learning = 24;
+
+
+    //variables for additional learning phase
+    private int numAdditionalTrials = 0;
+    private int maxAdditionalTrials = 12;
 
     //stage 2 reevaulation variables
     private int maxTrials_Reeval = 2;
@@ -265,6 +277,7 @@ public class ShoplifterScript : MonoBehaviour
         instructionVideo.SetActive(false);
         EnablePlayerCam(false);
         Application.targetFrameRate = 60;
+        deviationQueue = new Queue<float>();
     }
 
     void EnablePlayerCam(bool shouldEnable)
@@ -1080,9 +1093,12 @@ public class ShoplifterScript : MonoBehaviour
 		int randIndex = 0;
 		randOrder = GiveRandSequenceOfTwoInts(0,1,trialsToNextSlider);
 
-		//		while(numTrials < 1)
-		while(numTrials_Learning < maxTrials)
+        //		while(numTrials < 1)
+
+
+        while(numTrials_Learning < maxTrials || (!isPostTest && !hasLearned && numAdditionalTrials < maxAdditionalTrials))
 		{ 
+            
 			Debug.Log ("about to run phase 1");
 			if (randOrder [0] == 0)
 				isLeft = true;
@@ -1093,29 +1109,37 @@ public class ShoplifterScript : MonoBehaviour
 
 			Debug.Log ("about to run phase 2");
 
-				yield return StartCoroutine (RunPhaseTwo((isLeft) ? 0 : 1,false,false,-1,true,true));
+			yield return StartCoroutine (RunPhaseTwo((isLeft) ? 0 : 1,false,false,-1,true,true));
 
 			Debug.Log("about to run phase 3");
-			yield return StartCoroutine(RunPhaseThree((isLeft) ? 0:1,false,true));
+            if(!isPostTest)
+			    yield return StartCoroutine(RunPhaseThree((isLeft) ? 0:1,false,true));
+            else
+                yield return StartCoroutine(RunPhaseThree((isLeft)?0:1,false,false));
             //			TurnOffRooms ();
             Debug.Log("num trials learning " + numTrials_Learning.ToString());
             if((numTrials_Learning+1)%4==0 && numTrials_Learning >0)
             {
 				showOneTwo = !showOneTwo;
 					if (showOneTwo) {
-						yield return StartCoroutine (AskPreference (0,false));
+                    yield return StartCoroutine (AskPreference (0,false,(!isPostTest)? true : false));
 					} else
-						yield return StartCoroutine (AskPreference (1,false));
+                    yield return StartCoroutine (AskPreference (1,false,(!isPostTest) ? true:false));
 					randOrder.Clear ();
 					trialsToNextSlider = 4;
                 Debug.Log("got new order");
 					randOrder = GiveRandSequenceOfTwoInts (0, 1, trialsToNextSlider);
 			}
-			if (numTrials_Learning < maxTrials - 1)
+            if (numTrials_Learning < maxTrials - 1 || (!hasLearned && numAdditionalTrials < maxAdditionalTrials-1))
 				yield return StartCoroutine (ShowEndTrialScreen (false,ShouldShowTips()));
 			else if(!isPostTest)
 				yield return StartCoroutine (ShowNextStageScreen ());
 			numTrials_Learning++;
+
+            if(numTrials_Learning >=maxTrials)
+            {
+                numAdditionalTrials++;
+            }
 			yield return 0;
 		}
 
@@ -1138,16 +1162,26 @@ public class ShoplifterScript : MonoBehaviour
 		Debug.Log("about to start Re-Evaluation Phase");
 		stageIndex = 2;
 		bool leftChoice = false;
-		switch (reevalConditionIndex) {
-		case 0:
-			Debug.Log ("IT'S RR");
-			SetupRewardReeval ();
-			break;
-		case 1:
-			Debug.Log ("IT'S TR");
-			SetupTransitionReeval ();
-			break;
-		}
+
+        //do revaluation only if they have learned; otherwise it will be control
+        if (hasLearned)
+        {
+            switch (reevalConditionIndex)
+            {
+                case 0:
+                    Debug.Log("IT'S RR");
+                    SetupRewardReeval();
+                    break;
+                case 1:
+                    Debug.Log("IT'S TR");
+                    SetupTransitionReeval();
+                    break;
+            }
+        }
+        else
+        {
+            Debug.Log("hasn't learnt so this will be CONTROL");
+        }
 		Experiment.Instance.shopLiftLog.LogPhaseEvent("RE-EVALUATION",true);
 		while (numBlocks_Reeval < maxBlocks_Reeval) {
 			while (numTrials_Reeval < maxTrials_Reeval) {
@@ -1164,7 +1198,7 @@ public class ShoplifterScript : MonoBehaviour
 				numTrials_Reeval++;
 				yield return 0;
 			}
-			yield return StartCoroutine (AskPreference (1,false));
+			yield return StartCoroutine (AskPreference (1,false,false));
 //			yield return StartCoroutine (RunRestPeriod());
 			numTrials_Reeval = 0;
 			numBlocks_Reeval++;
@@ -1235,7 +1269,7 @@ public class ShoplifterScript : MonoBehaviour
 
 		Experiment.Instance.shopLiftLog.LogPhaseEvent ("TESTING", true);
 		//run one instances of comp slider  + 2sec resting phase
-			yield return StartCoroutine (AskPreference (0,false));
+			yield return StartCoroutine (AskPreference (0,false,false));
 		yield return StartCoroutine (RunRestPeriod (2f));
         int caseOrder = 0;
         if (Random.value > 0.5f)
@@ -1247,7 +1281,7 @@ public class ShoplifterScript : MonoBehaviour
             //another instance of comp 1-2 slider
             if (i ==1  || i==3)
             {
-                yield return StartCoroutine(AskPreference(0, false));
+                yield return StartCoroutine(AskPreference(0, false,false));
                 yield return StartCoroutine(RunRestPeriod(2f));
             }
             caseOrder = Mathf.Abs(caseOrder - 1);
@@ -1274,7 +1308,7 @@ public class ShoplifterScript : MonoBehaviour
 		}
 
 		//another instance of comp 1-2 slider
-		yield return StartCoroutine (AskPreference (0,false));
+		yield return StartCoroutine (AskPreference (0,false,false));
 		yield return StartCoroutine (RunRestPeriod (2f));
 
 		List<int> multipleChoiceSequence = new List<int> ();
@@ -1418,7 +1452,27 @@ public class ShoplifterScript : MonoBehaviour
 
         TCPServer.Instance.SetState(TCP_Config.DefineStates.SOLO_SLIDER, true);
 		bool pressed = false;
-		yield return StartCoroutine (WaitForButtonPress (10f,didPress =>
+
+        float tElapsed = 0f;
+        float minSelectTime = 1.5f;
+
+        while (tElapsed < minSelectTime)
+        {
+            tElapsed += Time.deltaTime;
+            if (Input.GetButtonDown("Action Button"))
+            {
+
+                infoText.text = "Please take your time to make a choice!";
+                infoGroup.alpha = 1f;
+            }
+            yield return 0;
+        }
+
+        infoText.text = "";
+        infoGroup.alpha = 0f;
+
+
+        yield return StartCoroutine (WaitForButtonPress (9f,didPress =>
 			{
 				pressed=didPress;
 			}
@@ -1478,7 +1532,7 @@ public class ShoplifterScript : MonoBehaviour
         yield return null;
 	}
 
-	IEnumerator AskPreference(int prefType, bool allowTimeouts)
+	IEnumerator AskPreference(int prefType, bool allowTimeouts, bool isLearningPhase)
 	{
 //		Cursor.visible = true;
 //		Cursor.lockState = CursorLockMode.None;
@@ -1499,6 +1553,9 @@ public class ShoplifterScript : MonoBehaviour
 			break;
 			
 		}
+
+
+
 		bool pressed = false;
             if(allowTimeouts)
             {
@@ -1510,7 +1567,25 @@ public class ShoplifterScript : MonoBehaviour
              }
             else
             {
-                yield return StartCoroutine(WaitForButtonPress(10f, didPress =>
+            float tElapsed = 0f;
+            float minSelectTime = 1.5f;
+
+            while(tElapsed<minSelectTime)
+            {
+                tElapsed += Time.deltaTime;
+                if(Input.GetButtonDown("Action Button"))
+                {
+
+                    infoText.text = "Please take your time to make a choice!";
+                    infoGroup.alpha = 1f;
+                }
+                yield return 0;
+            }
+            
+                infoText.text = "";
+                infoGroup.alpha = 0f;
+
+                yield return StartCoroutine(WaitForButtonPress(9f, didPress =>
                 {
                     pressed = didPress;
                 }
@@ -1528,7 +1603,88 @@ public class ShoplifterScript : MonoBehaviour
                 infoText.text = "";
                 infoGroup.alpha = 0f;
             }
-		Experiment.Instance.shopLiftLog.LogFinalSliderValue ("COMPARATIVE", prefGroup.GetComponent<PrefGroupSetup> ().prefSlider.value, pressed);
+
+        float finalSliderValue = prefGroup.GetComponent<PrefGroupSetup>().prefSlider.value;
+
+        if (isLearningPhase)
+        {
+            string leftImgName = prefGroup.GetComponent<PrefGroupSetup>().leftImg.texture.name;
+            string rightImgName = prefGroup.GetComponent<PrefGroupSetup>().rightImg.texture.name;
+
+            bool leftHigher = false; //to indicate if the left IMAGE is of a higher reward value
+                                     //left image is of a left-corridor room
+            if (leftImgName.Contains("One") || leftImgName.Contains("Three"))
+            {
+                Debug.Log("left image is of a left corridor room");
+                if (registerVals[0] > registerVals[1])
+                {
+                    leftHigher = true;
+                }
+                else
+                {
+                    leftHigher = false;
+                }
+            }
+
+            //left image is of a right-corridor room
+            else
+            {
+
+                Debug.Log("left image is of a right corridor room");
+                if (registerVals[0] > registerVals[1])
+                {
+                    leftHigher = false;
+                }
+                else
+                {
+                    leftHigher = true;
+                }
+            }
+
+            float deviation = 0f;
+
+
+            //the slider should ideally be at 0.0
+            if (leftHigher)
+            {
+                Debug.Log("left reward value is higher");
+                deviation = finalSliderValue;
+            }
+            //the slider should ideally be at 1.0
+            else
+            {
+                Debug.Log("right reward value is higher");
+                deviation = 1f - finalSliderValue;
+            }
+
+            //add deviation to the deviationQueue
+
+            Debug.Log("added " + deviation.ToString() + " to the queue");
+            deviationQueue.Enqueue(deviation);
+            //we only want to store the last two values
+            if (deviationQueue.Count > 2)
+            {
+                float dequeuedFloat = deviationQueue.Dequeue();
+                Debug.Log("removed " + dequeuedFloat.ToString() + " from the queue");
+            }
+            Debug.Log("current deviation average  " + deviationQueue.Average().ToString());
+            if (deviationQueue.Average() > 0.4f)
+            {
+                Debug.Log("NOT LEARNED");
+                hasLearned = false;
+            }
+            else
+            {
+                Debug.Log("HAS LEARNED");
+                hasLearned = true;
+            }
+        }
+
+
+
+
+
+        Experiment.Instance.shopLiftLog.LogFinalSliderValue ("COMPARATIVE",finalSliderValue, pressed);
 		prefGroup.gameObject.SetActive (false);
 		afterSlider = true;
 		Cursor.visible = false;
