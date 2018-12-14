@@ -708,7 +708,7 @@ public class ShoplifterScript : MonoBehaviour
             Debug.Log("enabled player cam");
             blackScreen.alpha = 0f;
             EnablePlayerCam(true);
-            while (!Input.GetButtonDown("Action Button") && timer < maxTimer)
+            while (!Input.GetButtonDown("Skip Button") && timer < maxTimer)
             {
                 timer += Time.deltaTime;
                 yield return 0;
