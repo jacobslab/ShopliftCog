@@ -514,36 +514,69 @@ public class ShoplifterScript : MonoBehaviour
     }
 
     //for initial random assignment
-    void AssignRooms()
+    void AssignRooms(bool focusLeft)
     {
-
         leftRegisterObj = envManager.leftRegisterObj;
         rightRegisterObj = envManager.rightRegisterObj;
-        if (Random.value < 0.5f)
+        if (!Config.isDayThree)
         {
-            leftRoom = roomOne;
-            three_L_Audio = envManager.three_L_Audio;
-            leftRoomColor = roomOneColor;
-            rightRoom = roomTwo;
-            three_R_Audio = envManager.three_R_Audio;
-            rightRoomColor = roomTwoColor;
+
+            if (Random.value < 0.5f)
+            {
+                leftRoom = roomOne;
+                three_L_Audio = envManager.three_L_Audio;
+                leftRoomColor = roomOneColor;
+                rightRoom = roomTwo;
+                three_R_Audio = envManager.three_R_Audio;
+                rightRoomColor = roomTwoColor;
 
 
-            Experiment.Instance.shopLiftLog.LogRooms(roomOne.name, roomTwo.name);
+                Experiment.Instance.shopLiftLog.LogRooms(roomOne.name, roomTwo.name);
+            }
+            else
+            {
+                leftRoom = roomTwo;
+                three_L_Audio = envManager.three_R_Audio;
+                leftRoomColor = roomTwoColor;
+
+                rightRoom = roomOne;
+                three_R_Audio = envManager.three_L_Audio;
+                rightRoomColor = roomOneColor;
+
+
+                Experiment.Instance.shopLiftLog.LogRooms(roomTwo.name, roomOne.name);
+            }
         }
         else
         {
-            leftRoom = roomTwo;
-            three_L_Audio = envManager.three_R_Audio;
-            leftRoomColor = roomTwoColor;
+            if (focusLeft)
+            {
+                leftRoom = roomOne;
+                three_L_Audio = envManager.three_L_Audio;
+                leftRoomColor = roomOneColor;
+                rightRoom = roomTwo;
+                three_R_Audio = envManager.three_R_Audio;
+                rightRoomColor = roomTwoColor;
 
-            rightRoom = roomOne;
-            three_R_Audio = envManager.three_L_Audio;
-            rightRoomColor = roomOneColor;
+
+                Experiment.Instance.shopLiftLog.LogRooms(roomOne.name, roomTwo.name);
+            }
+            else
+            {
+                leftRoom = roomTwo;
+                three_L_Audio = envManager.three_R_Audio;
+                leftRoomColor = roomTwoColor;
+
+                rightRoom = roomOne;
+                three_R_Audio = envManager.three_L_Audio;
+                rightRoomColor = roomOneColor;
 
 
-            Experiment.Instance.shopLiftLog.LogRooms(roomTwo.name, roomOne.name);
+                Experiment.Instance.shopLiftLog.LogRooms(roomTwo.name, roomOne.name);
+            }
+
         }
+
 
         leftRoom.transform.localPosition = envManager.leftRoomTransform.localPosition;
         rightRoom.transform.localPosition = envManager.rightRoomTransform.localPosition;
@@ -1094,11 +1127,12 @@ public class ShoplifterScript : MonoBehaviour
 		randOrder = GiveRandSequenceOfTwoInts(0,1,trialsToNextSlider);
 
         //		while(numTrials < 1)
-
+        bool showOnce = true;
+        int maxDeviationQueueLength = 2;
+        float deviationThreshold = 0.4f;
 
         while(numTrials_Learning < maxTrials || (!isPostTest && !hasLearned && numAdditionalTrials < maxAdditionalTrials))
 		{ 
-            
 			Debug.Log ("about to run phase 1");
 			if (randOrder [0] == 0)
 				isLeft = true;
@@ -1122,14 +1156,28 @@ public class ShoplifterScript : MonoBehaviour
             {
 				showOneTwo = !showOneTwo;
 					if (showOneTwo) {
-                    yield return StartCoroutine (AskPreference (0,false,(!isPostTest)? true : false));
+                    yield return StartCoroutine (AskPreference (0,false,(!isPostTest)? true : false,maxDeviationQueueLength,deviationThreshold));
 					} else
-                    yield return StartCoroutine (AskPreference (1,false,(!isPostTest) ? true:false));
+                    yield return StartCoroutine (AskPreference (1,false,(!isPostTest) ? true:false, maxDeviationQueueLength, deviationThreshold));
 					randOrder.Clear ();
 					trialsToNextSlider = 4;
                 Debug.Log("got new order");
 					randOrder = GiveRandSequenceOfTwoInts (0, 1, trialsToNextSlider);
 			}
+
+
+            if (numTrials_Learning >= maxTrials && !hasLearned && showOnce)
+            {
+                intertrialGroup.alpha = 1f;
+                maxDeviationQueueLength = 1;
+                deviationThreshold = 0.35f;
+                intertrialText.text = "Please keep in mind the structure of rooms and rewards when responding";
+                yield return new WaitForSeconds(5f);
+                intertrialText.text = "";
+                intertrialGroup.alpha = 0f;
+                showOnce = false;
+            } 
+
             if (numTrials_Learning < maxTrials - 1 || (!hasLearned && numAdditionalTrials < maxAdditionalTrials-1))
 				yield return StartCoroutine (ShowEndTrialScreen (false,ShouldShowTips()));
 			else if(!isPostTest)
@@ -1198,7 +1246,7 @@ public class ShoplifterScript : MonoBehaviour
 				numTrials_Reeval++;
 				yield return 0;
 			}
-			yield return StartCoroutine (AskPreference (1,false,false));
+			yield return StartCoroutine (AskPreference (1,false,false,0,0f));
 //			yield return StartCoroutine (RunRestPeriod());
 			numTrials_Reeval = 0;
 			numBlocks_Reeval++;
@@ -1269,7 +1317,7 @@ public class ShoplifterScript : MonoBehaviour
 
 		Experiment.Instance.shopLiftLog.LogPhaseEvent ("TESTING", true);
 		//run one instances of comp slider  + 2sec resting phase
-			yield return StartCoroutine (AskPreference (0,false,false));
+			yield return StartCoroutine (AskPreference (0,false,false,0,0f));
 		yield return StartCoroutine (RunRestPeriod (2f));
         int caseOrder = 0;
         if (Random.value > 0.5f)
@@ -1281,7 +1329,7 @@ public class ShoplifterScript : MonoBehaviour
             //another instance of comp 1-2 slider
             if (i ==1  || i==3)
             {
-                yield return StartCoroutine(AskPreference(0, false,false));
+                yield return StartCoroutine(AskPreference(0, false,false,0,0f));
                 yield return StartCoroutine(RunRestPeriod(2f));
             }
             caseOrder = Mathf.Abs(caseOrder - 1);
@@ -1308,7 +1356,7 @@ public class ShoplifterScript : MonoBehaviour
 		}
 
 		//another instance of comp 1-2 slider
-		yield return StartCoroutine (AskPreference (0,false,false));
+		yield return StartCoroutine (AskPreference (0,false,false,0,0f));
 		yield return StartCoroutine (RunRestPeriod (2f));
 
 		List<int> multipleChoiceSequence = new List<int> ();
@@ -1507,7 +1555,21 @@ public class ShoplifterScript : MonoBehaviour
 
         TCPServer.Instance.SetState(TCP_Config.DefineStates.MULTIPLE_CHOICE, true);
 		bool pressed = false;
-		yield return StartCoroutine (WaitForButtonPress (10f,didPress =>
+        float tElapsed = 0f;
+        float minSelectTime = 2f;
+
+        while (tElapsed < minSelectTime)
+        {
+            tElapsed += Time.deltaTime;
+            if (Input.GetButtonDown("Action Button"))
+            {
+
+                infoText.text = "Please take your time to make a choice!";
+                infoGroup.alpha = 1f;
+            }
+            yield return 0;
+        }
+        yield return StartCoroutine (WaitForButtonPress (10f,didPress =>
 			{
 				pressed=didPress;
 			}
@@ -1532,7 +1594,7 @@ public class ShoplifterScript : MonoBehaviour
         yield return null;
 	}
 
-	IEnumerator AskPreference(int prefType, bool allowTimeouts, bool isLearningPhase)
+	IEnumerator AskPreference(int prefType, bool allowTimeouts, bool isLearningPhase,int maxDeviationQueueLength, float deviationThreshold)
 	{
 //		Cursor.visible = true;
 //		Cursor.lockState = CursorLockMode.None;
@@ -1579,6 +1641,13 @@ public class ShoplifterScript : MonoBehaviour
                     infoText.text = "Please take your time to make a choice!";
                     infoGroup.alpha = 1f;
                 }
+                yield return 0;
+            }
+            //wait for them to select something on the slider
+            while (!Input.GetKeyDown(KeyCode.LeftArrow) && !Input.GetKeyDown(KeyCode.RightArrow) && Mathf.Abs(Input.GetAxis("Horizontal")) == 0f)
+            {
+                infoText.text = "Please move the slider to make a choice!";
+                infoGroup.alpha = 1f;
                 yield return 0;
             }
             
@@ -1662,13 +1731,13 @@ public class ShoplifterScript : MonoBehaviour
             Debug.Log("added " + deviation.ToString() + " to the queue");
             deviationQueue.Enqueue(deviation);
             //we only want to store the last two values
-            if (deviationQueue.Count > 2)
+            if (deviationQueue.Count > maxDeviationQueueLength)
             {
                 float dequeuedFloat = deviationQueue.Dequeue();
                 Debug.Log("removed " + dequeuedFloat.ToString() + " from the queue");
             }
             Debug.Log("current deviation average  " + deviationQueue.Average().ToString());
-            if (deviationQueue.Average() > 0.4f)
+            if (deviationQueue.Average() > deviationThreshold)
             {
                 Debug.Log("NOT LEARNED");
                 hasLearned = false;
@@ -1911,7 +1980,14 @@ public class ShoplifterScript : MonoBehaviour
 
 
             //after env has been selected and all necessary object references set, assign rooms and randomize cam zones
-            AssignRooms();
+            if (blockCount == 0)
+            {
+                AssignRooms(true);
+            }
+            else
+            {
+                AssignRooms(true);
+            }
             RandomizeSpeedChangeZones();
             yield return StartCoroutine(RandomizeCameraZones(blockCount));
         }
@@ -1953,11 +2029,15 @@ public class ShoplifterScript : MonoBehaviour
         int totalEnvCount = environments.Count;
 		int currentReevalCondition = 0;
 
-
-		if (Random.value > 0.5f) {
-			isTransition = true;
-		} else
-			isTransition = false;
+        if (!Config.isDayThree)
+        {
+            if (Random.value > 0.5f)
+            {
+                isTransition = true;
+            }
+            else
+                isTransition = false;
+        }
 		
 		int startingIndex = 0;
 
@@ -1982,8 +2062,25 @@ public class ShoplifterScript : MonoBehaviour
             RandomizeSuitcases();
             if (!Experiment.shouldCheckpoint)
             {
-                AssignRooms();
-                yield return StartCoroutine(PickRegisterValues()); //new reg values to be picked for each environment
+                if (!Config.isDayThree)
+                {
+
+                    AssignRooms(false);
+                    yield return StartCoroutine(PickRegisterValues()); //new reg values to be picked for each environment
+                }
+                else
+                {
+                    if (i == 0)
+                    {
+                        registerVals[0] = 30;
+                        registerVals[1] = 70;
+                    }
+                    else if (i == 1)
+                    {
+                        registerVals[0] = 50;
+                        registerVals[1] = 90;
+                    }
+                }
             }
 
             isTransition = !isTransition; //flip the transition condition before the next round

@@ -6,6 +6,7 @@ public class ColorChanger : MonoBehaviour {
 
 	public Color selColor;
 	public Color emissionColor;
+    public bool shouldWhitewash = false;
 	// Use this for initialization
 	void Start () {
 		ChangeColors (selColor);
@@ -32,7 +33,7 @@ public class ColorChanger : MonoBehaviour {
 						meshRend [i].materials [j].DisableKeyword ("_EMISSION");
 				}
 			}
-			else if(meshRend[i].gameObject.layer !=12) {
+            else if(meshRend[i].gameObject.layer !=12 && shouldWhitewash) {
 				meshRend [i].material.color = Color.white;
 				meshRend [i].material.DisableKeyword ("_EMISSION");
 //				meshRend [i].material.EnableKeyword ("_EMISSION");

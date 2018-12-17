@@ -59,8 +59,10 @@ public class AnswerSelector : MonoBehaviour {
 
         if (positions.Count >= 0)
         {
-            currPositionIndex = -1; //reset it to move it to the blank option at the beginning
-            Experiment.Instance.shopLiftLog.LogSelectorPosition(-1, "BLANK");
+            
+            currPositionIndex = 0; //reset it to move it to the blank option at the beginning
+            //Experiment.Instance.shopLiftLog.LogSelectorPosition(-1, "BLANK");
+            Experiment.Instance.shopLiftLog.LogSelectorPosition(currPositionIndex, gameObject.GetComponent<MultipleChoiceGroup>().choiceImageList[currPositionIndex].name);
             selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(blankPosition, selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D.y, selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D.z);
         }
         //int resetIndex = 0; //first index
@@ -143,7 +145,6 @@ public class AnswerSelector : MonoBehaviour {
 			selectionSwitchAudio.PlayOneShot (selectionSwitchAudio.clip);
 
 		}
-
         Experiment.Instance.shopLiftLog.LogSelectorPosition (currPositionIndex,gameObject.GetComponent<MultipleChoiceGroup>().choiceImageList[currPositionIndex].name);
 
 		//TODO: make nice smooth movement with a coroutine.

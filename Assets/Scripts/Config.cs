@@ -1,24 +1,25 @@
 using UnityEngine;
 using System.Collections;
 
-public class Config : MonoBehaviour {
+public class Config : MonoBehaviour
+{
 
-	public enum Version
-	{
-		MAZE
-	}
+    public enum Version
+    {
+        MAZE
+    }
 
-	public enum SessionType
-	{
-		Adaptive,
-		NonAdaptive
-	}
+    public enum SessionType
+    {
+        Adaptive,
+        NonAdaptive
+    }
 
-	public static SessionType sessionType=SessionType.NonAdaptive;
-	public static Version BuildVersion = Version.MAZE; //TODO: change this for your experiment!
-	public static string VersionNumber = "2.055"; //TODO: change this for your experiment!
+    public static SessionType sessionType = SessionType.NonAdaptive;
+    public static Version BuildVersion = Version.MAZE; //TODO: change this for your experiment!
+    public static string VersionNumber = "2.055"; //TODO: change this for your experiment!
 
-	public static bool isGamified=false;
+    public static bool isGamified = false;
 
 #if SYS3
 	public static bool isSystem3 = true;
@@ -39,6 +40,13 @@ public class Config : MonoBehaviour {
     public static bool isSystem2 = false;
     public static bool isSyncbox = false;
     public static bool isSystem3 = false;
+#endif
+
+#if DAY_THREE
+    public static bool isDayThree=true;
+#else
+    public static bool isDayThree = false;
+
 #endif
 
     //recall
@@ -74,11 +82,11 @@ public class Config : MonoBehaviour {
     public static float maxPercent = 0.5f;
 
 	void Awake(){
-		#if !GAMIFIED
+#if !GAMIFIED
 		isGamified=false;
-		#else
+#else
 		isGamified=true;
-		#endif
+#endif
 		DontDestroyOnLoad(transform.gameObject);
 	}
 
