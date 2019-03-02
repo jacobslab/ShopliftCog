@@ -57,7 +57,8 @@ public class CameraZone : MonoBehaviour {
 		if (Input.GetButtonDown("Action Button") && isFocus && !showingWarning && !hasSneaked) {
 			Debug.Log ("showing warning is: " + showingWarning.ToString ());
 			Debug.Log ("press count is: " + pressCount.ToString ());
-			if (pressCount <= 1) {
+            Experiment.Instance.shopLiftLog.LogButtonPress();
+            if (pressCount <= 1) {
 				Debug.Log ("activate cam: " + activateCam.ToString () + " isFocus : " + isFocus.ToString ());
 				if (activateCam && isFocus) {
 					Experiment.Instance.shopLift.infoGroup.alpha = 0f;
