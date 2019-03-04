@@ -141,11 +141,16 @@ public class ShoplifterScript : MonoBehaviour
     bool firstTime = true;
 
     string currentPhaseName = "NONE";
-
+#if !SPANISH
     private string pressToContinueInstruction = "Press (X) button to continue";
     private string musicBaselineInstruction = "In what follows you will hear music from the game. \n Please maintain your gaze at the fixation cross, relax, and pay attention to the music.";
     private string imageSlideshowInstruction = "In what follows you will see images from the game. \n Please maintain your gaze on the screen, relax, and pay attention to different images that appear on the screen.";
-
+#else
+    private string pressToContinueInstruction = "Presiona (X) para continuar";
+    private string musicBaselineInstruction = "A continuar escucharas música del juego.\n Por favor mantenga su mirada en la cruz. \n Relájate y preste atención a la música.";
+    private string imageSlideshowInstruction = "A continuar escucharas imagenes del juego.\n Por favor mantenga su mirada en la cruz. \n Relájate y preste atención a la imagenes.";
+    
+#endif
 
     //tip metrics
     private int consecutiveIncorrectCameraPresses = 0; //activated when >=4
@@ -185,8 +190,8 @@ public class ShoplifterScript : MonoBehaviour
     private GameObject roomTwo;
 
     //instr strings
-    private string doorText = "Press (X) to open the door";
-    private string registerText = "Press (X) to open the suitcase!";
+    private string doorText = "Presiona el botón (X) para abrir la puertar";
+    private string registerText = "Presiona el botón (X) para abrir la maleta";
 
 
     //audio
@@ -1171,8 +1176,7 @@ public class ShoplifterScript : MonoBehaviour
                 intertrialGroup.alpha = 1f;
                 maxDeviationQueueLength = 1;
                 deviationThreshold = 0.35f;
-                intertrialText.text = "Please keep in mind the structure of rooms and rewards when responding";
-                yield return new WaitForSeconds(5f);
+                intertrialText.text = "Por favor, tenga en cuenta la estructura de las habitaciones y las recompensas al responder";
                 intertrialText.text = "";
                 intertrialGroup.alpha = 0f;
                 showOnce = false;
@@ -1510,7 +1514,7 @@ public class ShoplifterScript : MonoBehaviour
             if (Input.GetButtonDown("Action Button"))
             {
 
-                infoText.text = "Please take your time to make a choice!";
+                infoText.text = "Por favor tómese su tiempo para hacer una elección";
                 infoGroup.alpha = 1f;
             }
             yield return 0;
@@ -1526,7 +1530,7 @@ public class ShoplifterScript : MonoBehaviour
 			}
 		));
 
-        infoText.text = "Please make a choice!";
+        infoText.text = "Por favor, haga una elección";
         infoGroup.alpha = 1f;
         if(!pressed)
         {
@@ -1564,7 +1568,7 @@ public class ShoplifterScript : MonoBehaviour
             if (Input.GetButtonDown("Action Button"))
             {
 
-                infoText.text = "Please take your time to make a choice!";
+                infoText.text = "Por favor tómese su tiempo para hacer una elección";
                 infoGroup.alpha = 1f;
             }
             yield return 0;
@@ -1575,7 +1579,7 @@ public class ShoplifterScript : MonoBehaviour
 			}
 		));
         Debug.Log("about to ask them to make a choice");
-        infoText.text = "Please make a choice!";
+        infoText.text = "Por favor, haga una elección";
         infoGroup.alpha = 1f;
         if (!pressed)
         {
@@ -1638,7 +1642,7 @@ public class ShoplifterScript : MonoBehaviour
                 if(Input.GetButtonDown("Action Button"))
                 {
 
-                    infoText.text = "Please take your time to make a choice!";
+                    infoText.text = "Por favor tómese su tiempo para hacer una elección";
                     infoGroup.alpha = 1f;
                 }
                 yield return 0;
@@ -1646,7 +1650,7 @@ public class ShoplifterScript : MonoBehaviour
             //wait for them to select something on the slider
             while (!Input.GetKeyDown(KeyCode.LeftArrow) && !Input.GetKeyDown(KeyCode.RightArrow) && Mathf.Abs(Input.GetAxis("Horizontal")) == 0f)
             {
-                infoText.text = "Please move the slider to make a choice!";
+                infoText.text = "Por favor, mueva el control deslizante para hacer una elección";
                 infoGroup.alpha = 1f;
                 yield return 0;
             }
@@ -1660,7 +1664,7 @@ public class ShoplifterScript : MonoBehaviour
                 }
             ));
                 Debug.Log("about to ask them to make a choice");
-                infoText.text = "Please make a choice!";
+                infoText.text = "Por favor, haga una elección";
                 infoGroup.alpha = 1f;
                 if(!pressed)
                 {
@@ -2087,7 +2091,7 @@ public class ShoplifterScript : MonoBehaviour
 
             currentPhaseName = "TRAINING";
             if (ExperimentSettings.isTraining)
-                yield return StartCoroutine(RunCamTrainingPhase((i == 0) ? true : false));
+                yield return StartCoroutine(RunCamTrainingPhase(false));
 
             blackScreen.alpha = 0f;
             //randomize rooms and cam zones again
@@ -2331,9 +2335,9 @@ public class ShoplifterScript : MonoBehaviour
 		EnablePlayerCam (false);
         intertrialGroup.alpha = 1f;
 		if (!isTraining) {
-			intertrialText.text = "Starting next trial...";
+			intertrialText.text = "Comenzando la siguiente prueba...";
 		} else {
-			intertrialText.text = "Starting next practice trial...";
+			intertrialText.text = "Comenzando el siguiente ensayo de práctica...";
 		}
 		Experiment.Instance.shopLiftLog.LogEndTrial ();
         Experiment.Instance.shopLiftLog.LogEndTrialScreen(true,hasTips);
@@ -2360,7 +2364,7 @@ public class ShoplifterScript : MonoBehaviour
     }
 	IEnumerator ShowEndEnvironmentStageScreen()
 	{ 	intertrialGroup.alpha = 1f;
-		intertrialText.text = "Congratulations!\n You have finished one environment! \n Have a brief rest!";
+		intertrialText.text = "Felicidades, Has terminado. \n Tenga un breve descanso.";
 
         Experiment.Instance.shopLiftLog.LogEndEnvironmentStage(true);
 		yield return new WaitForSeconds(30f);
@@ -2371,7 +2375,7 @@ public class ShoplifterScript : MonoBehaviour
 	IEnumerator ShowEndSessionScreen()
 	{ 
 		intertrialGroup.alpha = 1f;
-        intertrialText.text = "Congratulations! You have completed your session! \n Press Escape to exit the application";
+        intertrialText.text = "Felicidades. Has completado la sesión. \n Presiona Escape para salir de la aplicación.";
 		Experiment.Instance.shopLiftLog.LogEndSession(true);
 		yield return new WaitForSeconds(1000f);
 		intertrialGroup.alpha = 0f;

@@ -21,7 +21,7 @@ public class PrefGroupSetup : MonoBehaviour {
 #if KEYBOARD
         instructionText.text = "Left and right arrow keys moves slider \nPress(X) to confirm";
 #else
-        instructionText.text = "Left joystick moves slider \nPress(X) to confirm";
+        instructionText.text = "El joystick izquierdo mueve el control. \n Presiona(X) para continuar";
 #endif
         active = true;
 		if(Experiment.Instance!=null)
