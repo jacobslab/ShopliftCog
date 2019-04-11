@@ -124,6 +124,7 @@ public class ExperimentSettings : MonoBehaviour {
         //		ChangeReevalType ();
         ToggleSystem2();
         reevalType = ReevalType.Transition;
+        InitMainMenuLabels();
 //		reevalType = ReevalType.Reward;
 //		}
 	}
@@ -207,18 +208,16 @@ public class ExperimentSettings : MonoBehaviour {
 	void InitMainMenuLabels()
 	{
 
-
+        Debug.Log("syncbox " + Config.isSyncbox.ToString());
 		if (Config.isSyncbox) {
 			buildType.text = "Syncbox";
 		}
-//		} else if (Config.isSystem3) {
-//			if (Config.BuildVersion == Config.Version.RAA1) {
-//				buildType.text = "SYS3 Record-Only";
-//			} else {
-//				buildType.text = "SYS3 Stim"; 
-//			}
-//		} else
-			buildType.text = "Demo";
+        else if(Config.isSystem2)
+        {
+            buildType.text = "Blackrock";
+        }
+		else
+		    buildType.text = "Demo";
 
 		buildDate = 
 			new FileInfo(Assembly.GetExecutingAssembly().Location).LastWriteTime.ToString();

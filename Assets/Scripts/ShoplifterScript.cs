@@ -1119,9 +1119,10 @@ public class ShoplifterScript : MonoBehaviour
 		bool isLeft = (Random.value < 0.5f) ? true: false;
 		bool showOneTwo = false;
 
-		int[] sliderTrials = new int[] { 3,7,11,15,19,maxTrials-1 };
 
-		int trialsToNextSlider = 4; //should be 4 in the beginning
+        //current list of slider-trials during learning phase are 3,7,11,15,19,23
+
+        int trialsToNextSlider = 4; //should be 4 in the beginning
 		List<int> randOrder = new List<int>();
 		int randIndex = 0;
 		randOrder = GiveRandSequenceOfTwoInts(0,1,trialsToNextSlider);
@@ -1184,6 +1185,7 @@ public class ShoplifterScript : MonoBehaviour
 				yield return StartCoroutine (ShowNextStageScreen ());
 			numTrials_Learning++;
 
+            //this indicates that we are in additional_learning phase until the subject has learned the structure
             if(numTrials_Learning >=maxTrials)
             {
                 numAdditionalTrials++;
@@ -2361,6 +2363,9 @@ public class ShoplifterScript : MonoBehaviour
 	IEnumerator ShowEndEnvironmentStageScreen()
 	{ 	intertrialGroup.alpha = 1f;
 		intertrialText.text = "Congratulations!\n You have finished one environment! \n Have a brief rest!";
+
+        //reset deviation queue before beginning the next environment
+        deviationQueue = new Queue<float>();
 
         Experiment.Instance.shopLiftLog.LogEndEnvironmentStage(true);
 		yield return new WaitForSeconds(30f);
