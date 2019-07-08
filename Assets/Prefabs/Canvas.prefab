@@ -929,7 +929,7 @@ GameObject:
   - component: {fileID: 225449799674114730}
   - component: {fileID: 114353635838822808}
   m_Layer: 5
-  m_Name: ImagineScreen
+  m_Name: DotGroup
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1901,7 +1901,7 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 20
+    m_FontSize: 16
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 1
@@ -1912,7 +1912,8 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "How confident are you that \nthis room leads to higher reward?"
+  m_Text: "\xBFPara sacar la m\xE1xima cantidad de dinero, \ncuanto prefieres pasar
+    por esta sala?"
 --- !u!114 &114012839645258192
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2059,7 +2060,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: GAME PAUSED
+  m_Text: JUEGO PAUSADO
 --- !u!114 &114046189827039222
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2092,7 +2093,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Not Sure
+  m_Text: No es seguro
 --- !u!114 &114058888945413726
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2189,9 +2190,8 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "You will see a room next. \n\nImagine going through the room until the
-    briefcase, and collecting the cash!\n\nYou will then be asked how much you prefer
-    \nstarting your journey there\n\n"
+  m_Text: "Siguiente, veras una sala.\nImag\xEDnate atravesando la sala hasta la maleta
+    y recoger el dinero.\nSe le preguntara cuanto prefiere comenzar su viaje all\xED."
 --- !u!114 &114077231534725974
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2213,10 +2213,10 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 30
+    m_FontSize: 18
     m_FontStyle: 0
     m_BestFit: 0
-    m_MinSize: 2
+    m_MinSize: 1
     m_MaxSize: 40
     m_Alignment: 4
     m_AlignByGeometry: 0
@@ -2268,7 +2268,7 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 30
+    m_FontSize: 22
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 2
@@ -2279,7 +2279,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Please press (X) only at the exact spot!
+  m_Text: "por favor presione el (X) bot\xF3n solo en el lugar exacto"
 --- !u!114 &114125232059221996
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2507,7 +2507,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Confident
+  m_Text: Confidente
 --- !u!114 &114224166699748454
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2594,7 +2594,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: You did not deactivate the camera!
+  m_Text: "No has desactivado la c\xE1mara"
 --- !u!114 &114261756254682348
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2702,11 +2702,9 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Left joystick moves slider
+  m_Text: 'El joystick izquierdo mueve el control.
 
-    Press (X) to confirm
-
-'
+    Presiona (X) para continuar'
 --- !u!114 &114288672814148802
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2739,7 +2737,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Room A
+  m_Text: Sala A
 --- !u!114 &114290879500689280
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3061,7 +3059,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: You deactivated the camera!
+  m_Text: "usted desactiv\xF3 la c\xE1mara"
 --- !u!114 &114345112108765544
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3132,7 +3130,9 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "Choose room with left joystick \nPress (X) to confirm\n"
+  m_Text: 'Elige la sala con el joystick izquierdo.
+
+    Presiona (X) para continuar'
 --- !u!114 &114376949281768130
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3176,7 +3176,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "Which room will lead you \nto more cash?"
+  m_Text: "\xBFCu\xE1l sala te llevara a m\xE1s dinero?"
 --- !u!114 &114401886190190690
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3496,10 +3496,10 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "WELCOME!\n\nIn this game, you are a thief!\nYou will go through different
-    routes that pass through different rooms. \nAt the end of each route there is
-    a briefcase with money. \n\nYour goal is to learn which routes lead to the most
-    money!\nMore instructions will follow\n\nPress (X) to continue\n"
+  m_Text: "\nBienvenidos\nEn este juego, eres un ladr\xF3n.\nPasaras por diferentes
+    rutas que pasan por diferentes salas.\nAl final de cada ruta hay una maleta con
+    dinero.\nSu objetivo es aprender qu\xE9 rutas conducen a la mayor cantidad de
+    dinero\nM\xE1s instrucciones seguir\xE1n\nPresiona (X) para continuar"
 --- !u!114 &114498955443457180
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3565,7 +3565,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Not Confident
+  m_Text: No Confidente
 --- !u!114 &114514716836585616
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3657,22 +3657,22 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 20
+    m_FontSize: 18
     m_FontStyle: 0
     m_BestFit: 1
-    m_MinSize: 2
-    m_MaxSize: 40
+    m_MinSize: 1
+    m_MaxSize: 25
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "TRAINING\n\nFirst, in each room you must deactivate its security camera
-    \nby pressing (X) when you pass its location.\n\nYou\u2019ll see the camera only
-    the first time you pass through the room. \nRemember this location, the \u201Ccamera
-    zone\u201D! \n\nPress (X) each time you pass a camera zone!\nIf you fail, you
-    get caught & lose money.\n\nPress (X) to Proceed!\n"
+  m_Text: "Entrenamiento \u2013 \nPrimero, en cada sala necesitas desactivar la c\xE1mara
+    de seguridad presionando (X) cuando pases su ubicaci\xF3n.\nSolo veras la c\xE1mara
+    de seguridad la primera vez que pases por la sala. \nRecuerda esta ubicaci\xF3n,
+    la \u201Czona de c\xE1mara\u201D.\nPresiona (X) cada vez que pases una zona de
+    c\xE1mara.\nSi fallas, te atrapan y pierdes dinero.\nPresiona (X) para continuar\n"
 --- !u!114 &114536216970141778
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3834,7 +3834,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Room A
+  m_Text: Sala A
 --- !u!114 &114571188623635426
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3894,8 +3894,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Imagine going through this room to the briefcase at the end of the chain
-    of rooms
+  m_Text: Imagina pasar por esta sala hasta la maleta al final de la cadena de salas.
 --- !u!114 &114589464884388934
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4244,11 +4243,9 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Left joystick moves slider
+  m_Text: 'El joystick izquierdo mueve el control.
 
-    Press (X) to confirm
-
-'
+    Presiona (X) para continuar'
 --- !u!114 &114693074319644622
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4281,7 +4278,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Room B
+  m_Text: Sala B
 --- !u!114 &114694436004108452
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4602,7 +4599,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: TRAINING PERIOD
+  m_Text: Entrenamiento
 --- !u!114 &114795695376283842
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4721,7 +4718,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Room B
+  m_Text: Sala B
 --- !u!114 &114860462362149256
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -5046,29 +5043,12 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'SESSION STARTING
-
-
-    Now, you are ready to go on a heist!
-
-
-    Just follow the on-screen instructions!
-
-    Pay attention to your location, and learn the routes
-
-    as well as the rewards you collect from briefcases at the end!
-
-    Stay watchful! Routes and rewards may change...
-
-
-    As you just learnt, make sure to press (X) over
-
-    camera zones to deactivate the cameras!
-
-
-    Press (X) to proceed!
-
-'
+  m_Text: "Inicio de Sesi\xF3n \u2013 \n\xA1Ahora, est\xE1s listo para ir a un robo!\n\nSiga
+    las instrucciones en la pantalla.\nPresta atenci\xF3n a tu ubicaci\xF3n y aprende
+    las rutas as\xED como las recompensas que recoges en las maletas al final.\nMantente
+    vigilante. Rutas y premios pueden cambiar.\nComo acabas de aprender, presiona
+    (X) sobre las zonas de cameras para desactivar las c\xE1maras.\nPresiona (X) para
+    continuar"
 --- !u!114 &114982721082280966
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -5166,7 +5146,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Which room immediately follows the room above?
+  m_Text: "\xBFQu\xE9 sala viene despu\xE9s de la sala de arriba?"
 --- !u!222 &222002684613118748
 CanvasRenderer:
   m_ObjectHideFlags: 1

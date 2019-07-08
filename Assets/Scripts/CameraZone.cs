@@ -112,7 +112,7 @@ public class CameraZone : MonoBehaviour {
 			activateCam = true;
 			if (isTraining) {
 //				Debug.Log ("showing sneak text now");
-				Experiment.Instance.shopLift.infoText.text = "Press (X) to deactivate the camera!";
+                Experiment.Instance.shopLift.infoText.text = "Presiona el botón (X) para desactivar la cámara";
 				activateCam = true;
 				Experiment.Instance.shopLift.infoGroup.alpha = 1f;
 			}
