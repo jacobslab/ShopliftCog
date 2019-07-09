@@ -6,7 +6,7 @@ public class Config : MonoBehaviour
 
     public enum Version
     {
-        MAZE
+        SpaceHeist
     }
 
     public enum SessionType
@@ -16,8 +16,8 @@ public class Config : MonoBehaviour
     }
 
     public static SessionType sessionType = SessionType.NonAdaptive;
-    public static Version BuildVersion = Version.MAZE; //TODO: change this for your experiment!
-    public static string VersionNumber = "2.055"; //TODO: change this for your experiment!
+    public static Version BuildVersion = Version.SpaceHeist; //TODO: change this for your experiment!
+    public static string VersionNumber = "2.1"; //TODO: change this for your experiment!
 
     public static bool isGamified = false;
 

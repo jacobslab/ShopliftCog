@@ -73,7 +73,7 @@ public class TCP_Config : MonoBehaviour
 	
 	public static SessionType GetSessionType(){
 		switch (Config.BuildVersion) {
-		case Config.Version.MAZE:
+		case Config.Version.SpaceHeist:
 			return SessionType.NO_STIM;
 		}
 

@@ -222,7 +222,7 @@ public class ExperimentSettings : MonoBehaviour {
 		buildDate = 
 			new FileInfo(Assembly.GetExecutingAssembly().Location).LastWriteTime.ToString();
 		UnityEngine.Debug.Log (buildDate);
-		buildType.text += " | " + buildDate;
+		buildType.text += " [ " + buildDate + " ] ";
 
 	}
 
