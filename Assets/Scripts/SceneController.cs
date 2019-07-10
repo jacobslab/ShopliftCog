@@ -31,38 +31,8 @@ public class SceneController : MonoBehaviour
 
     void Awake()
     {
-        //		if (_instance != null) {
-        //			Debug.Log("Instance already exists!");
-        //			Destroy(transform.gameObject);
-        //			return;
-        //		}
-#if PHOTOSYNC
-        syncPulser.SetActive(true);
-        syncPulsingImage.SetActive(true);
-
-#else
-        if (!Config.isSyncbox)
-        {
-            syncPulser.SetActive(false);
-        }
-        else
-        {
-            syncPulser.SetActive(true);
-            syncPulser.GetComponent<SyncPulser>().enabled = false;
-            syncPulser.GetComponent<SyncboxControl>().enabled = true;
-        }
-        syncPulsingImage.SetActive(false);
-#endif
-
-#if KEYBOARD
-
         instructionVideoPlayer.GetComponent<VideoPlayer>().clip = keyboard_video;
         instructionVideoPlayer.GetComponent<AudioSource>().clip = keyboard_audio;
-#else
-        instructionVideoPlayer.GetComponent<VideoPlayer>().clip = controller_video;
-        instructionVideoPlayer.GetComponent<AudioSource>().clip = controller_audio;
-
-#endif
         _instance = this;
 	}
 

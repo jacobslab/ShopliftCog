@@ -75,9 +75,6 @@ public class ShoplifterScript : MonoBehaviour
 
     private int correctResponses = 0;
 
-    //SYSTEM2 Server
-    public TCPServer tcpServer;
-
 
     public List<int> registerVal1;
     public List<int> registerVal2;
@@ -112,8 +109,9 @@ public class ShoplifterScript : MonoBehaviour
     public List<int> registerVals; // 0-1 is L-R for toy , 2-3 is L-R for hardware
 
     private string activeEnvLabel = "";
-
+#if !UNITY_WEBGL
     public GameObject instructionVideo;
+#endif
 
     public List<GameObject> environments;
     private EnvironmentManager envManager;
@@ -141,16 +139,11 @@ public class ShoplifterScript : MonoBehaviour
     bool firstTime = true;
 
     string currentPhaseName = "NONE";
-#if !SPANISH
+
     private string pressToContinueInstruction = "Press (X) button to continue";
     private string musicBaselineInstruction = "In what follows you will hear music from the game. \n Please maintain your gaze at the fixation cross, relax, and pay attention to the music.";
     private string imageSlideshowInstruction = "In what follows you will see images from the game. \n Please maintain your gaze on the screen, relax, and pay attention to different images that appear on the screen.";
-#else
-    private string pressToContinueInstruction = "Presiona (X) para continuar";
-    private string musicBaselineInstruction = "A continuar escucharas música del juego.\n Por favor mantenga su mirada en la cruz. \n Relájate y preste atención a la música.";
-    private string imageSlideshowInstruction = "A continuar escucharas imagenes del juego.\n Por favor mantenga su mirada en la cruz. \n Relájate y preste atención a la imagenes.";
-    
-#endif
+
 
     //tip metrics
     private int consecutiveIncorrectCameraPresses = 0; //activated when >=4
@@ -190,8 +183,8 @@ public class ShoplifterScript : MonoBehaviour
     private GameObject roomTwo;
 
     //instr strings
-    private string doorText = "Presiona el botón (X) para abrir la puertar";
-    private string registerText = "Presiona el botón (X) para abrir la maleta";
+    private string doorText = "Press (X) to open the door";
+    private string registerText = "Press (X) to open the suitcase!";
 
 
     //audio
@@ -277,9 +270,16 @@ public class ShoplifterScript : MonoBehaviour
 
     void Awake()
     {
+        //instantiate the list and create two empty objects as temporary placeholders
+        environments = new List<GameObject>();
+        environments.Add(null);
+        environments.Add(null);
+
         blackScreen.alpha = 1f;
         pauseUI.alpha = 0f;
+#if !UNITY_WEBGL
         instructionVideo.SetActive(false);
+#endif
         EnablePlayerCam(false);
         Application.targetFrameRate = 60;
         deviationQueue = new Queue<float>();
@@ -327,7 +327,7 @@ public class ShoplifterScript : MonoBehaviour
         Cursor.visible = false;
         //then start the task
         //		Debug.Log(ExperimentSettings.env.ToString());
-        StartCoroutine("RunTask");
+        //StartCoroutine("RunTask");
     }
 
     // Update is called once per frame
@@ -726,47 +726,10 @@ public class ShoplifterScript : MonoBehaviour
 		Debug.Log ("starting cam training phase");
 		CameraZone.isTraining = true;
         //inst video
-        if (playVideo)
-        {
-            Debug.Log("set video");
-            instructionVideo.SetActive(true);
-            Experiment.Instance.shopLiftLog.LogInstructionVideoEvent(true);
-            float timer = 0f;
-            float maxTimer = instructionVideo.GetComponent<AudioSource>().clip.length;
-            Debug.Log("the max timer is : " + maxTimer.ToString());
-            instructionVideo.GetComponent<VideoPlayer>().Prepare();
-            while (!instructionVideo.GetComponent<VideoPlayer>().isPrepared)
-            {
-                yield return 0;
-            }
-            TCPServer.Instance.SetState(TCP_Config.DefineStates.INST_VIDEO, true);
-            instructionVideo.GetComponent<VideoPlayer>().Play();
-            instructionVideo.gameObject.GetComponent<AudioSource>().Play();
-            yield return new WaitForSeconds(0.3f);
-            Debug.Log("enabled player cam");
-            blackScreen.alpha = 0f;
-            EnablePlayerCam(true);
-            while (!Input.GetButtonDown("Skip Button") && timer < maxTimer)
-            {
-                timer += Time.deltaTime;
-                yield return 0;
-            }
-
-            TCPServer.Instance.SetState(TCP_Config.DefineStates.INST_VIDEO, false);
-            instructionVideo.GetComponent<VideoPlayer>().Stop();
-            instructionVideo.SetActive(false);
-
-            Experiment.Instance.shopLiftLog.LogInstructionVideoEvent(false);
-        }
-        else
-        {
-            blackScreen.alpha = 0f;
-            EnablePlayerCam(true);
-        }
-
+        blackScreen.alpha = 0f;
+        EnablePlayerCam(true);
 
         Experiment.Instance.shopLiftLog.LogTextInstructions(1,true);
-        TCPServer.Instance.SetState(TCP_Config.DefineStates.INSTRUCTIONS, true);
         introInstructionGroup.alpha = 1f;
         yield return new WaitForSeconds(0.5f);
 
@@ -788,10 +751,8 @@ public class ShoplifterScript : MonoBehaviour
 		trainingInstructionsGroup.alpha = 0f;
 
         Experiment.Instance.shopLiftLog.LogTextInstructions(2, false);
-        TCPServer.Instance.SetState(TCP_Config.DefineStates.INSTRUCTIONS, false);
 
         //training begins here
-        TCPServer.Instance.SetState(TCP_Config.DefineStates.TRAINING, true);
         Experiment.Instance.shopLiftLog.LogPhaseEvent("TRAINING", true);
 
 		trainingPeriodGroup.alpha = 1f;
@@ -828,7 +789,6 @@ public class ShoplifterScript : MonoBehaviour
         //make sure the cameras don't appear outside of training zone
         CameraZone.firstTime = false;
 
-        TCPServer.Instance.SetState(TCP_Config.DefineStates.TRAINING, false);
         Experiment.Instance.shopLiftLog.LogPhaseEvent("TRAINING", false);
 		trainingPeriodGroup.alpha = 0f;
 		yield return null;
@@ -1177,7 +1137,8 @@ public class ShoplifterScript : MonoBehaviour
                 intertrialGroup.alpha = 1f;
                 maxDeviationQueueLength = 1;
                 deviationThreshold = 0.35f;
-                intertrialText.text = "Por favor, tenga en cuenta la estructura de las habitaciones y las recompensas al responder";
+                intertrialText.text = "Please keep in mind the structure of rooms and rewards when responding";
+                yield return new WaitForSeconds(5f);
                 intertrialText.text = "";
                 intertrialGroup.alpha = 0f;
                 showOnce = false;
@@ -1268,7 +1229,6 @@ public class ShoplifterScript : MonoBehaviour
     IEnumerator RunSilentTraversal()
     {
 
-        TCPServer.Instance.SetState(TCP_Config.DefineStates.SILENT_TRAVERSAL, true);
         Experiment.Instance.shopLiftLog.LogPhaseEvent("SILENT_TRAVERSAL", true);
 
         bool isLeft = (Random.value >0.5f) ?  true : false;
@@ -1294,7 +1254,6 @@ public class ShoplifterScript : MonoBehaviour
         }
 
         mainSceneListener.enabled = true;
-        TCPServer.Instance.SetState(TCP_Config.DefineStates.SILENT_TRAVERSAL, false);
         Experiment.Instance.shopLiftLog.LogPhaseEvent("SILENT_TRAVERSAL", false);
         //AudioListener.pause = true;
         //AudioListener.volume = 0f;
@@ -1384,7 +1343,6 @@ public class ShoplifterScript : MonoBehaviour
     IEnumerator RunImageSlideshow()
     {
         //show image slideshow instructions
-        TCPServer.Instance.SetState(TCP_Config.DefineStates.IMAGE_BASELINE, true);
         Experiment.Instance.shopLiftLog.LogPhaseEvent("IMAGE_BASELINE", true);
 
         intertrialGroup.alpha = 1f;
@@ -1410,7 +1368,6 @@ public class ShoplifterScript : MonoBehaviour
 
         }
 
-        TCPServer.Instance.SetState(TCP_Config.DefineStates.IMAGE_BASELINE, false);
         Experiment.Instance.shopLiftLog.LogPhaseEvent("IMAGE_BASELINE", false);
         yield return null;
     }
@@ -1418,7 +1375,6 @@ public class ShoplifterScript : MonoBehaviour
 	IEnumerator RunMusicBaseline()
 	{
         //show music baseline instructions
-        TCPServer.Instance.SetState(TCP_Config.DefineStates.MUSIC_BASELINE, true);
         Experiment.Instance.shopLiftLog.LogPhaseEvent("MUSIC_BASELINE", true);
 
         intertrialGroup.alpha = 1f;
@@ -1444,7 +1400,6 @@ public class ShoplifterScript : MonoBehaviour
             completeAudioList.RemoveAt(randIndex);
         }
 
-        TCPServer.Instance.SetState(TCP_Config.DefineStates.MUSIC_BASELINE, false);
         Experiment.Instance.shopLiftLog.LogPhaseEvent("MUSIC_BASELINE", false);
 
         yield return null;
@@ -1503,8 +1458,6 @@ public class ShoplifterScript : MonoBehaviour
 		EnablePlayerCam (false);
 		prefSolo.gameObject.SetActive (true);
 		prefSolo.GetComponent<PrefSoloSetup> ().SetupPrefs (prefIndex);
-
-        TCPServer.Instance.SetState(TCP_Config.DefineStates.SOLO_SLIDER, true);
 		bool pressed = false;
 
         float tElapsed = 0f;
@@ -1516,7 +1469,7 @@ public class ShoplifterScript : MonoBehaviour
             if (Input.GetButtonDown("Action Button"))
             {
 
-                infoText.text = "Por favor tómese su tiempo para hacer una elección";
+                infoText.text = "Please take your time to make a choice!";
                 infoGroup.alpha = 1f;
             }
             yield return 0;
@@ -1532,7 +1485,7 @@ public class ShoplifterScript : MonoBehaviour
 			}
 		));
 
-        infoText.text = "Por favor, haga una elección";
+        infoText.text = "Please make a choice!";
         infoGroup.alpha = 1f;
         if(!pressed)
         {
@@ -1547,7 +1500,6 @@ public class ShoplifterScript : MonoBehaviour
 		Experiment.Instance.shopLiftLog.LogFinalSliderValue ("SOLO", prefSolo.GetComponent<PrefSoloSetup> ().prefSlider.value, pressed);
 		prefSolo.gameObject.SetActive (false);
 		Cursor.visible = false;
-        TCPServer.Instance.SetState(TCP_Config.DefineStates.SOLO_SLIDER, false);
 
         yield return null;
 	}
@@ -1558,8 +1510,6 @@ public class ShoplifterScript : MonoBehaviour
 		EnablePlayerCam (false);
 		multipleChoiceGroup.gameObject.SetActive (true);
 		multipleChoiceGroup.GetComponent<MultipleChoiceGroup> ().SetupMultipleChoice (prefIndex);
-
-        TCPServer.Instance.SetState(TCP_Config.DefineStates.MULTIPLE_CHOICE, true);
 		bool pressed = false;
         float tElapsed = 0f;
         float minSelectTime = 2f;
@@ -1570,7 +1520,7 @@ public class ShoplifterScript : MonoBehaviour
             if (Input.GetButtonDown("Action Button"))
             {
 
-                infoText.text = "Por favor tómese su tiempo para hacer una elección";
+                infoText.text = "Please take your time to make a choice!";
                 infoGroup.alpha = 1f;
             }
             yield return 0;
@@ -1581,7 +1531,7 @@ public class ShoplifterScript : MonoBehaviour
 			}
 		));
         Debug.Log("about to ask them to make a choice");
-        infoText.text = "Por favor, haga una elección";
+        infoText.text = "Please make a choice!";
         infoGroup.alpha = 1f;
         if (!pressed)
         {
@@ -1595,7 +1545,6 @@ public class ShoplifterScript : MonoBehaviour
         Experiment.Instance.shopLiftLog.LogMultipleChoiceResponse (multipleChoiceGroup.GetComponent<AnswerSelector> ().ReturnSelectorPosition(), pressed);
 		multipleChoiceGroup.gameObject.SetActive (false);
 		Cursor.visible = false;
-        TCPServer.Instance.SetState(TCP_Config.DefineStates.MULTIPLE_CHOICE,false);
 
         yield return null;
 	}
@@ -1606,7 +1555,6 @@ public class ShoplifterScript : MonoBehaviour
 //		Cursor.lockState = CursorLockMode.None;
 
 		prefGroup.GetComponent<PrefGroupSetup> ().prefSlider.value = 0.5f;
-        TCPServer.Instance.SetState(TCP_Config.DefineStates.COMP_SLIDER, true);
 
         EnablePlayerCam (false);
 		prefGroup.gameObject.SetActive (true);
@@ -1644,7 +1592,7 @@ public class ShoplifterScript : MonoBehaviour
                 if(Input.GetButtonDown("Action Button"))
                 {
 
-                    infoText.text = "Por favor tómese su tiempo para hacer una elección";
+                    infoText.text = "Please take your time to make a choice!";
                     infoGroup.alpha = 1f;
                 }
                 yield return 0;
@@ -1652,7 +1600,7 @@ public class ShoplifterScript : MonoBehaviour
             //wait for them to select something on the slider
             while (!Input.GetKeyDown(KeyCode.LeftArrow) && !Input.GetKeyDown(KeyCode.RightArrow) && Mathf.Abs(Input.GetAxis("Horizontal")) == 0f)
             {
-                infoText.text = "Por favor, mueva el control deslizante para hacer una elección";
+                infoText.text = "Please move the slider to make a choice!";
                 infoGroup.alpha = 1f;
                 yield return 0;
             }
@@ -1666,7 +1614,7 @@ public class ShoplifterScript : MonoBehaviour
                 }
             ));
                 Debug.Log("about to ask them to make a choice");
-                infoText.text = "Por favor, haga una elección";
+                infoText.text = "Please make a choice!";
                 infoGroup.alpha = 1f;
                 if(!pressed)
                 {
@@ -1763,7 +1711,6 @@ public class ShoplifterScript : MonoBehaviour
 		prefGroup.gameObject.SetActive (false);
 		afterSlider = true;
 		Cursor.visible = false;
-        TCPServer.Instance.SetState(TCP_Config.DefineStates.COMP_SLIDER, false);
         yield return null;
 	}
 
@@ -1772,13 +1719,11 @@ public class ShoplifterScript : MonoBehaviour
 		infoText.text = text;
 		infoGroup.alpha = 1f;
 		Experiment.Instance.shopLiftLog.LogWaitEvent("DOOR",true);
-        TCPServer.Instance.SetState(TCP_Config.DefineStates.DOOR_OPEN, true);
         yield return StartCoroutine (WaitForButtonPress (5f,didPress =>
 			{
 				Debug.Log("did press: " + didPress);
 			}
 		));
-        TCPServer.Instance.SetState(TCP_Config.DefineStates.DOOR_OPEN, false);
         Experiment.Instance.shopLiftLog.LogWaitEvent("DOOR",false);
 		infoGroup.alpha = 0f;
 		yield return null;
@@ -1847,7 +1792,11 @@ public class ShoplifterScript : MonoBehaviour
 
 		//first turn off all environments
 		for (int i = 0; i<environments.Count; i++) {
-			envManager = environments [envIndex].GetComponent<EnvironmentManager> ();
+            Debug.Log("environments  " + environments);
+            Debug.Log("env count " + environments.Count);
+            Debug.Log("env index " + envIndex.ToString());
+            Debug.Log("env " + environments[envIndex]);
+            envManager = environments [envIndex].GetComponent<EnvironmentManager> ();
 		}
 		camVehicle.GetComponent<CapsuleCollider> ().height = 3.2f;
 		Debug.Log ("picking environment");
@@ -2001,36 +1950,13 @@ public class ShoplifterScript : MonoBehaviour
 		yield return null;
 	}
 
-    IEnumerator RunTask()
+    public IEnumerator RunTask()
     {
 		stageIndex = 1;
 		Experiment.Instance.CreateSessionStartedFile ();
 
         //		yield return StartCoroutine(PickRegisterValues());
-
-        //only run if system2 is expected
-        if (Config.isSystem2)
-        {
-            sys2ConnectionGroup.alpha = 1f;
-
-            sys2ConnectionText.text = "Attempting to connect with server...";
-            //wait till the SYS2 Server connects
-            while (!tcpServer.isConnected)
-            {
-                yield return 0;
-            }
-            sys2ConnectionText.text = "Waiting for server to start...";
-            while (!tcpServer.canStartGame)
-            {
-                yield return 0;
-            }
-
-            sys2ConnectionGroup.alpha = 0f;
-        }
-        else
-        {
-            sys2ConnectionGroup.alpha = 0f;
-        }
+        sys2ConnectionGroup.alpha = 0f;
 
         int totalEnvCount = environments.Count;
 		int currentReevalCondition = 0;
@@ -2062,7 +1988,8 @@ public class ShoplifterScript : MonoBehaviour
             numTrials_Learning = 0;
             numTrials = 0;
             currentReevalCondition = reevalConditions[i];
-
+            Debug.Log("about to pick env");
+            Debug.Log("taskmanager status " + gameObject.activeSelf.ToString());
             yield return StartCoroutine(PickEnvironment(i,true));
 
             RandomizeSuitcases();
@@ -2093,7 +2020,7 @@ public class ShoplifterScript : MonoBehaviour
 
             currentPhaseName = "TRAINING";
             if (ExperimentSettings.isTraining)
-                yield return StartCoroutine(RunCamTrainingPhase(false));
+                yield return StartCoroutine(RunCamTrainingPhase((i == 0) ? true : false));
 
             blackScreen.alpha = 0f;
             //randomize rooms and cam zones again
@@ -2107,9 +2034,7 @@ public class ShoplifterScript : MonoBehaviour
             if (ExperimentSettings.isLearning)
             {
 
-                TCPServer.Instance.SetState(TCP_Config.DefineStates.LEARNING, true);
                 yield return StartCoroutine(RunLearningPhase(false, maxTrials_Learning));
-                TCPServer.Instance.SetState(TCP_Config.DefineStates.LEARNING, false);
             }
 
             //shuffle rewards
@@ -2121,9 +2046,7 @@ public class ShoplifterScript : MonoBehaviour
             CheckpointSession(i, true);
             if (ExperimentSettings.isReeval)
             {
-                TCPServer.Instance.SetState(TCP_Config.DefineStates.REEVALUATION, true);
                 yield return StartCoroutine(RunReevaluationPhase(currentReevalCondition));
-                TCPServer.Instance.SetState(TCP_Config.DefineStates.REEVALUATION, false);
             }
 
 
@@ -2133,9 +2056,7 @@ public class ShoplifterScript : MonoBehaviour
             if (ExperimentSettings.isTesting)
             {
 
-                TCPServer.Instance.SetState(TCP_Config.DefineStates.TESTING, true);
                 yield return StartCoroutine(RunTestingPhase());
-                TCPServer.Instance.SetState(TCP_Config.DefineStates.TESTING, false);
             }
 
 
@@ -2144,9 +2065,7 @@ public class ShoplifterScript : MonoBehaviour
             {
                 Debug.Log("RUNNING ADDITIONAL LEARN PHASE");
                 currentPhaseName = "POST-TEST";
-                TCPServer.Instance.SetState(TCP_Config.DefineStates.POST_TEST, true);
                 yield return StartCoroutine(RunLearningPhase(true, maxTrials_PostTest));
-                TCPServer.Instance.SetState(TCP_Config.DefineStates.POST_TEST, true);
             }
             //skip if it is the final environment
             if (i != totalEnvCount - 1)
@@ -2264,7 +2183,6 @@ public class ShoplifterScript : MonoBehaviour
         //		yield return new WaitForSeconds (2f);
 
         //then open the suitcase
-        TCPServer.Instance.SetState(TCP_Config.DefineStates.REWARD_OPEN, true);
         suitcaseObj.GetComponent<Animator> ().SetTrigger ("Open");
 //		suitcaseObj.GetComponent<Suitcase>().TurnImageOff();
 
@@ -2289,7 +2207,6 @@ public class ShoplifterScript : MonoBehaviour
         Debug.Log("waiting for 2 seconds");
 		yield return StartCoroutine(rewardScore.gameObject.GetComponent<FontChanger> ().GrowText (2f));
 		rewardScore.enabled = false;
-        TCPServer.Instance.SetState(TCP_Config.DefineStates.REWARD_OPEN, false);
         Experiment.Instance.shopLiftLog.LogRegisterEvent(false);
 
 //        infoGroup.alpha = 0f;
@@ -2337,9 +2254,9 @@ public class ShoplifterScript : MonoBehaviour
 		EnablePlayerCam (false);
         intertrialGroup.alpha = 1f;
 		if (!isTraining) {
-			intertrialText.text = "Comenzando la siguiente prueba...";
+			intertrialText.text = "Starting next trial...";
 		} else {
-			intertrialText.text = "Comenzando el siguiente ensayo de práctica...";
+			intertrialText.text = "Starting next practice trial...";
 		}
 		Experiment.Instance.shopLiftLog.LogEndTrial ();
         Experiment.Instance.shopLiftLog.LogEndTrialScreen(true,hasTips);
@@ -2366,7 +2283,7 @@ public class ShoplifterScript : MonoBehaviour
     }
 	IEnumerator ShowEndEnvironmentStageScreen()
 	{ 	intertrialGroup.alpha = 1f;
-		intertrialText.text = "Felicidades, Has terminado. \n Tenga un breve descanso.";
+		intertrialText.text = "Congratulations!\n You have finished one environment! \n Have a brief rest!";
 
         //reset deviation queue before beginning the next environment
         deviationQueue = new Queue<float>();
@@ -2380,7 +2297,7 @@ public class ShoplifterScript : MonoBehaviour
 	IEnumerator ShowEndSessionScreen()
 	{ 
 		intertrialGroup.alpha = 1f;
-        intertrialText.text = "Felicidades. Has completado la sesión. \n Presiona Escape para salir de la aplicación.";
+        intertrialText.text = "Congratulations! You have completed your session! \n Press Escape to exit the application";
 		Experiment.Instance.shopLiftLog.LogEndSession(true);
 		yield return new WaitForSeconds(1000f);
 		intertrialGroup.alpha = 0f;
@@ -2393,7 +2310,6 @@ public class ShoplifterScript : MonoBehaviour
 		Debug.Log ("randomizing speed");
 		suggestedSpeed = Random.Range (minSpeed, maxSpeed);
 		StartCoroutine ("UpdateSpeed", suggestedSpeed);
-        TCPServer.Instance.SetState(TCP_Config.DefineStates.SPEED_CHANGE, true);
 //		Debug.Log ("randomized speed to: " + currentSpeed.ToString ());
 	}
 

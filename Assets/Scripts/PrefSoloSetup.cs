@@ -20,7 +20,7 @@ public class PrefSoloSetup : MonoBehaviour
 #if KEYBOARD
         instructionText.text = "Left and right arrow keys moves slider \nPress(X) to confirm";
 #else
-        instructionText.text = "El joystick izquierdo mueve el control. \n Presiona(X) para continuar";
+        instructionText.text = "Left joystick moves slider \nPress(X) to confirm";
 #endif
 
         active = true;

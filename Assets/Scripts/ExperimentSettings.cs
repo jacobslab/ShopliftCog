@@ -16,7 +16,8 @@ public class ExperimentSettings : MonoBehaviour {
 	public static bool shouldStim=false;
 
 
-	public static bool isLogging = true;
+//#TODO: CHANGE THIS when you're ready to incorporate logging
+    public static bool isLogging = false; 
 
 	public enum Environment
 	{
@@ -222,7 +223,7 @@ public class ExperimentSettings : MonoBehaviour {
 		buildDate = 
 			new FileInfo(Assembly.GetExecutingAssembly().Location).LastWriteTime.ToString();
 		UnityEngine.Debug.Log (buildDate);
-		buildType.text += " [ " + buildDate + " ] ";
+		buildType.text += " | " + buildDate;
 
 	}
 
