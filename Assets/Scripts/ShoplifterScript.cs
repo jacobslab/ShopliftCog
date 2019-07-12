@@ -2314,7 +2314,7 @@ public class ShoplifterScript : MonoBehaviour
             timer += Time.deltaTime;
             yield return 0;
         }
-        intertrialText.text = "";
+        intertrialText.text = "Al día siguiente";
         intertrialGroup.alpha = 0f;
         yield return null;
     }
@@ -2324,7 +2324,7 @@ public class ShoplifterScript : MonoBehaviour
 
 		EnablePlayerCam (false);
 		intertrialGroup.alpha = 1f;
-		intertrialText.text = "On the next day...";
+		intertrialText.text = "";
 		Experiment.Instance.shopLiftLog.LogEndTrial ();
 		yield return new WaitForSeconds(2f);
 		intertrialGroup.alpha = 0f;

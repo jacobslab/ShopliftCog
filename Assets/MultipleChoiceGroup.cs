@@ -14,7 +14,7 @@ public class MultipleChoiceGroup : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 #if KEYBOARD
-        instructionText.text = "Choose room with left and right arrow keys";
+        instructionText.text = "Elegir habitación con las teclas de flecha izquierda y derecha";
 #else
         instructionText.text = "Choose room with left joystick";
 #endif
