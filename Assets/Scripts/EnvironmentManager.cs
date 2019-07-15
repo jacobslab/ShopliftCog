@@ -77,8 +77,14 @@ public class EnvironmentManager : MonoBehaviour {
 	public GameObject suitcasePrefab;
 	public List<GameObject> suitcases;
 
-	// Use this for initialization
-	void Start () {
+
+    private void Awake()
+    {
+
+    }
+
+    // Use this for initialization
+    void Start () {
 		
 	}
 	

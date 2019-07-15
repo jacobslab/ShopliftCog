@@ -112,7 +112,10 @@ public class LoadScenePrefabs: MonoBehaviour
         //else, it is loading up individual environment prefabs
         else
         {
+            //fill out missing references to cam zone which are now children of "Base" GameObject
+			basePrefabObj.GetComponent<BaseObject>().AddCamZoneReferences(prefab);
             scenePrefabList.Add(prefab);
+
             Debug.Log("assigning " + scenePrefabList[index]);
             experimentObj.GetComponent<Experiment>().shopLift.environments[index] = scenePrefabList[index];
             Debug.Log("in shoplift env " + experimentObj.GetComponent<Experiment>().shopLift.environments[index].gameObject.name);

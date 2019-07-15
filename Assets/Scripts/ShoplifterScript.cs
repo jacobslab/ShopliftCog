@@ -1953,7 +1953,7 @@ public class ShoplifterScript : MonoBehaviour
     public IEnumerator RunTask()
     {
 		stageIndex = 1;
-		Experiment.Instance.CreateSessionStartedFile ();
+		//Experiment.Instance.CreateSessionStartedFile ();
 
         //		yield return StartCoroutine(PickRegisterValues());
         sys2ConnectionGroup.alpha = 0f;
