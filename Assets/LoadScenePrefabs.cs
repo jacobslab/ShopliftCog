@@ -23,6 +23,7 @@ public class LoadScenePrefabs: MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Cursor.visible = true;
         if (assetBundleType == AssetBundleType.Native)
         {
             basePrefabObj = LoadPrefabFromNativeAssetBundle("base");

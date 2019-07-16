@@ -56,6 +56,7 @@ public class SceneController : MonoBehaviour
 		}
 
 		Debug.Log("loading main menu!");
+
 		//SubjectReaderWriter.Instance.RecordSubjects();
 		Application.LoadLevel(0);
 	}
@@ -105,7 +106,7 @@ public class SceneController : MonoBehaviour
 			Debug.Log ("loading experiment!");
 //			Application.LoadLevel (1);
 			menuObj.SetActive(false);
-			Cursor.visible = false;
+			//Cursor.visible = false;
 			sceneObj.SetActive (true);
 		} else {
 			Debug.Log ("Subject has already finished all blocks! Loading end menu.");

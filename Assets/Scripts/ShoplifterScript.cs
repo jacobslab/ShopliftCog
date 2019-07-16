@@ -324,7 +324,7 @@ public class ShoplifterScript : MonoBehaviour
         rewardScore.enabled = false;
         //		mouseLook.XSensitivity = 0f;
 
-        Cursor.visible = false;
+        //Cursor.visible = false;
         //then start the task
         //		Debug.Log(ExperimentSettings.env.ToString());
         //StartCoroutine("RunTask");
@@ -855,7 +855,9 @@ public class ShoplifterScript : MonoBehaviour
 		clearCameraZoneFlags = false;
 		Debug.Log ("running phase one");
 		AudioSource baseAudio = (pathIndex == 0) ? one_L_Audio : one_R_Audio;
-		float delayOne = Random.Range (0f, baseAudio.clip.length);
+        AudioClip clip = baseAudio.clip;
+        Debug.Log("clip length " + clip.length.ToString());
+        float delayOne = Random.Range (0f, clip.length);
 
 		baseAudio.time = delayOne;
 		baseAudio.Play ();
@@ -1444,7 +1446,7 @@ public class ShoplifterScript : MonoBehaviour
 		));
 		Experiment.Instance.shopLiftLog.LogFinalSliderValue ("IMAGERY_QUALITY", imageryQualityGroup.GetComponent<PrefSoloSetup> ().prefSlider.value,true);
 		imageryQualityGroup.gameObject.SetActive (false);
-		Cursor.visible = false;
+		//Cursor.visible = false;
 
 		yield return null;
 	}
