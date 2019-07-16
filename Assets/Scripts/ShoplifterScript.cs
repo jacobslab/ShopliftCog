@@ -2032,7 +2032,7 @@ public class ShoplifterScript : MonoBehaviour
             //learning phase
 
             currentPhaseName = "LEARNING";
-            CheckpointSession(i, true);
+            //CheckpointSession(i, true);
             if (ExperimentSettings.isLearning)
             {
 
@@ -2045,7 +2045,7 @@ public class ShoplifterScript : MonoBehaviour
 
             //re-evaluation phase
             currentPhaseName = "REEVALUATION";
-            CheckpointSession(i, true);
+            //CheckpointSession(i, true);
             if (ExperimentSettings.isReeval)
             {
                 yield return StartCoroutine(RunReevaluationPhase(currentReevalCondition));
@@ -2054,7 +2054,7 @@ public class ShoplifterScript : MonoBehaviour
 
             //testing phase
             currentPhaseName = "TESTING";
-            CheckpointSession(i, true);
+            //CheckpointSession(i, true);
             if (ExperimentSettings.isTesting)
             {
 
@@ -2075,7 +2075,7 @@ public class ShoplifterScript : MonoBehaviour
                 yield return StartCoroutine(ShowEndEnvironmentStageScreen());
             }
 
-            CheckpointSession(i, true);
+            //CheckpointSession(i, true);
 
             //reset variables
              ResetEnvironmentVariables();
@@ -2088,7 +2088,7 @@ public class ShoplifterScript : MonoBehaviour
 //			environments.RemoveAt (envIndex);
 		}
 
-		CheckpointSession (totalEnvCount-1,false);
+		//CheckpointSession (totalEnvCount-1,false);
 
         //run baseline
         yield return StartCoroutine(MakeCompleteBaselineList(2));
