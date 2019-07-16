@@ -13,6 +13,13 @@ public class LoadScenePrefabs: MonoBehaviour
     private GameObject experimentObj;
     private List<GameObject> scenePrefabList= new List<GameObject>();
 
+    public enum HeistEnv
+    { WA,
+    SO
+    };
+
+    public HeistEnv heistEnvType = HeistEnv.WA;
+
     enum AssetBundleType
     {
         Native,
@@ -28,8 +35,16 @@ public class LoadScenePrefabs: MonoBehaviour
         {
             basePrefabObj = LoadPrefabFromNativeAssetBundle("base");
             experimentObj = basePrefabObj.GetComponent<BaseObject>().experimentObj;
-            assetBundleNames[0] = "spacestation";
-            assetBundleNames[1] = "office";
+            if (heistEnvType == HeistEnv.SO)
+            {
+                assetBundleNames[0] = "spacestation";
+                assetBundleNames[1] = "office";
+            }
+            else
+            {
+                assetBundleNames[0] = "westerntown";
+                assetBundleNames[1] = "apartment";
+            }
             for (int i = 0; i < 2; i++)
             {
                 GameObject prefab = null;
@@ -74,8 +89,16 @@ public class LoadScenePrefabs: MonoBehaviour
     {
         yield return StartCoroutine(LoadPrefabFromWWWAssetBundle("base",-1));
         experimentObj = basePrefabObj.GetComponent<BaseObject>().experimentObj;
-        assetBundleNames[0] = "spacestation";
-        assetBundleNames[1] = "office";
+        if (heistEnvType == HeistEnv.SO)
+        {
+            assetBundleNames[0] = "spacestation";
+            assetBundleNames[1] = "office";
+        }
+        else
+        {
+            assetBundleNames[0] = "westerntown";
+            assetBundleNames[1] = "apartment";
+        }
         for (int i = 0; i < 2; i++)
         {
             yield return StartCoroutine(LoadPrefabFromWWWAssetBundle(assetBundleNames[i],i));
@@ -92,7 +115,7 @@ public class LoadScenePrefabs: MonoBehaviour
     { 
         //Debug.Log("datapath " + Application.dataPath);
         //var path = Path.Combine(Application.dataPath, "AssetBundles/WebGL");
-        var path = "http://orion.bme.columbia.edu/jacobs/SPACEHEIST_SO_WEB/AssetBundles/WebGL";
+        var path = "http://orion.bme.columbia.edu/jacobs/heist_task_data/AssetBundles/WebGL";
         string uri = Path.Combine(path, bundleName);
         Debug.Log("the uri is " + uri);
         UnityWebRequest request = UnityWebRequestAssetBundle.GetAssetBundle(uri, 0);

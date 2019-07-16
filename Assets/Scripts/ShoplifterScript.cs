@@ -877,8 +877,10 @@ public class ShoplifterScript : MonoBehaviour
 		Vector3 endPos = (pathIndex == 0) ? phase1End_L.transform.position : phase1End_R.transform.position;
 		camVehicle.transform.position = startPos;
 		Debug.Log ("start pos " + startPos.ToString ());
+		Debug.Log("end pos " + endPos.ToString());
 		camVehicle.SetActive (true);
 		Experiment.Instance.shopLiftLog.LogMoveEvent (1,true);
+        
 		yield return StartCoroutine(VelocityPlayerTo (startPos,endPos, phase1Factor));
 
 		Experiment.Instance.shopLiftLog.LogMoveEvent (1,false);
@@ -2398,25 +2400,25 @@ public class ShoplifterScript : MonoBehaviour
 		int sign = (int) ((endPos.z - startPos.z) / Mathf.Abs (endPos.z - startPos.z));
 //		Debug.Log ("the sign is: " + sign.ToString ());
 		Vector3 moveDir = new Vector3 (0f, 0f, sign*1f);
-//		Debug.Log ("move dir: " + moveDir.ToString ());
+		Debug.Log("move dir: " + moveDir.ToString());
 		//set some initial current speed
 		currentSpeed = Random.Range(minSpeed,maxSpeed);
-//		Debug.Log ("current speed is " + currentSpeed.ToString ());
+		Debug.Log("current speed is " + currentSpeed.ToString());
 		float distanceLeft = Vector3.Distance(camVehicle.transform.position,endPos);
 
-//		Debug.Log ("distance left is " + distanceLeft.ToString ());
+		Debug.Log("distance left is " + distanceLeft.ToString());
 		camVehicle.GetComponent<RigidbodyFirstPersonController> ().enabled = false;
 		float timer = 0f;
 //		Debug.Log ("velocity player movement");
 		while (distanceLeft > 1.5f) {
 			timer += Time.deltaTime;
-//			Debug.Log ("velocity : " + camVehicle.GetComponent<Rigidbody> ().velocity.ToString ());
+			Debug.Log("velocity : " + camVehicle.GetComponent<Rigidbody>().velocity.ToString());
 			camVehicle.GetComponent<Rigidbody>().velocity = moveDir * currentSpeed;
 			distanceLeft = Vector3.Distance (camVehicle.transform.position, endPos);
 			yield return 0;
 		}
-//		Debug.Log ("stopping the player");
-//		Debug.Log("final timer: " + timer.ToString());
+		Debug.Log("stopping the player");
+		//		Debug.Log("final timer: " + timer.ToString());
 		camVehicle.GetComponent<Rigidbody> ().velocity = Vector3.zero;
 //		camVehicle.GetComponent<RigidbodyFirstPersonController> ().enabled = true;
 		yield return null;
