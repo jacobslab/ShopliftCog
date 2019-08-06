@@ -186,6 +186,12 @@ public class ShoplifterScript : MonoBehaviour
 
 
 
+    //TRAINING environment
+    public GameObject vikingEnv;
+    
+
+
+
     private GameObject roomOne;
     private GameObject roomTwo;
 
@@ -717,6 +723,16 @@ public class ShoplifterScript : MonoBehaviour
 		return vals;
 	}
 
+    IEnumerator RunSliderTrainingPhase()
+    {
+        
+        yield return null;
+    }
+
+    IEnumerator RunMultipleChoiceTrainingPhase()
+    {
+        yield return null;
+    }
 
 
 	IEnumerator RunCamTrainingPhase(bool playVideo)
@@ -1104,6 +1120,8 @@ public class ShoplifterScript : MonoBehaviour
 			return false;
 		
 	}
+
+
 
 
 	IEnumerator RunLearningPhase(bool isPostTest, int maxTrials)
