@@ -64,6 +64,9 @@ public class ShoplifterScript : MonoBehaviour
     public List<GameObject> phase3SpeedChangeZones_L;
     public List<GameObject> phase3SpeedChangeZones_R;
 
+    //camera zone manager
+    public CameraZoneManager cameraZoneManager;
+
 
     //learning bool
     private bool hasLearned = false;
@@ -72,6 +75,9 @@ public class ShoplifterScript : MonoBehaviour
     public Queue<float> deviationQueue;
 
     public AudioListener mainSceneListener;
+
+    //halts player
+    public static bool haltPlayer = false;
 
     private int correctResponses = 0;
 
@@ -259,6 +265,8 @@ public class ShoplifterScript : MonoBehaviour
 
     public GameObject testFloor;
 
+    private int[] trainingReward = new int[2];
+
     enum EnvironmentIndex
     {
         FirstEnv,
@@ -288,9 +296,28 @@ public class ShoplifterScript : MonoBehaviour
             }
         }
     }
+    //SINGLETON
+    private static ShoplifterScript _instance;
+
+    public static ShoplifterScript Instance
+    {
+        get
+        {
+            return _instance;
+        }
+    }
 
     void Awake()
     {
+
+        if (_instance != null)
+        {
+            Debug.Log("Instance already exists!");
+            Destroy(transform.gameObject);
+            return;
+        }
+        _instance = this;
+
         blackScreen.alpha = 1f;
         pauseUI.alpha = 0f;
         instructionVideo.SetActive(false);
@@ -533,11 +560,11 @@ public class ShoplifterScript : MonoBehaviour
     }
 
     //for initial random assignment
-    void AssignRooms(bool focusLeft)
+    void AssignRooms(bool focusLeft, bool isTraining)
     {
         leftRegisterObj = envManager.leftRegisterObj;
         rightRegisterObj = envManager.rightRegisterObj;
-        if (!Config.isDayThree)
+        if (!Config.isDayThree && !isTraining)
         {
 
             if (Random.value < 0.5f)
@@ -570,6 +597,7 @@ public class ShoplifterScript : MonoBehaviour
         {
             if (focusLeft)
             {
+                Debug.Log("FOCUSING LEFT");
                 leftRoom = roomOne;
                 three_L_Audio = envManager.three_L_Audio;
                 leftRoomColor = roomOneColor;
@@ -775,12 +803,53 @@ public class ShoplifterScript : MonoBehaviour
         yield return null;
     }
 
+    void RandomizeTrainingRewards()
+    {
+        int leftReward = 0;
+        int rightReward = 0;
+        //get randomized rewards
+        while (leftReward == rightReward)
+        {
+            leftReward = Mathf.CeilToInt(Random.Range(10f, 90f));
+            rightReward = Mathf.CeilToInt(Random.Range(10f, 90f));
+        }
+        //then add the rewards to a list
+        trainingReward = new int[2];
+        trainingReward[0] = leftReward;
+        trainingReward[1] = rightReward;
+    }
+
     IEnumerator RunSliderTrainingPhase()
     {
-        bool isLeft = true;
-        Debug.Log("about to run phase 3");
-        yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, true, true));
-        yield return StartCoroutine(AskPreference(2, false, false, 0, 0f));
+        
+    
+
+        cameraZoneManager.ToggleAllCamZones(false); //turn off all cameras
+
+        //comparative sliders
+        for (int i = 0; i < 3; i++)
+        {
+            RandomizeTrainingRewards();
+            bool isLeft = true;
+            yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, true, true));
+            //now run the other corridor
+            isLeft = !isLeft;
+            yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, true, true));
+            yield return StartCoroutine(AskPreference(2, false, false, true, 0, 0f));
+        }
+
+        //solo sliders
+        for (int i = 0; i < 3; i++)
+        {
+            RandomizeTrainingRewards();
+            bool isLeft = true;
+            yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, true, true));
+            //now run the other corridor
+            isLeft = !isLeft;
+            yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, true, true));
+            //we will randomly pick on whether to query the left or right room
+            yield return StartCoroutine(AskSoloPreference((Random.value > 0.5f)? 2 : 3, true)); // we have assigned Room 5 (left) and Room 6 (right) as 2 and 3 index in the solo img groups
+         }
         yield return null;
     }
 
@@ -793,6 +862,7 @@ public class ShoplifterScript : MonoBehaviour
 	IEnumerator RunCamTrainingPhase()
 	{
         //blackScreen.alpha = 1f;
+        cameraZoneManager.ToggleAllCamZones(true); //temporarily turn on all cameras
         RandomizeSpeedChangeZones ();
 		Debug.Log ("starting cam training phase");
 		CameraZone.isTraining = true;
@@ -1044,21 +1114,9 @@ public class ShoplifterScript : MonoBehaviour
 		if(activeCamZone!=null)
 			activeCamZone.GetComponent<CameraZone> ().isFocus = false;
 		yield return StartCoroutine (WaitForDoorOpenPress (doorText));
-		if (hasRewards) { 
-			suitcaseObj = Instantiate ((pathIndex==0)?leftSuitcase:rightSuitcase, ((pathIndex==0) ?  register_L.transform.position : register_R.transform.position ) + (new Vector3(0f,0.35f,directionEnv) * 2f), Quaternion.identity) as GameObject;
+		if (hasRewards) {
 
-			if (ExperimentSettings.env == ExperimentSettings.Environment.SpaceStation) {
-				Debug.Log ("NOT WESTERN TOWN");
-				suitcaseObj.transform.eulerAngles = (directionEnv == 1) ? new Vector3 (-90f, 0f, 0f) : new Vector3 (-90f, 0f, 180f);
-//				suitcaseObj = suitcaseObj.transform.GetChild (0).gameObject;
-			} else if (ExperimentSettings.env == ExperimentSettings.Environment.Office) {
-				suitcaseObj.transform.eulerAngles = new Vector3 (0f, 90f, 0f);
-				
-			}
-
-//			if (ExperimentSettings.env == ExperimentSettings.Environment.VikingVillage) {
-//				suitcaseObj.transform.position = suitcaseObj.transform.position + new Vector3 (0f, -1f, 4f);
-//			}
+            SpawnSuitcase(pathIndex); //we spawn suitcase here for both learning and relearning phase
 		}
 			yield return StartCoroutine(targetDoor.GetComponent<Doors> ().Open ());
 			if (pathIndex == 0) {
@@ -1087,7 +1145,11 @@ public class ShoplifterScript : MonoBehaviour
 
 	IEnumerator RunPhaseThree(int pathIndex,bool isDirect, bool hasRewards)
 	{
-		
+        if (isDirect)
+        {
+            EnablePlayerCam(true);
+            SpawnSuitcase(pathIndex); //this will only run for slider training phase where we are directly spawned into the last room in the corridor
+        }
 		ChangeCamZoneFocus ((pathIndex == 0) ? 2 : 5);
 		Vector3 startPos = (pathIndex == 0) ? phase3Start_L.transform.position : phase3Start_R.transform.position;
 		Vector3 endPos = (pathIndex == 0) ? phase3End_L.transform.position : phase3End_R.transform.position;
@@ -1106,7 +1168,6 @@ public class ShoplifterScript : MonoBehaviour
 		Experiment.Instance.shopLiftLog.LogMoveEvent (3, false);
 		clearCameraZoneFlags = true;
 		if (hasRewards) {
-
 			if (pathIndex == 0) {
 				yield return StartCoroutine (MovePlayerTo (camVehicle.transform.position, register_L.transform.position, 0.5f));
 
@@ -1118,7 +1179,7 @@ public class ShoplifterScript : MonoBehaviour
 				activeCamZone.GetComponent<CameraZone> ().isFocus = false;
 			yield return StartCoroutine (WaitForDoorOpenPress (registerText));
 			Experiment.Instance.shopLiftLog.LogWaitEvent ("REGISTER", false);
-			yield return StartCoroutine (ShowRegisterReward (pathIndex));
+			yield return StartCoroutine (ShowRegisterReward (pathIndex,isDirect));
 			Debug.Log ("closing the third door now");
 		}
 		currentAudio.Stop ();
@@ -1126,7 +1187,29 @@ public class ShoplifterScript : MonoBehaviour
 		yield return null;
 	}
 
-	public bool ShouldShowTips()
+    void SpawnSuitcase(int pathIndex)
+    {
+        suitcaseObj = Instantiate((pathIndex == 0) ? leftSuitcase : rightSuitcase, ((pathIndex == 0) ? register_L.transform.position : register_R.transform.position) + (new Vector3(0f, 0.35f, directionEnv) * 2f), Quaternion.identity) as GameObject;
+
+        if (ExperimentSettings.env == ExperimentSettings.Environment.SpaceStation)
+        {
+            Debug.Log("NOT WESTERN TOWN");
+            suitcaseObj.transform.eulerAngles = (System.Math.Abs(directionEnv - 1f) < double.Epsilon) ? new Vector3(-90f, 0f, 0f) : new Vector3(-90f, 0f, 180f);
+            //				suitcaseObj = suitcaseObj.transform.GetChild (0).gameObject;
+        }
+        else if (ExperimentSettings.env == ExperimentSettings.Environment.Office)
+        {
+            suitcaseObj.transform.eulerAngles = new Vector3(0f, 90f, 0f);
+
+        }
+
+        else if (ExperimentSettings.env == ExperimentSettings.Environment.VikingVillage)
+        {
+            suitcaseObj.transform.position = suitcaseObj.transform.position + new Vector3(0f, -1f, 4f);
+        }
+    }
+
+    public bool ShouldShowTips()
 	{
 		if (consecutiveIncorrectCameraPresses >= 4 || didTimeout || afterSlider) {
 			afterSlider = false;
@@ -1195,9 +1278,9 @@ public class ShoplifterScript : MonoBehaviour
             {
 				showOneTwo = !showOneTwo;
 					if (showOneTwo) {
-                    yield return StartCoroutine (AskPreference (0,false,(!isPostTest)? true : false,maxDeviationQueueLength,deviationThreshold));
+                    yield return StartCoroutine (AskPreference (0,false,(!isPostTest)? true : false, false, maxDeviationQueueLength, deviationThreshold));
 					} else
-                    yield return StartCoroutine (AskPreference (1,false,(!isPostTest) ? true:false, maxDeviationQueueLength, deviationThreshold));
+                    yield return StartCoroutine (AskPreference (1,false,(!isPostTest) ? true:false, false, maxDeviationQueueLength, deviationThreshold));
 					randOrder.Clear ();
 					trialsToNextSlider = 4;
                 Debug.Log("got new order");
@@ -1285,7 +1368,7 @@ public class ShoplifterScript : MonoBehaviour
 				numTrials_Reeval++;
 				yield return 0;
 			}
-			yield return StartCoroutine (AskPreference (1,false,false,0,0f));
+			yield return StartCoroutine (AskPreference (1,false,false,false,0,0f));
 //			yield return StartCoroutine (RunRestPeriod());
 			numTrials_Reeval = 0;
 			numBlocks_Reeval++;
@@ -1356,7 +1439,7 @@ public class ShoplifterScript : MonoBehaviour
 
 		Experiment.Instance.shopLiftLog.LogPhaseEvent ("TESTING", true);
 		//run one instances of comp slider  + 2sec resting phase
-			yield return StartCoroutine (AskPreference (0,false,false,0,0f));
+			yield return StartCoroutine (AskPreference (0,false,false,false,0,0f));
 		yield return StartCoroutine (RunRestPeriod (2f));
         int caseOrder = 0;
         if (Random.value > 0.5f)
@@ -1368,7 +1451,7 @@ public class ShoplifterScript : MonoBehaviour
             //another instance of comp 1-2 slider
             if (i ==1  || i==3)
             {
-                yield return StartCoroutine(AskPreference(0, false,false,0,0f));
+                yield return StartCoroutine(AskPreference(0, false,false,false,0,0f));
                 yield return StartCoroutine(RunRestPeriod(2f));
             }
             caseOrder = Mathf.Abs(caseOrder - 1);
@@ -1379,14 +1462,14 @@ public class ShoplifterScript : MonoBehaviour
 			case 0:
 				yield return StartCoroutine (RunPhaseOne (0, false, -1, true));
 				yield return StartCoroutine (RunImaginePeriod (5f));
-				yield return StartCoroutine (AskSoloPreference (0));
+				yield return StartCoroutine (AskSoloPreference (0,false));
 //				yield return StartCoroutine (AskImageryQualityRating (0));
 				yield return StartCoroutine (RunRestPeriod (2f));
 				break;
 			case 1:
 				yield return StartCoroutine(RunPhaseOne (1, false, -1, true));
 				yield return StartCoroutine (RunImaginePeriod (5f));
-				yield return StartCoroutine (AskSoloPreference (1));
+				yield return StartCoroutine (AskSoloPreference (1,false));
 //				yield return StartCoroutine (AskImageryQualityRating (1));
 				yield return StartCoroutine (RunRestPeriod (2f));
 				break;
@@ -1395,7 +1478,7 @@ public class ShoplifterScript : MonoBehaviour
 		}
 
 		//another instance of comp 1-2 slider
-		yield return StartCoroutine (AskPreference (0,false,false,0,0f));
+		yield return StartCoroutine (AskPreference (0,false,false, false,0,0f));
 		yield return StartCoroutine (RunRestPeriod (2f));
 
 		List<int> multipleChoiceSequence = new List<int> ();
@@ -1527,15 +1610,17 @@ public class ShoplifterScript : MonoBehaviour
 		yield return null;
 	}
 
-	IEnumerator AskSoloPreference(int prefIndex)
+	IEnumerator AskSoloPreference(int prefIndex,bool isTraining)
 	{
 
-		prefSolo.GetComponent<PrefSoloSetup> ().prefSlider.value = 0.5f;
+        PrefSoloSetup prefSoloSetup = prefSolo.GetComponent<PrefSoloSetup>();
+
+        prefSoloSetup.prefSlider.value = 0.5f;
 //		Cursor.visible = true;
 //		Cursor.lockState = CursorLockMode.None;
 		EnablePlayerCam (false);
 		prefSolo.gameObject.SetActive (true);
-		prefSolo.GetComponent<PrefSoloSetup> ().SetupPrefs (prefIndex);
+        prefSoloSetup.SetupPrefs (prefIndex);
 
         TCPServer.Instance.SetState(TCP_Config.DefineStates.SOLO_SLIDER, true);
 		bool pressed = false;
@@ -1549,7 +1634,7 @@ public class ShoplifterScript : MonoBehaviour
             if (Input.GetButtonDown("Action Button"))
             {
 
-                infoText.text = "Por favor tómese su tiempo para hacer una elección";
+                infoText.text = "Please take your time to make a choice";
                 infoGroup.alpha = 1f;
             }
             yield return 0;
@@ -1565,7 +1650,7 @@ public class ShoplifterScript : MonoBehaviour
 			}
 		));
 
-        infoText.text = "Por favor, haga una elección";
+        infoText.text = "Please make a choice";
         infoGroup.alpha = 1f;
         if(!pressed)
         {
@@ -1577,7 +1662,110 @@ public class ShoplifterScript : MonoBehaviour
         infoText.text = "";
         infoGroup.alpha = 0f;
 
-		Experiment.Instance.shopLiftLog.LogFinalSliderValue ("SOLO", prefSolo.GetComponent<PrefSoloSetup> ().prefSlider.value, pressed);
+        float finalSliderValue = prefSoloSetup.prefSlider.value;
+
+        if (isTraining)
+        {
+            string focusImg = prefSoloSetup.focusImg.texture.name;
+
+            bool isLeft = false;
+            bool leftHigher = false;
+
+            int leftRegisterReward = trainingReward[0];
+            int rightRegisterReward = trainingReward[1];
+
+            if (leftRegisterReward > rightRegisterReward)
+                leftHigher = true;
+            else
+                leftHigher = false;
+
+            Debug.Log("left higher " + leftHigher.ToString());
+
+            bool rightSliderIsCorrect = false; //keeps track of whether moving the Solo Slider to the right is the correct response or not
+
+            float deviation = 0f; //how much away from the correct answer was the player's response
+
+            if (focusImg.Contains("Five")) //the focus image room was of a left corridor
+            {
+                isLeft = true;
+                if(leftHigher)
+                {
+                    deviation = 1f - finalSliderValue;
+                    rightSliderIsCorrect = true;
+                }
+                else
+                {
+                    deviation = finalSliderValue;
+                    rightSliderIsCorrect = false;
+                }
+                
+            }
+            else //the focus image room was of a right corridor
+            {
+                isLeft = false;
+                if (leftHigher)
+                {
+                    deviation = finalSliderValue;
+                    rightSliderIsCorrect = false;
+                }
+                else
+                {
+                    deviation = 1f - finalSliderValue;
+                    rightSliderIsCorrect = true;
+                }
+            }
+
+            Debug.Log("deviation is " + deviation.ToString());
+            Debug.Log("right slider is correct " + rightSliderIsCorrect.ToString());
+
+            if (deviation > 0.5f)
+            {
+                StartCoroutine(prefSoloSetup.ShowIncorrectFeedback());
+            }
+            else
+            {
+                StartCoroutine(prefSoloSetup.ShowCorrectFeedback());
+            }
+            yield return new WaitForSeconds(1f);
+            CanvasGroup assistiveSliderUI = null;
+            assistiveSliderUI = prefSoloSetup.GetAssistiveSliderUI(rightSliderIsCorrect);
+
+            //turn the assistive slider on
+            assistiveSliderUI.alpha = 1f;
+            if (leftHigher)
+            {
+                while (prefSoloSetup.prefSlider.value > 0.4f)
+                {
+                   
+                    yield return 0;
+                }
+                Debug.Log("waiting for button press");
+                yield return StartCoroutine(WaitForButtonPress(100000f, didPress =>
+                {
+                    pressed = didPress;
+                }));
+            }
+            else
+            {
+                while (1f - prefSoloSetup.prefSlider.value > 0.4f)
+                {
+                   
+                    yield return 0;
+                }
+                Debug.Log("waiting for button press");
+                yield return StartCoroutine(WaitForButtonPress(100000f, didPress =>
+                {
+                    pressed = didPress;
+                }));
+            }
+
+
+
+
+        }
+
+
+        Experiment.Instance.shopLiftLog.LogFinalSliderValue ("SOLO", finalSliderValue, pressed);
 		prefSolo.gameObject.SetActive (false);
 		Cursor.visible = false;
         TCPServer.Instance.SetState(TCP_Config.DefineStates.SOLO_SLIDER, false);
@@ -1591,7 +1779,6 @@ public class ShoplifterScript : MonoBehaviour
 		EnablePlayerCam (false);
 		multipleChoiceGroup.gameObject.SetActive (true);
 		multipleChoiceGroup.GetComponent<MultipleChoiceGroup> ().SetupMultipleChoice (prefIndex);
-
         TCPServer.Instance.SetState(TCP_Config.DefineStates.MULTIPLE_CHOICE, true);
 		bool pressed = false;
         float tElapsed = 0f;
@@ -1633,12 +1820,17 @@ public class ShoplifterScript : MonoBehaviour
         yield return null;
 	}
 
-	IEnumerator AskPreference(int prefType, bool allowTimeouts, bool isLearningPhase,int maxDeviationQueueLength, float deviationThreshold)
+	IEnumerator AskPreference(int prefType, bool allowTimeouts, bool isLearningPhase, bool isTraining, int maxDeviationQueueLength, float deviationThreshold)
 	{
-//		Cursor.visible = true;
-//		Cursor.lockState = CursorLockMode.None;
+        //		Cursor.visible = true;
+        //		Cursor.lockState = CursorLockMode.None;
 
-		prefGroup.GetComponent<PrefGroupSetup> ().prefSlider.value = 0.5f;
+        Debug.Log("left reward is " + trainingReward[0].ToString() + " and right reward is " + trainingReward[1].ToString());
+
+        PrefGroupSetup prefGroupSetup = prefGroup.GetComponent<PrefGroupSetup>();
+
+
+        prefGroupSetup.prefSlider.value = 0.5f;
         TCPServer.Instance.SetState(TCP_Config.DefineStates.COMP_SLIDER, true);
 
         EnablePlayerCam (false);
@@ -1646,15 +1838,15 @@ public class ShoplifterScript : MonoBehaviour
 		switch (prefType) {
 		//between 1 and 2
 		case 0:
-			prefGroup.GetComponent<PrefGroupSetup> ().SetupPrefs (0);
+                prefGroupSetup.SetupPrefs(0);
 			break;
 		//between 3 and 4
 		case 1:
-			prefGroup.GetComponent<PrefGroupSetup> ().SetupPrefs (1);
+                prefGroupSetup.SetupPrefs (1);
 			break;
         //between 5 and 6
         case 2:
-            prefGroup.GetComponent<PrefGroupSetup>().SetupPrefs(2);
+                prefGroupSetup.SetupPrefs(2);
             break;
 
         }
@@ -1703,8 +1895,11 @@ public class ShoplifterScript : MonoBehaviour
                 }
             ));
                 Debug.Log("about to ask them to make a choice");
+            if (isTraining)
+            {
                 infoText.text = "Por favor, haga una elección";
                 infoGroup.alpha = 1f;
+            }
                 if(!pressed)
                 {
                     yield return StartCoroutine(WaitForButtonPress(100000f, didPress =>
@@ -1716,19 +1911,33 @@ public class ShoplifterScript : MonoBehaviour
                 infoGroup.alpha = 0f;
             }
 
-        float finalSliderValue = prefGroup.GetComponent<PrefGroupSetup>().prefSlider.value;
+        float finalSliderValue = prefGroupSetup.prefSlider.value;
 
-        if (isLearningPhase)
+        if (isLearningPhase || isTraining)
         {
-            string leftImgName = prefGroup.GetComponent<PrefGroupSetup>().leftImg.texture.name;
-            string rightImgName = prefGroup.GetComponent<PrefGroupSetup>().rightImg.texture.name;
+            string leftImgName = prefGroupSetup.leftImg.texture.name;
+            string rightImgName = prefGroupSetup.rightImg.texture.name;
 
             bool leftHigher = false; //to indicate if the left IMAGE is of a higher reward value
                                      //left image is of a left-corridor room
-            if (leftImgName.Contains("One") || leftImgName.Contains("Three"))
+
+            int leftRegisterReward = 0;
+            int rightRegisterReward = 0;
+            if(isTraining)
+            {
+                leftRegisterReward = trainingReward[0];
+                rightRegisterReward = trainingReward[1];
+            }
+            else
+            {
+                leftRegisterReward = registerVals[0];
+                rightRegisterReward = registerVals[1];
+            }
+            if (leftImgName.Contains("One") || leftImgName.Contains("Three") || leftImgName.Contains("Five"))
             {
                 Debug.Log("left image is of a left corridor room");
-                if (registerVals[0] > registerVals[1])
+                
+                if (leftRegisterReward > rightRegisterReward)
                 {
                     leftHigher = true;
                 }
@@ -1743,7 +1952,7 @@ public class ShoplifterScript : MonoBehaviour
             {
 
                 Debug.Log("left image is of a right corridor room");
-                if (registerVals[0] > registerVals[1])
+                if (leftRegisterReward > rightRegisterReward)
                 {
                     leftHigher = false;
                 }
@@ -1769,26 +1978,77 @@ public class ShoplifterScript : MonoBehaviour
                 deviation = 1f - finalSliderValue;
             }
 
-            //add deviation to the deviationQueue
+            Debug.Log("deviation is " + deviation.ToString());
 
-            Debug.Log("added " + deviation.ToString() + " to the queue");
-            deviationQueue.Enqueue(deviation);
-            //we only want to store the last two values
-            if (deviationQueue.Count > maxDeviationQueueLength)
+            if (isTraining)
             {
-                float dequeuedFloat = deviationQueue.Dequeue();
-                Debug.Log("removed " + dequeuedFloat.ToString() + " from the queue");
-            }
-            Debug.Log("current deviation average  " + deviationQueue.Average().ToString());
-            if (deviationQueue.Average() > deviationThreshold)
-            {
-                Debug.Log("NOT LEARNED");
-                hasLearned = false;
+                if (deviation > 0.5f)
+                {
+                    StartCoroutine(prefGroupSetup.ShowIncorrectFeedback());
+                }
+                else
+                {
+                    StartCoroutine(prefGroupSetup.ShowCorrectFeedback());
+                }
+                yield return new WaitForSeconds(1f);
+                CanvasGroup assistiveSliderUI=null;
+                    assistiveSliderUI = prefGroupSetup.GetAssistiveSliderUI(leftHigher);
+
+                    //turn the assistive slider on
+                    assistiveSliderUI.alpha = 1f;
+                    if (leftHigher)
+                    {
+                        while (prefGroupSetup.prefSlider.value > 0.4f)
+                    {
+                        yield return 0;
+
+                    }
+                    Debug.Log("waiting for button press");
+                    yield return StartCoroutine(WaitForButtonPress(100000f, didPress =>
+                    {
+                        pressed = didPress;
+                    }));
+
+                    }   
+                    else
+                    {
+                        while(1f - prefGroupSetup.prefSlider.value > 0.4f)
+                        {
+                        yield return 0;
+                        }
+                    Debug.Log("waiting for button press");
+                    yield return StartCoroutine(WaitForButtonPress(100000f, didPress =>
+                    {
+                        pressed = didPress;
+                    }));
+                }
+
+
             }
             else
             {
-                Debug.Log("HAS LEARNED");
-                hasLearned = true;
+
+                //add deviation to the deviationQueue
+
+                Debug.Log("added " + deviation.ToString() + " to the queue");
+                deviationQueue.Enqueue(deviation);
+                //we only want to store the last two values
+                if (deviationQueue.Count > maxDeviationQueueLength)
+                {
+                    float dequeuedFloat = deviationQueue.Dequeue();
+                    Debug.Log("removed " + dequeuedFloat.ToString() + " from the queue");
+                }
+                Debug.Log("current deviation average  " + deviationQueue.Average().ToString());
+                if (deviationQueue.Average() > deviationThreshold)
+                {
+                    Debug.Log("NOT LEARNED");
+                    hasLearned = false;
+                }
+                else
+                {
+                    Debug.Log("HAS LEARNED");
+                    hasLearned = true;
+                }
             }
         }
 
@@ -1939,7 +2199,12 @@ public class ShoplifterScript : MonoBehaviour
 			camVehicle.transform.GetChild (0).GetChild (1).gameObject.SetActive (false);
 			directionEnv = -1;
 		}
-		envManager = environments [envIndex].GetComponent<EnvironmentManager> ();
+
+
+        //after env is picked, set the cam object for all Camera Zones
+        cameraZoneManager.SetCameraObjects();
+
+        envManager = environments [envIndex].GetComponent<EnvironmentManager> ();
 		activeEnvLabel = environments [envIndex].name;
 		phase1Start_L =envManager.phase1Start_L;
 		phase1Start_R =envManager.phase1Start_R;
@@ -1999,8 +2264,12 @@ public class ShoplifterScript : MonoBehaviour
         prefSolo.gameObject.GetComponent<PrefSoloSetup> ().imgGroup [0] = envManager.groupOne [0];
 		prefSolo.gameObject.GetComponent<PrefSoloSetup> ().imgGroup [1] = envManager.groupOne [1];
 
-		//for multiple choice
-		Debug.Log("ADDED MULTIPLE CHOICE ROOMTEXTURES");
+        //for solo training only
+        prefSolo.gameObject.GetComponent<PrefSoloSetup>().imgGroup[2] = envManager.groupThree[0];
+        prefSolo.gameObject.GetComponent<PrefSoloSetup>().imgGroup[3] = envManager.groupThree[1];
+
+        //for multiple choice
+        Debug.Log("ADDED MULTIPLE CHOICE ROOMTEXTURES");
 		multipleChoiceGroup.gameObject.GetComponent<MultipleChoiceGroup>().roomTextureList[0] = envManager.groupOne[0];
 		multipleChoiceGroup.gameObject.GetComponent<MultipleChoiceGroup>().roomTextureList[1] = envManager.groupOne[1];
 		multipleChoiceGroup.gameObject.GetComponent<MultipleChoiceGroup>().roomTextureList[2] = envManager.groupTwo[0];
@@ -2024,13 +2293,14 @@ public class ShoplifterScript : MonoBehaviour
 
 
             //after env has been selected and all necessary object references set, assign rooms and randomize cam zones
-            if (blockCount == 0)
+            if (blockCount == 0 || blockCount == 1)
             {
-                AssignRooms(true);
+                AssignRooms(true,false);
             }
-            else
+            // for training only
+            else if (blockCount==2)
             {
-                AssignRooms(true);
+                AssignRooms(true,true); 
             }
             RandomizeSpeedChangeZones();
             yield return StartCoroutine(RandomizeCameraZones(blockCount));
@@ -2044,7 +2314,6 @@ public class ShoplifterScript : MonoBehaviour
 		stageIndex = 1;
 		Experiment.Instance.CreateSessionStartedFile ();
 
-        //		yield return StartCoroutine(PickRegisterValues());
 
         //only run if system2 is expected
         if (Config.isSystem2)
@@ -2107,8 +2376,12 @@ public class ShoplifterScript : MonoBehaviour
                 yield return StartCoroutine(PickEnvironment(2, true)); //training env
                 RandomizeSuitcases();
                 yield return StartCoroutine(PlayInstructionVideo(false));
-                yield return StartCoroutine(RunSliderTrainingPhase());
-                yield return StartCoroutine(RunMultipleChoiceTrainingPhase());
+                //disable any kind of camera zone interaction
+                CameraZone.isPretraining = true; 
+                //yield return StartCoroutine(RunSliderTrainingPhase());
+                //yield return StartCoroutine(RunMultipleChoiceTrainingPhase());
+                //enable camera zone interaction before camera training
+                CameraZone.isPretraining = false;
                 Debug.Log("running cam training");
                 yield return StartCoroutine(RunCamTrainingPhase());
             }
@@ -2124,7 +2397,7 @@ public class ShoplifterScript : MonoBehaviour
                 if (!Config.isDayThree)
                 {
 
-                    AssignRooms(false);
+                    AssignRooms(false,false);
                     yield return StartCoroutine(PickRegisterValues()); //new reg values to be picked for each environment
                 }
                 else
@@ -2290,7 +2563,7 @@ public class ShoplifterScript : MonoBehaviour
 		yield return null;
 	}
 
-	IEnumerator ShowRegisterReward(int pathIndex)
+	IEnumerator ShowRegisterReward(int pathIndex, bool isTraining)
     {
 		GameObject chosenRegister = null;
 		Texture chosenTexture = null;
@@ -2318,13 +2591,24 @@ public class ShoplifterScript : MonoBehaviour
 		//wait until suitcase is fully open
 		yield return new WaitForSeconds (0.5f);
 
-		GameObject coinShowerObj = Instantiate(coinShower,((pathIndex==0) ?  register_L.transform.position : register_R.transform.position ) + (new Vector3(0f,0.2f,directionEnv) * 2f), Quaternion.identity) as GameObject;		
+		GameObject coinShowerObj = Instantiate(coinShower,((pathIndex==0) ?  register_L.transform.position : register_R.transform.position ) + (new Vector3(0f,0.2f,directionEnv) * 2f), Quaternion.identity) as GameObject;
 
-//		if (activeEnvLabel == "Cybercity") {
-//			coinShowerObj.transform.GetChild (0).transform.localPosition = Vector3.zero;
-//		}
-		System.Random rand = new System.Random ();
-		int reward = Mathf.CeilToInt(NextGaussian (rand, registerVals [choiceOutput], 1));
+        //		if (activeEnvLabel == "Cybercity") {
+        //			coinShowerObj.transform.GetChild (0).transform.localPosition = Vector3.zero;
+        //		}
+
+        int reward = 0;
+
+        //check to see if it's training for slider questions
+        if (!isTraining)
+        {
+            System.Random rand = new System.Random();
+            reward = Mathf.CeilToInt(NextGaussian(rand, registerVals[choiceOutput], 1)); //if not training, then retrieve appropriate reward values
+        }
+        else
+        {
+            reward = trainingReward[choiceOutput]; //else, obtain a random reward for training
+        }
 		rewardScore.enabled = true;
 		rewardScore.text = "$" + reward.ToString ();
 
@@ -2342,7 +2626,7 @@ public class ShoplifterScript : MonoBehaviour
 //        infoGroup.alpha = 0f;
 		Destroy(coinShowerObj);
 		Destroy (suitcaseObj);
-//		camVehicle.GetComponent<RigidbodyFirstPersonController> ().enabled = true;
+//		camVehicle.GetComponent<RigidbodyFisurstPersonController> ().enabled = true;
         yield return null;
     }
 
@@ -2519,6 +2803,17 @@ public class ShoplifterScript : MonoBehaviour
 //		camVehicle.GetComponent<RigidbodyFirstPersonController> ().enabled = true;
 		yield return null;
 	}
+
+    public IEnumerator HaltPlayerMovement()
+    {
+        while (ShoplifterScript.haltPlayer)
+        {
+            camVehicle.GetComponent<Rigidbody>().isKinematic = true;
+               yield return 0;
+        }
+        camVehicle.GetComponent<Rigidbody>().isKinematic = false;
+       yield return null;
+    }
 
 
 	//uses velocity and distance check to move player

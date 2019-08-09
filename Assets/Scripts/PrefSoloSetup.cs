@@ -11,6 +11,13 @@ public class PrefSoloSetup : MonoBehaviour
     public RawImage negativeFocusImg;
     public Text instructionText;
 
+
+    public CanvasGroup correctFeedback;
+    public CanvasGroup incorrectFeedback;
+
+    public CanvasGroup leftSliderRange;
+    public CanvasGroup rightSliderRange;
+
     public List<Texture> imgGroup;
     private bool active = false;
     // Use this for initialization
@@ -23,6 +30,10 @@ public class PrefSoloSetup : MonoBehaviour
         instructionText.text = "El joystick izquierdo mueve el control. \n Presiona(X) para continuar";
 #endif
 
+        correctFeedback.alpha = 0f;
+        incorrectFeedback.alpha = 0f;
+        leftSliderRange.alpha = 0f;
+        rightSliderRange.alpha = 0f;
         active = true;
 		//update on enable
 		if(Experiment.Instance!=null)
@@ -37,7 +48,38 @@ public class PrefSoloSetup : MonoBehaviour
 		}
 	}
 
-	public void UpdateSlider()
+
+    public IEnumerator ShowCorrectFeedback()
+    {
+        correctFeedback.alpha = 1f;
+        yield return new WaitForSeconds(5f);
+        correctFeedback.alpha = 0f;
+        yield return null;
+
+    }
+
+    public IEnumerator ShowIncorrectFeedback()
+    {
+        incorrectFeedback.alpha = 1f;
+        yield return new WaitForSeconds(5f);
+        incorrectFeedback.alpha = 0f;
+        yield return null;
+    }
+
+    public CanvasGroup GetAssistiveSliderUI(bool rightSliderIsCorrect)
+    {
+        if (rightSliderIsCorrect)
+        {
+            return rightSliderRange;
+
+        }
+        else
+        {
+            return leftSliderRange;
+        }
+    }
+
+    public void UpdateSlider()
 	{
 		Experiment.Instance.shopLiftLog.LogSliderValue ("SOLO", prefSlider.value);
 	}

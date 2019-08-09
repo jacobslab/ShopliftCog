@@ -13,6 +13,12 @@ public class PrefGroupSetup : MonoBehaviour {
 	public List<Texture> secondGroup;
     public List<Texture> thirdGroup;
 
+    public CanvasGroup correctFeedback;
+    public CanvasGroup incorrectFeedback;
+
+    public CanvasGroup leftSliderRange;
+    public CanvasGroup rightSliderRange;
+
     public Text instructionText;
 
 	private bool active=false;
@@ -25,6 +31,12 @@ public class PrefGroupSetup : MonoBehaviour {
         instructionText.text = "El joystick izquierdo mueve el control. \n Presiona(X) para continuar";
 #endif
         active = true;
+
+        correctFeedback.alpha = 0f;
+        incorrectFeedback.alpha = 0f;
+        leftSliderRange.alpha = 0f;
+        rightSliderRange.alpha = 0f;
+
 		if(Experiment.Instance!=null)
 			UpdateSlider ();
 	}
@@ -40,6 +52,36 @@ public class PrefGroupSetup : MonoBehaviour {
 	{
 		Experiment.Instance.shopLiftLog.LogSliderValue ("COMPARATIVE", prefSlider.value);
 	}
+
+    public IEnumerator ShowCorrectFeedback()
+    {
+        correctFeedback.alpha = 1f;
+        yield return new WaitForSeconds(5f);
+        correctFeedback.alpha = 0f;
+        yield return null;
+
+    }
+
+    public IEnumerator ShowIncorrectFeedback()
+    {
+        incorrectFeedback.alpha = 1f;
+        yield return new WaitForSeconds(5f);
+        incorrectFeedback.alpha = 0f;
+        yield return null;
+    }
+
+    public CanvasGroup GetAssistiveSliderUI(bool isLeft)
+    {
+        if(isLeft)
+        {
+            return leftSliderRange;
+
+        }
+        else
+        {
+            return rightSliderRange;
+        }
+    }
 
 	public void SetupPrefs(int prefType)
 	{

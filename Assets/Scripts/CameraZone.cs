@@ -7,7 +7,8 @@ public class CameraZone : MonoBehaviour {
 	private bool activateCam = false;
 	public static bool firstTime = true;
 	public int camIndex = 0;
-	public static bool isTraining= false;
+    public static bool isPretraining = false; //covers the slider and multiple choice training
+	public static bool isTraining= false; //for camera training
 	public bool isFocus = false;
 
 	private bool hasSneaked = false;
@@ -15,6 +16,8 @@ public class CameraZone : MonoBehaviour {
 
 	private int pressCount = 0;
 	public static bool showingWarning=false;
+
+    private GameObject activeCamObj;
 
 	public GameObject binoculars;
 	public GameObject securityCam;
@@ -24,39 +27,71 @@ public class CameraZone : MonoBehaviour {
 	// Use this for initialization
 	void OnEnable () {
 
-		securityCam.SetActive (false);
-		binoculars.SetActive(false);
-		magnifyingGlass.SetActive (false);
-		wirelessCam.SetActive (false);
+        ToggleCamObjects(false);
 
 		hasSneaked = false;
 		pressCount = 0;
-		if (firstTime) {
-			if (ExperimentSettings.env == ExperimentSettings.Environment.SpaceStation) {
-				securityCam.SetActive (true);
-			} else if (ExperimentSettings.env == ExperimentSettings.Environment.WesternTown) {
-				binoculars.SetActive (true);
-			}else if (ExperimentSettings.env == ExperimentSettings.Environment.VikingVillage) {
-				magnifyingGlass.SetActive (true);
-			}else if (ExperimentSettings.env == ExperimentSettings.Environment.Office) {
-				securityCam.SetActive (true);
-			}
-            else if(ExperimentSettings.env == ExperimentSettings.Environment.Apartment)
+	}
+
+    public void SetCameraObject()
+    {
+        if (firstTime)
+        {
+            if (ExperimentSettings.env == ExperimentSettings.Environment.SpaceStation)
             {
                 securityCam.SetActive(true);
+                activeCamObj = securityCam;
+            }
+            else if (ExperimentSettings.env == ExperimentSettings.Environment.WesternTown)
+            {
+                binoculars.SetActive(true);
+                activeCamObj = binoculars;
+            }
+            else if (ExperimentSettings.env == ExperimentSettings.Environment.VikingVillage)
+            {
+                magnifyingGlass.SetActive(true);
+                activeCamObj = magnifyingGlass;
+            }
+            else if (ExperimentSettings.env == ExperimentSettings.Environment.Office)
+            {
+                securityCam.SetActive(true);
+                activeCamObj = securityCam;
+            }
+            else if (ExperimentSettings.env == ExperimentSettings.Environment.Apartment)
+            {
+                securityCam.SetActive(true);
+                activeCamObj = securityCam;
                 securityCam.transform.localEulerAngles = new Vector3(securityCam.transform.localEulerAngles.x, securityCam.transform.localEulerAngles.y + 180f, securityCam.transform.localEulerAngles.z);
             }
-		}
-	}
+        }
+    }
+
+
+    public void ToggleCamObjects(bool shouldEnable)
+    {
+        if (activeCamObj != null)
+        {
+            Debug.Log("active cam obj is " + activeCamObj.ToString());
+            activeCamObj.SetActive(false);
+        }
+        else
+        {
+            securityCam.SetActive(shouldEnable);
+            binoculars.SetActive(shouldEnable);
+            magnifyingGlass.SetActive(shouldEnable);
+            wirelessCam.SetActive(shouldEnable);
+        }
+    }
+    
 	
 	// Update is called once per frame
 	void LateUpdate () {
 
-
 //		Debug.Log ("activate cam: " + activateCam.ToString ());
-		if (Input.GetButtonDown("Action Button") && isFocus && !showingWarning && !hasSneaked) {
+		if (Input.GetButtonDown("Action Button") && isFocus && !showingWarning && !hasSneaked && !isPretraining) {
 			Debug.Log ("showing warning is: " + showingWarning.ToString ());
 			Debug.Log ("press count is: " + pressCount.ToString ());
+            ShoplifterScript.haltPlayer = false;
             Experiment.Instance.shopLiftLog.LogButtonPress();
             if (pressCount <= 1) {
 				Debug.Log ("activate cam: " + activateCam.ToString () + " isFocus : " + isFocus.ToString ());
@@ -103,16 +138,15 @@ public class CameraZone : MonoBehaviour {
 
 	void OnTriggerEnter(Collider col)
 	{
-		if (col.gameObject.tag == "Player") {
+		if (col.gameObject.tag == "Player" && !isPretraining) {
 			hasSneaked = false;
 			activateCam = true;
 			pressCount = 0;
-//			Debug.Log ("activate cam is true");
-//			Debug.Log ("CAM ACTIVATED for " + gameObject.name);
 			activateCam = true;
 			if (isTraining) {
-//				Debug.Log ("showing sneak text now");
-                Experiment.Instance.shopLift.infoText.text = "Presiona el botón (X) para desactivar la cámara";
+                ShoplifterScript.haltPlayer = true;
+                StartCoroutine(ShoplifterScript.Instance.HaltPlayerMovement());
+                Experiment.Instance.shopLift.infoText.text = "Press (X) to deactivate the camera";
 				activateCam = true;
 				Experiment.Instance.shopLift.infoGroup.alpha = 1f;
 			}
@@ -123,7 +157,7 @@ public class CameraZone : MonoBehaviour {
 
 	void OnTriggerExit(Collider col)
 	{
-		if (col.gameObject.tag == "Player") {
+		if (col.gameObject.tag == "Player" && !isPretraining) {
 			//firstTime = false;
 			activateCam = false;
 			if (!hasSneaked && !alreadyShown) {
