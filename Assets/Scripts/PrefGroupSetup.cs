@@ -11,6 +11,7 @@ public class PrefGroupSetup : MonoBehaviour {
 
 	public List<Texture> firstGroup;
 	public List<Texture> secondGroup;
+    public List<Texture> thirdGroup;
 
     public Text instructionText;
 
@@ -51,8 +52,11 @@ public class PrefGroupSetup : MonoBehaviour {
 		case 1:
 			targetGroup = secondGroup;
 			break;
-			
-		}
+        case 2:
+        targetGroup = thirdGroup;
+        break;
+
+        }
 		if (Random.value < 0.5f) {
 			leftImg.texture = targetGroup [0];
 			rightImg.texture = targetGroup [1];

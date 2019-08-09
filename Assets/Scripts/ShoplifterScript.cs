@@ -259,6 +259,14 @@ public class ShoplifterScript : MonoBehaviour
 
     public GameObject testFloor;
 
+    enum EnvironmentIndex
+    {
+        FirstEnv,
+        SecondEnv,
+        TrainingEnv
+    };
+
+
 
     public class CoroutineWithData
     {
@@ -723,24 +731,8 @@ public class ShoplifterScript : MonoBehaviour
 		return vals;
 	}
 
-    IEnumerator RunSliderTrainingPhase()
+    IEnumerator PlayInstructionVideo(bool playVideo)
     {
-        
-        yield return null;
-    }
-
-    IEnumerator RunMultipleChoiceTrainingPhase()
-    {
-        yield return null;
-    }
-
-
-	IEnumerator RunCamTrainingPhase(bool playVideo)
-	{
-        blackScreen.alpha = 1f;
-        RandomizeSpeedChangeZones ();
-		Debug.Log ("starting cam training phase");
-		CameraZone.isTraining = true;
         //inst video
         if (playVideo)
         {
@@ -748,16 +740,16 @@ public class ShoplifterScript : MonoBehaviour
             instructionVideo.SetActive(true);
             Experiment.Instance.shopLiftLog.LogInstructionVideoEvent(true);
             float timer = 0f;
-            float maxTimer = instructionVideo.GetComponent<AudioSource>().clip.length;
-            Debug.Log("the max timer is : " + maxTimer.ToString());
             instructionVideo.GetComponent<VideoPlayer>().Prepare();
             while (!instructionVideo.GetComponent<VideoPlayer>().isPrepared)
             {
                 yield return 0;
             }
+            float maxTimer = (float)instructionVideo.GetComponent<VideoPlayer>().clip.length;
+            Debug.Log("the max timer is : " + maxTimer.ToString());
             TCPServer.Instance.SetState(TCP_Config.DefineStates.INST_VIDEO, true);
             instructionVideo.GetComponent<VideoPlayer>().Play();
-            instructionVideo.gameObject.GetComponent<AudioSource>().Play();
+            //instructionVideo.gameObject.GetComponent<AudioSource>().Play();
             yield return new WaitForSeconds(0.3f);
             Debug.Log("enabled player cam");
             blackScreen.alpha = 0f;
@@ -780,7 +772,30 @@ public class ShoplifterScript : MonoBehaviour
             EnablePlayerCam(true);
         }
 
+        yield return null;
+    }
 
+    IEnumerator RunSliderTrainingPhase()
+    {
+        bool isLeft = true;
+        Debug.Log("about to run phase 3");
+        yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, true, true));
+        yield return StartCoroutine(AskPreference(2, false, false, 0, 0f));
+        yield return null;
+    }
+
+    IEnumerator RunMultipleChoiceTrainingPhase()
+    {
+        yield return null;
+    }
+
+
+	IEnumerator RunCamTrainingPhase()
+	{
+        //blackScreen.alpha = 1f;
+        RandomizeSpeedChangeZones ();
+		Debug.Log ("starting cam training phase");
+		CameraZone.isTraining = true;
         Experiment.Instance.shopLiftLog.LogTextInstructions(1,true);
         TCPServer.Instance.SetState(TCP_Config.DefineStates.INSTRUCTIONS, true);
         introInstructionGroup.alpha = 1f;
@@ -1637,8 +1652,12 @@ public class ShoplifterScript : MonoBehaviour
 		case 1:
 			prefGroup.GetComponent<PrefGroupSetup> ().SetupPrefs (1);
 			break;
-			
-		}
+        //between 5 and 6
+        case 2:
+            prefGroup.GetComponent<PrefGroupSetup>().SetupPrefs(2);
+            break;
+
+        }
 
 
 
@@ -1886,17 +1905,16 @@ public class ShoplifterScript : MonoBehaviour
 			camVehicle.GetComponent<CapsuleCollider> ().height =2f;
 			directionEnv = 1;
 		}
-//		else if (environments [envIndex].name == "VikingVillage") { //viking village, for now
-//			Debug.Log ("chosen viking village");
-//			ExperimentSettings.env = ExperimentSettings.Environment.VikingVillage;
-//			camVehicle.transform.localEulerAngles = new Vector3 (0f, 0f, 0f);
-//			camVehicle.transform.GetChild (0).GetChild (1).gameObject.SetActive (false);
-//			camVehicle.transform.GetChild (0).GetChild (2).gameObject.SetActive (false);
-//			camVehicle.transform.GetChild (0).GetChild (3).gameObject.SetActive (true);
-//			camVehicle.transform.GetChild (0).GetChild (4).gameObject.SetActive (false);
-//			directionEnv = -1;
-//		}
-		else if (environments [envIndex].name == "Office") { //office
+        else if (environments[envIndex].name == "VikingVillage")
+        { //viking village, for now
+            Debug.Log("chosen viking village");
+            ExperimentSettings.env = ExperimentSettings.Environment.VikingVillage;
+            camVehicle.transform.localEulerAngles = new Vector3(0f, 0f, 0f);
+            camVehicle.transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
+            camVehicle.transform.GetChild(0).GetChild(1).gameObject.SetActive(true);
+            directionEnv = -1;
+        }
+        else if (environments [envIndex].name == "Office") { //office
 			Debug.Log ("chosen office");
 			ExperimentSettings.env = ExperimentSettings.Environment.Office;
 			camVehicle.transform.localEulerAngles = new Vector3 (0f, 180f, 0f);
@@ -1974,9 +1992,11 @@ public class ShoplifterScript : MonoBehaviour
 		prefGroup.gameObject.GetComponent<PrefGroupSetup>().firstGroup[1] = envManager.groupOne[1];
 		prefGroup.gameObject.GetComponent<PrefGroupSetup>().secondGroup[0] = envManager.groupTwo[0];
 		prefGroup.gameObject.GetComponent<PrefGroupSetup>().secondGroup[1] = envManager.groupTwo[1];
+        prefGroup.gameObject.GetComponent<PrefGroupSetup>().thirdGroup[0] = envManager.groupThree[0];
+        prefGroup.gameObject.GetComponent<PrefGroupSetup>().thirdGroup[1] = envManager.groupThree[1];
 
-		//for solo
-		prefSolo.gameObject.GetComponent<PrefSoloSetup> ().imgGroup [0] = envManager.groupOne [0];
+        //for solo
+        prefSolo.gameObject.GetComponent<PrefSoloSetup> ().imgGroup [0] = envManager.groupOne [0];
 		prefSolo.gameObject.GetComponent<PrefSoloSetup> ().imgGroup [1] = envManager.groupOne [1];
 
 		//for multiple choice
@@ -2079,11 +2099,26 @@ public class ShoplifterScript : MonoBehaviour
         {
             numTrials_Learning = 0;
             numTrials = 0;
+
+            currentPhaseName = "TRAINING";
+            if (ExperimentSettings.isTraining)
+            {
+                blackScreen.alpha = 0f;
+                yield return StartCoroutine(PickEnvironment(2, true)); //training env
+                RandomizeSuitcases();
+                yield return StartCoroutine(PlayInstructionVideo(false));
+                yield return StartCoroutine(RunSliderTrainingPhase());
+                yield return StartCoroutine(RunMultipleChoiceTrainingPhase());
+                Debug.Log("running cam training");
+                yield return StartCoroutine(RunCamTrainingPhase());
+            }
+
+            yield return StartCoroutine(PickEnvironment(i, true));
+            RandomizeSuitcases();
+
             currentReevalCondition = reevalConditions[i];
 
-            yield return StartCoroutine(PickEnvironment(i,true));
 
-            RandomizeSuitcases();
             if (!Experiment.shouldCheckpoint)
             {
                 if (!Config.isDayThree)
@@ -2108,12 +2143,6 @@ public class ShoplifterScript : MonoBehaviour
             }
 
             isTransition = !isTransition; //flip the transition condition before the next round
-
-            currentPhaseName = "TRAINING";
-            if (ExperimentSettings.isTraining)
-                yield return StartCoroutine(RunCamTrainingPhase(false));
-
-            blackScreen.alpha = 0f;
             //randomize rooms and cam zones again
             //			AssignRooms ();
             //			yield return StartCoroutine(RandomizeCameraZones (i)); //we randomize cameras when picking environment now

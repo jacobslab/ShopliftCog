@@ -57,10 +57,10 @@ public class SceneController : MonoBehaviour
 #if KEYBOARD
 
         instructionVideoPlayer.GetComponent<VideoPlayer>().clip = keyboard_video;
-        instructionVideoPlayer.GetComponent<AudioSource>().clip = keyboard_audio;
+        //instructionVideoPlayer.GetComponent<AudioSource>().clip = keyboard_audio;
 #else
         instructionVideoPlayer.GetComponent<VideoPlayer>().clip = controller_video;
-        instructionVideoPlayer.GetComponent<AudioSource>().clip = controller_audio;
+        //instructionVideoPlayer.GetComponent<AudioSource>().clip = controller_audio;
 
 #endif
         _instance = this;
