@@ -1,13 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityStandardAssets.CrossPlatformInput;
-using UnityStandardAssets.Characters.FirstPerson;
-using UnityEngine.SceneManagement;
 using UnityEngine.Video;
-using System.Linq;
-using System.IO;
+using UnityStandardAssets.Characters.FirstPerson;
 public class ShoplifterScript : MonoBehaviour
 {
 
@@ -451,13 +448,13 @@ public class ShoplifterScript : MonoBehaviour
         for (int i = 0; i < randomCount; i++)
         {
             int randInt = rand.Next(50, 80);
-            Debug.Log("rand int is " + randInt.ToString());
+            //Debug.Log("rand int is " + randInt.ToString());
             float nextDouble = (float)randInt / 100f;
-            Debug.Log("next double is  " + nextDouble.ToString());
+           // Debug.Log("next double is  " + nextDouble.ToString());
             //float nextDouble = (float)rand.NextDouble();
             nextDouble = Mathf.Clamp(nextDouble, 0.5f, 0.8f);
             randList.Add((float)(nextDouble));
-            Debug.Log("cam zone factor: " + randList[i]);
+           // Debug.Log("cam zone factor: " + randList[i]);
         }
         return randList;
     }
@@ -564,6 +561,18 @@ public class ShoplifterScript : MonoBehaviour
     {
         leftRegisterObj = envManager.leftRegisterObj;
         rightRegisterObj = envManager.rightRegisterObj;
+
+        Dictionary<int, int> newMap = new Dictionary<int, int>();
+        newMap.Add(1, 3);
+        newMap.Add(2, 4);
+
+        //by default, 
+        int finalRoomLeft = 5;
+        int finalRoomRight = 6;
+
+        //now, if the above two values have changed we will update them accordingly below 
+
+
         if (!Config.isDayThree && !isTraining)
         {
 
@@ -584,10 +593,12 @@ public class ShoplifterScript : MonoBehaviour
                 leftRoom = roomTwo;
                 three_L_Audio = envManager.three_R_Audio;
                 leftRoomColor = roomTwoColor;
+                finalRoomLeft = 6;
 
                 rightRoom = roomOne;
                 three_R_Audio = envManager.three_L_Audio;
                 rightRoomColor = roomOneColor;
+                finalRoomRight = 5;
 
 
                 Experiment.Instance.shopLiftLog.LogRooms(roomTwo.name, roomOne.name);
@@ -613,21 +624,33 @@ public class ShoplifterScript : MonoBehaviour
                 leftRoom = roomTwo;
                 three_L_Audio = envManager.three_R_Audio;
                 leftRoomColor = roomTwoColor;
+                finalRoomLeft = 6;
 
                 rightRoom = roomOne;
                 three_R_Audio = envManager.three_L_Audio;
                 rightRoomColor = roomOneColor;
+                finalRoomRight = 5;
 
 
                 Experiment.Instance.shopLiftLog.LogRooms(roomTwo.name, roomOne.name);
             }
-
         }
 
+            //finally update the mappings to Room 3 and 4
+            newMap.Add(3, finalRoomLeft);
+            newMap.Add(4, finalRoomRight);
 
-        leftRoom.transform.localPosition = envManager.leftRoomTransform.localPosition;
-        rightRoom.transform.localPosition = envManager.rightRoomTransform.localPosition;
-        Debug.Log("set " + leftRoom.gameObject.name + " as left and " + rightRoom.gameObject.name + " as right");
+            Debug.Log("new map keys count " + newMap.Keys.Count);
+            //finally send the mappings to the multipleChoice script
+            multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().UpdateRoomMappings(newMap);
+
+
+
+
+            leftRoom.transform.localPosition = envManager.leftRoomTransform.localPosition;
+            rightRoom.transform.localPosition = envManager.rightRoomTransform.localPosition;
+            Debug.Log("set " + leftRoom.gameObject.name + " as left and " + rightRoom.gameObject.name + " as right");
+       
     }
 
     void ResetCamZone()
@@ -821,9 +844,9 @@ public class ShoplifterScript : MonoBehaviour
 
     IEnumerator RunSliderTrainingPhase()
     {
-        
-    
 
+
+        Debug.Log("turning off all cam zones");
         cameraZoneManager.ToggleAllCamZones(false); //turn off all cameras
 
         //comparative sliders
@@ -855,6 +878,17 @@ public class ShoplifterScript : MonoBehaviour
 
     IEnumerator RunMultipleChoiceTrainingPhase()
     {
+        cameraZoneManager.ToggleAllCamZones(false);
+        bool isLeft = true;
+        for (int i = 0; i < 2; i++)
+        {
+            yield return StartCoroutine(RunPhaseTwo((isLeft) ? 0 : 1, true, false));
+            yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, false, false));
+            yield return StartCoroutine(AskMultipleChoice(2+i,true));
+            isLeft = !isLeft;
+
+        }
+
         yield return null;
     }
 
@@ -862,6 +896,7 @@ public class ShoplifterScript : MonoBehaviour
 	IEnumerator RunCamTrainingPhase()
 	{
         //blackScreen.alpha = 1f;
+        cameraZoneManager.ResetAllCamZones();
         cameraZoneManager.ToggleAllCamZones(true); //temporarily turn on all cameras
         RandomizeSpeedChangeZones ();
 		Debug.Log ("starting cam training phase");
@@ -910,10 +945,10 @@ public class ShoplifterScript : MonoBehaviour
             }
 			Debug.Log ("about to run phase 1");
 			isLeft = !isLeft;
-			yield return StartCoroutine (RunPhaseOne ((isLeft) ? 0:1,false,-1,false));
+			yield return StartCoroutine (RunPhaseOne ((isLeft) ? 0:1,false));
 
 			Debug.Log ("about to run phase 2");
-			yield return StartCoroutine (RunPhaseTwo ((isLeft) ? 0:1,false,false,-1,false,false));
+			yield return StartCoroutine (RunPhaseTwo ((isLeft) ? 0:1,false,false));
 //			TurnOffRooms ();
 			Debug.Log("about to run phase 3");
 			yield return StartCoroutine(RunPhaseThree((isLeft) ? 0:1,false,false));
@@ -985,7 +1020,7 @@ public class ShoplifterScript : MonoBehaviour
         yield return null;
     }
 
-	IEnumerator RunPhaseOne(int pathIndex, bool isGuided, int guidedChoice, bool terminateWithChoice)
+	IEnumerator RunPhaseOne(int pathIndex, bool terminateWithChoice)
 	{
 		Experiment.Instance.shopLiftLog.LogPathIndex (pathIndex);
 		EnablePlayerCam (true);
@@ -1029,6 +1064,7 @@ public class ShoplifterScript : MonoBehaviour
 		float delayTwo = 0f;
 		if (!terminateWithChoice) {
 			Doors.canOpen = true;
+            Debug.Log("opening doors");
 			yield return StartCoroutine (targetDoor.GetComponent<Doors> ().Open ());
 		
 //		ToggleMouseLook(false);
@@ -1079,14 +1115,13 @@ public class ShoplifterScript : MonoBehaviour
 			baseAudio.Stop ();
 		}
 
-		Debug.Log ("closing the first door now");
 		if (!terminateWithChoice) {
-			targetDoor.GetComponent<Doors> ().Close ();
+            yield return StartCoroutine(targetDoor.GetComponent<Doors> ().Close ());
 		}
 		yield return null;
 	}
 
-	IEnumerator RunPhaseTwo(int pathIndex,bool isDirect, bool isGuided, int guidedChoice, bool terminateWithChoice,bool hasRewards)
+	IEnumerator RunPhaseTwo(int pathIndex,bool isDirect,bool hasRewards)
 	{
 		EnablePlayerCam (true);
 		ChangeCamZoneFocus ((pathIndex == 0) ? 1 : 4);
@@ -1118,7 +1153,9 @@ public class ShoplifterScript : MonoBehaviour
 
             SpawnSuitcase(pathIndex); //we spawn suitcase here for both learning and relearning phase
 		}
+        //open the door
 			yield return StartCoroutine(targetDoor.GetComponent<Doors> ().Open ());
+
 			if (pathIndex == 0) {
 			yield return StartCoroutine (MovePlayerTo (camVehicle.transform.position, phase2Door_L.transform.GetChild(0).position, 0.5f));
 			currentAudio.Stop ();
@@ -1138,8 +1175,7 @@ public class ShoplifterScript : MonoBehaviour
 				yield return StartCoroutine (MovePlayerTo (phase2Door_R.transform.GetChild(0).position, phase3Start_R.transform.position, 0.5f));
 			}
 
-		Debug.Log ("closing the second door now");
-		targetDoor.GetComponent<Doors>().Close();
+        yield return StartCoroutine(targetDoor.GetComponent<Doors>().Close());
 		yield return null;
 	}
 
@@ -1261,11 +1297,11 @@ public class ShoplifterScript : MonoBehaviour
 			else
 				isLeft = false;
 			randOrder.RemoveAt (0);
-			yield return StartCoroutine (RunPhaseOne ((isLeft) ? 0 : 1, false, -1,false));
+			yield return StartCoroutine (RunPhaseOne ((isLeft) ? 0 : 1,false));
 
 			Debug.Log ("about to run phase 2");
 
-			yield return StartCoroutine (RunPhaseTwo((isLeft) ? 0 : 1,false,false,-1,true,true));
+			yield return StartCoroutine (RunPhaseTwo((isLeft) ? 0 : 1,false,true));
 
 			Debug.Log("about to run phase 3");
             if(!isPostTest)
@@ -1358,7 +1394,7 @@ public class ShoplifterScript : MonoBehaviour
 				leftChoice = !leftChoice; //flip it
 
 				Debug.Log ("about to run phase 2");
-				yield return StartCoroutine (RunPhaseTwo((leftChoice) ? 0 : 1,true,false,-1,true,true));
+				yield return StartCoroutine (RunPhaseTwo((leftChoice) ? 0 : 1,true,true));
 
 				Debug.Log("about to run phase 3");
 				yield return StartCoroutine(RunPhaseThree((leftChoice) ? 0:1,false,true));
@@ -1399,10 +1435,10 @@ public class ShoplifterScript : MonoBehaviour
             {   
                 Debug.Log("about to run phase 1");
                 isLeft = !isLeft; //flip the left right
-                yield return StartCoroutine(RunPhaseOne((isLeft) ? 0 : 1, false, -1, false));
+                yield return StartCoroutine(RunPhaseOne((isLeft) ? 0 : 1, false));
 
                 Debug.Log("about to run phase 2");
-                yield return StartCoroutine(RunPhaseTwo((isLeft) ? 0 : 1, false, false, -1, false, false));
+                yield return StartCoroutine(RunPhaseTwo((isLeft) ? 0 : 1, false, false));
                 //          TurnOffRooms ();
                 Debug.Log("about to run phase 3");
                 yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, false, false));
@@ -1460,14 +1496,14 @@ public class ShoplifterScript : MonoBehaviour
 			imagineGroup.alpha = 0f;
             switch (caseOrder) {
 			case 0:
-				yield return StartCoroutine (RunPhaseOne (0, false, -1, true));
+				yield return StartCoroutine (RunPhaseOne (0, true));
 				yield return StartCoroutine (RunImaginePeriod (5f));
 				yield return StartCoroutine (AskSoloPreference (0,false));
 //				yield return StartCoroutine (AskImageryQualityRating (0));
 				yield return StartCoroutine (RunRestPeriod (2f));
 				break;
 			case 1:
-				yield return StartCoroutine(RunPhaseOne (1, false, -1, true));
+				yield return StartCoroutine(RunPhaseOne (1, true));
 				yield return StartCoroutine (RunImaginePeriod (5f));
 				yield return StartCoroutine (AskSoloPreference (1,false));
 //				yield return StartCoroutine (AskImageryQualityRating (1));
@@ -1489,7 +1525,7 @@ public class ShoplifterScript : MonoBehaviour
 		multipleChoiceSequence = ShuffleList (multipleChoiceSequence);
 		for (int i = 0; i < 4; i++) {
 			int randIndex = Random.Range (0, multipleChoiceSequence.Count);
-            yield return StartCoroutine(AskMultipleChoice(multipleChoiceSequence[randIndex]));
+            yield return StartCoroutine(AskMultipleChoice(multipleChoiceSequence[randIndex],false));
 			multipleChoiceSequence.RemoveAt (randIndex);
             yield return StartCoroutine(RunRestPeriod(3f));
 		}
@@ -1681,7 +1717,7 @@ public class ShoplifterScript : MonoBehaviour
 
             Debug.Log("left higher " + leftHigher.ToString());
 
-            bool rightSliderIsCorrect = false; //keeps track of whether moving the Solo Slider to the right is the correct response or not
+            bool rightSliderIsCorrect = false; //keeps track of whether moving the Solo Slider all the way to the right is the correct response or not
 
             float deviation = 0f; //how much away from the correct answer was the player's response
 
@@ -1739,7 +1775,6 @@ public class ShoplifterScript : MonoBehaviour
                    
                     yield return 0;
                 }
-                Debug.Log("waiting for button press");
                 yield return StartCoroutine(WaitForButtonPress(100000f, didPress =>
                 {
                     pressed = didPress;
@@ -1752,7 +1787,6 @@ public class ShoplifterScript : MonoBehaviour
                    
                     yield return 0;
                 }
-                Debug.Log("waiting for button press");
                 yield return StartCoroutine(WaitForButtonPress(100000f, didPress =>
                 {
                     pressed = didPress;
@@ -1773,12 +1807,12 @@ public class ShoplifterScript : MonoBehaviour
         yield return null;
 	}
 
-	IEnumerator AskMultipleChoice(int prefIndex)
+	IEnumerator AskMultipleChoice(int prefIndex, bool isTraining)
 	{
         Debug.Log("PREF INDEX IS " + prefIndex.ToString());
 		EnablePlayerCam (false);
 		multipleChoiceGroup.gameObject.SetActive (true);
-		multipleChoiceGroup.GetComponent<MultipleChoiceGroup> ().SetupMultipleChoice (prefIndex);
+		int correctChoice = multipleChoiceGroup.GetComponent<MultipleChoiceGroup> ().SetupMultipleChoice (prefIndex);
         TCPServer.Instance.SetState(TCP_Config.DefineStates.MULTIPLE_CHOICE, true);
 		bool pressed = false;
         float tElapsed = 0f;
@@ -1790,7 +1824,7 @@ public class ShoplifterScript : MonoBehaviour
             if (Input.GetButtonDown("Action Button"))
             {
 
-                infoText.text = "Por favor tómese su tiempo para hacer una elección";
+                infoText.text = "Please take your time to make your choice";
                 infoGroup.alpha = 1f;
             }
             yield return 0;
@@ -1800,8 +1834,7 @@ public class ShoplifterScript : MonoBehaviour
 				pressed=didPress;
 			}
 		));
-        Debug.Log("about to ask them to make a choice");
-        infoText.text = "Por favor, haga una elección";
+        infoText.text = "Please make a choice";
         infoGroup.alpha = 1f;
         if (!pressed)
         {
@@ -1812,11 +1845,14 @@ public class ShoplifterScript : MonoBehaviour
         }
         infoText.text = "";
         infoGroup.alpha = 0f;
-        Experiment.Instance.shopLiftLog.LogMultipleChoiceResponse (multipleChoiceGroup.GetComponent<AnswerSelector> ().ReturnSelectorPosition(), pressed);
+        if(isTraining)
+        {
+            yield return StartCoroutine(multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().ShowFeedback(prefIndex,correctChoice,true));
+        }
+        Experiment.Instance.shopLiftLog.LogMultipleChoiceResponse (multipleChoiceGroup.GetComponent<AnswerSelector> ().ReturnSelectorPosition(), correctChoice, pressed);
 		multipleChoiceGroup.gameObject.SetActive (false);
 		Cursor.visible = false;
         TCPServer.Instance.SetState(TCP_Config.DefineStates.MULTIPLE_CHOICE,false);
-
         yield return null;
 	}
 
@@ -2081,7 +2117,7 @@ public class ShoplifterScript : MonoBehaviour
 		yield return null;
 	}
 
-	IEnumerator WaitForButtonPress(float maxWaitTime,System.Action<bool> didPress)
+	public IEnumerator WaitForButtonPress(float maxWaitTime,System.Action<bool> didPress)
 	{
 		float timer = 0f;
 		while (!Input.GetButtonDown ("Action Button") && timer < maxWaitTime) {
@@ -2377,9 +2413,9 @@ public class ShoplifterScript : MonoBehaviour
                 RandomizeSuitcases();
                 yield return StartCoroutine(PlayInstructionVideo(false));
                 //disable any kind of camera zone interaction
-                CameraZone.isPretraining = true; 
-                //yield return StartCoroutine(RunSliderTrainingPhase());
-                //yield return StartCoroutine(RunMultipleChoiceTrainingPhase());
+                CameraZone.isPretraining = true;
+                yield return StartCoroutine(RunSliderTrainingPhase());
+                yield return StartCoroutine(RunMultipleChoiceTrainingPhase());
                 //enable camera zone interaction before camera training
                 CameraZone.isPretraining = false;
                 Debug.Log("running cam training");
@@ -2388,6 +2424,8 @@ public class ShoplifterScript : MonoBehaviour
 
             yield return StartCoroutine(PickEnvironment(i, true));
             RandomizeSuitcases();
+            cameraZoneManager.ResetAllCamZones();
+            cameraZoneManager.ToggleAllCamZones(false);
 
             currentReevalCondition = reevalConditions[i];
 

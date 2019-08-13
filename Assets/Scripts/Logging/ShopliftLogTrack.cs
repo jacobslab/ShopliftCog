@@ -171,9 +171,9 @@ public class ShopliftLogTrack : LogTrack {
     {
         subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "MULTIPLE_CHOICE_FOCUS_IMAGE" + separator + focusImageName);
     }
-    public void LogMultipleChoiceResponse(float chosenValue, bool isChosen)
+    public void LogMultipleChoiceResponse(float chosenValue,int correctChoice, bool isChosen)
     {
-        subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "MULTIPLE_CHOICE_RESPONSE" + separator + chosenValue + separator + ((isChosen) ? "CHOSEN" : "TIMED_OUT"));
+        subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "MULTIPLE_CHOICE_RESPONSE" + separator + chosenValue.ToString() + separator + correctChoice.ToString() + separator + ((isChosen) ? "CHOSEN" : "TIMED_OUT"));
     }
 
 

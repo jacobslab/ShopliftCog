@@ -21,9 +21,18 @@ public class CameraZoneManager : MonoBehaviour
 
     public void ToggleAllCamZones(bool shouldEnable)
     {
+        Debug.Log("should enable " + shouldEnable.ToString());
         for(int i=0;i< camZoneObjList.Count;i++)
         {
             camZoneObjList[i].GetComponent<CameraZone>().ToggleCamObjects(shouldEnable);
+        }
+    }
+
+    public void ResetAllCamZones()
+    {
+        for(int i=0;i<camZoneObjList.Count;i++)
+        {
+            camZoneObjList[i].GetComponent<CameraZone>().Reset();
         }
     }
 

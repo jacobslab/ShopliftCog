@@ -13,6 +13,7 @@ public class AnswerSelector : MonoBehaviour {
 
 	public List<float> positions; //should be put in order of left to right
 	public GameObject selectorVisuals;
+    private GameObject correctIndicator;
     public float blankPosition;
 
 
@@ -22,7 +23,8 @@ public class AnswerSelector : MonoBehaviour {
 	int currPositionIndex = 0;
 
 	void Awake(){
-//		positions = new List<float> ();
+        //		positions = new List<float> ();
+        correctIndicator = gameObject.GetComponent<MultipleChoiceGroup>().correctIndicator.gameObject;
 	}
 
 	// Use this for initialization
@@ -122,6 +124,11 @@ public class AnswerSelector : MonoBehaviour {
 			yield return 0;
 		}
 	}
+
+    public void MoveDirectlyTo(GameObject visualsObj, int targetIndex)
+    {
+        visualsObj.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(positions[targetIndex], selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D.y, selectorVisuals.GetComponent<RectTransform>().anchoredPosition3D.z);
+    }
 
 
 	void Move(int indicesToMove){

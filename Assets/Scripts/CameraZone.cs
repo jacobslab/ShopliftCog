@@ -27,16 +27,16 @@ public class CameraZone : MonoBehaviour {
 	// Use this for initialization
 	void OnEnable () {
 
-        ToggleCamObjects(false);
-
-		hasSneaked = false;
+        hasSneaked = false;
 		pressCount = 0;
 	}
 
     public void SetCameraObject()
     {
+        Debug.Log("setting cam object");
         if (firstTime)
         {
+            ToggleCamObjects(false);
             if (ExperimentSettings.env == ExperimentSettings.Environment.SpaceStation)
             {
                 securityCam.SetActive(true);
@@ -69,10 +69,12 @@ public class CameraZone : MonoBehaviour {
 
     public void ToggleCamObjects(bool shouldEnable)
     {
+        Debug.Log("toggling cam objects");
         if (activeCamObj != null)
         {
             Debug.Log("active cam obj is " + activeCamObj.ToString());
-            activeCamObj.SetActive(false);
+            Debug.Log("should enable " + shouldEnable.ToString());
+            activeCamObj.SetActive(shouldEnable);
         }
         else
         {
@@ -111,7 +113,8 @@ public class CameraZone : MonoBehaviour {
 					StartCoroutine (Experiment.Instance.shopLift.ShowNegativeFeedback ());
 					alreadyShown = true;
 				}
-			} else {
+			} else if (!isTraining) {
+                //only show warning if it is not training
 				showingWarning = true;
 				StartCoroutine (Experiment.Instance.shopLift.ShowWarning ());
 		}
@@ -128,7 +131,9 @@ public class CameraZone : MonoBehaviour {
 	public void Reset()
 	{
 		firstTime = true;
-	}
+        ToggleCamObjects(false);
+        SetCameraObject();
+    }
 
 	void Sneak()
 	{
@@ -176,19 +181,19 @@ public class CameraZone : MonoBehaviour {
 	{
 		alreadyShown = false;
 		hasSneaked = false;
-		if (firstTime) {
-			if (ExperimentSettings.env == ExperimentSettings.Environment.SpaceStation) {
-				securityCam.SetActive (true);
-				binoculars.SetActive (false);
+		//if (firstTime) {
+		//	if (ExperimentSettings.env == ExperimentSettings.Environment.SpaceStation) {
+		//		securityCam.SetActive (true);
+		//		binoculars.SetActive (false);
 
-			} else if (ExperimentSettings.env == ExperimentSettings.Environment.WesternTown) {
-				securityCam.SetActive (false);
-				binoculars.SetActive (true);
-			}else if (ExperimentSettings.env == ExperimentSettings.Environment.VikingVillage) {
-				securityCam.SetActive (false);
-				binoculars.SetActive (false);
-				magnifyingGlass.SetActive (true);
-			}
-		}
+		//	} else if (ExperimentSettings.env == ExperimentSettings.Environment.WesternTown) {
+		//		securityCam.SetActive (false);
+		//		binoculars.SetActive (true);
+		//	}else if (ExperimentSettings.env == ExperimentSettings.Environment.VikingVillage) {
+		//		securityCam.SetActive (false);
+		//		binoculars.SetActive (false);
+		//		magnifyingGlass.SetActive (true);
+		//	}
+		//}
 	}
 }

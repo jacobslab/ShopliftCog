@@ -68,6 +68,7 @@ public class PrefSoloSetup : MonoBehaviour
 
     public CanvasGroup GetAssistiveSliderUI(bool rightSliderIsCorrect)
     {
+        Debug.Log("assistive slider UI; right slider is correct" + rightSliderIsCorrect.ToString());
         if (rightSliderIsCorrect)
         {
             return rightSliderRange;
