@@ -26,9 +26,9 @@ public class PrefGroupSetup : MonoBehaviour {
 	void OnEnable () {
         //update on enable
 #if KEYBOARD
-        instructionText.text = "Las teclas de flecha izquierda y derecha mueven el deslizador \n Presione(X) para confirmar";
+        instructionText.text = "Left and right arrow keys moves the slider \n Press (X) to confirm";
 #else
-        instructionText.text = "El joystick izquierdo mueve el control. \n Presiona(X) para continuar";
+        instructionText.text = "Left joystick moves slider \n Press (X) to confirm";
 #endif
         active = true;
 

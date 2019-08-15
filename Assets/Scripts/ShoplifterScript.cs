@@ -186,6 +186,8 @@ public class ShoplifterScript : MonoBehaviour
     public CanvasGroup pauseUI;
     public CanvasGroup sys2ConnectionGroup;
     public Text sys2ConnectionText;
+    public CanvasGroup correctGiantText;
+    public CanvasGroup incorrectGiantText;
 
 
 
@@ -199,8 +201,13 @@ public class ShoplifterScript : MonoBehaviour
     private GameObject roomTwo;
 
     //instr strings
+#if !SPANISH
+    private string doorText = "Press (X) to open the door";
+    private string registerText = "Press (X) to open the suitcase";
+#else
     private string doorText = "Presiona el botón (X) para abrir la puertar";
     private string registerText = "Presiona el botón (X) para abrir la maleta";
+#endif
 
 
     //audio
@@ -346,6 +353,8 @@ public class ShoplifterScript : MonoBehaviour
         trainingPeriodGroup.alpha = 0f;
         prefSolo.gameObject.SetActive(false);
         prefGroup.gameObject.SetActive(false);
+        correctGiantText.alpha = 0f;
+        incorrectGiantText.alpha = 0f;
         slideshowImage.transform.parent.gameObject.GetComponent<CanvasGroup>().alpha = 0f;
 
         suitcaseObj = null;
@@ -820,7 +829,6 @@ public class ShoplifterScript : MonoBehaviour
         else
         {
             blackScreen.alpha = 0f;
-            EnablePlayerCam(true);
         }
 
         yield return null;
@@ -847,6 +855,17 @@ public class ShoplifterScript : MonoBehaviour
 
 
         Debug.Log("turning off all cam zones");
+
+        //show instructions first
+        intertrialText.text = "We will first practice remembering which rooms lead to higher cash rewards. \n You will then be asked to respond to questions about that. \n Press (X) to begin!";
+        intertrialGroup.alpha = 1f;
+        yield return StartCoroutine(WaitForButtonPress(10000f, didPress =>
+        {
+            Debug.Log("did press: " + didPress);
+        }
+        ));
+        intertrialGroup.alpha = 0f;
+
         cameraZoneManager.ToggleAllCamZones(false); //turn off all cameras
 
         //comparative sliders
@@ -878,6 +897,16 @@ public class ShoplifterScript : MonoBehaviour
 
     IEnumerator RunMultipleChoiceTrainingPhase()
     {
+        //show instructions
+        intertrialText.text = "We will now practice remembering about the arrangement of rooms. \n You will then be asked questions about that. \n Press (X) to begin!";
+        intertrialGroup.alpha = 1f;
+        yield return StartCoroutine(WaitForButtonPress(10000f, didPress =>
+        {
+            Debug.Log("did press: " + didPress);
+        }
+        ));
+        intertrialGroup.alpha = 0f;
+
         cameraZoneManager.ToggleAllCamZones(false);
         bool isLeft = true;
         for (int i = 0; i < 2; i++)
@@ -892,28 +921,42 @@ public class ShoplifterScript : MonoBehaviour
         yield return null;
     }
 
-
-	IEnumerator RunCamTrainingPhase()
-	{
-        //blackScreen.alpha = 1f;
-        cameraZoneManager.ResetAllCamZones();
-        cameraZoneManager.ToggleAllCamZones(true); //temporarily turn on all cameras
-        RandomizeSpeedChangeZones ();
-		Debug.Log ("starting cam training phase");
-		CameraZone.isTraining = true;
-        Experiment.Instance.shopLiftLog.LogTextInstructions(1,true);
+    IEnumerator ShowIntroInstructions()
+    {
+        blackScreen.alpha = 0f;
+        Experiment.Instance.shopLiftLog.LogTextInstructions(1, true);
         TCPServer.Instance.SetState(TCP_Config.DefineStates.INSTRUCTIONS, true);
         introInstructionGroup.alpha = 1f;
         yield return new WaitForSeconds(0.5f);
 
-        yield return StartCoroutine (WaitForButtonPress (10000f,didPress =>
-			{
-				Debug.Log("did press: " + didPress);
-			}
-		));
-		introInstructionGroup.alpha = 0f;
-        
-        Experiment.Instance.shopLiftLog.LogTextInstructions(1,true);
+        yield return StartCoroutine(WaitForButtonPress(10000f, didPress =>
+        {
+            Debug.Log("did press: " + didPress);
+        }
+        ));
+        introInstructionGroup.alpha = 0f;
+
+        Experiment.Instance.shopLiftLog.LogTextInstructions(1, false);
+        blackScreen.alpha = 1f;
+        yield return null;
+    }
+
+
+	IEnumerator RunCamTrainingPhase()
+	{
+        //blackScreen.alpha = 1f;
+        intertrialText.text = "We will now practice remembering the location of camera and \n deactivating it by pressing (X) when we are at that position.  \n Press (X) to begin!";
+        intertrialGroup.alpha = 1f;
+        yield return StartCoroutine(WaitForButtonPress(10000f, didPress =>
+        {
+            Debug.Log("did press: " + didPress);
+        }
+        ));
+        intertrialGroup.alpha = 0f;
+        cameraZoneManager.ResetAllCamZones();
+        cameraZoneManager.ToggleAllCamZones(true); //temporarily turn on all cameras
+        RandomizeSpeedChangeZones ();
+		Debug.Log ("starting cam training phase");
         Experiment.Instance.shopLiftLog.LogTextInstructions(2, true);
         trainingInstructionsGroup.alpha = 1f;
 		yield return StartCoroutine(WaitForButtonPress (10000f,didPress =>
@@ -933,7 +976,12 @@ public class ShoplifterScript : MonoBehaviour
 		trainingPeriodGroup.alpha = 1f;
 		bool isLeft = false;
 		int numTraining = 0;
-		while (numTraining < 4) {
+
+
+        CameraZone.isTraining = true;
+
+
+        while (numTraining < 4) {
 
             //check correct responses and reset if it is less than 3
             if (numTraining % 2 == 0)
@@ -1329,7 +1377,11 @@ public class ShoplifterScript : MonoBehaviour
                 intertrialGroup.alpha = 1f;
                 maxDeviationQueueLength = 1;
                 deviationThreshold = 0.35f;
+#if SPANISH
                 intertrialText.text = "Por favor, tenga en cuenta la estructura de las habitaciones y las recompensas al responder";
+#else
+                intertrialText.text = "Please, consider the structure of the rooms and the rewards when responding";
+#endif
                 intertrialText.text = "";
                 intertrialGroup.alpha = 0f;
                 showOnce = false;
@@ -1768,9 +1820,9 @@ public class ShoplifterScript : MonoBehaviour
 
             //turn the assistive slider on
             assistiveSliderUI.alpha = 1f;
-            if (leftHigher)
+            if (rightSliderIsCorrect)
             {
-                while (prefSoloSetup.prefSlider.value > 0.4f)
+                while (prefSoloSetup.prefSlider.value < 0.6f)
                 {
                    
                     yield return 0;
@@ -1782,7 +1834,7 @@ public class ShoplifterScript : MonoBehaviour
             }
             else
             {
-                while (1f - prefSoloSetup.prefSlider.value > 0.4f)
+                while (1f - prefSoloSetup.prefSlider.value < 0.6f)
                 {
                    
                     yield return 0;
@@ -1908,8 +1960,11 @@ public class ShoplifterScript : MonoBehaviour
                 tElapsed += Time.deltaTime;
                 if(Input.GetButtonDown("Action Button"))
                 {
-
+#if SPANISH
                     infoText.text = "Por favor tómese su tiempo para hacer una elección";
+#else
+                    infoText.text = "Please take your time to make a choice";
+#endif
                     infoGroup.alpha = 1f;
                 }
                 yield return 0;
@@ -1917,7 +1972,11 @@ public class ShoplifterScript : MonoBehaviour
             //wait for them to select something on the slider
             while (!Input.GetKeyDown(KeyCode.LeftArrow) && !Input.GetKeyDown(KeyCode.RightArrow) && Mathf.Abs(Input.GetAxis("Horizontal")) == 0f)
             {
+#if SPANISH
                 infoText.text = "Por favor, mueva el control deslizante para hacer una elección";
+#else
+                infoText.text = "Please move the slider to make a choice";
+#endif
                 infoGroup.alpha = 1f;
                 yield return 0;
             }
@@ -1933,7 +1992,11 @@ public class ShoplifterScript : MonoBehaviour
                 Debug.Log("about to ask them to make a choice");
             if (isTraining)
             {
+#if SPANISH
                 infoText.text = "Por favor, haga una elección";
+#else
+                infoText.text = "Please make a choice";
+#endif
                 infoGroup.alpha = 1f;
             }
                 if(!pressed)
@@ -2185,7 +2248,11 @@ public class ShoplifterScript : MonoBehaviour
 		camVehicle.GetComponent<CapsuleCollider> ().height = 3.2f;
 		Debug.Log ("picking environment");
 		environments [envIndex].SetActive (true);
-		if (environments [envIndex].name == "SpaceStation") {
+
+
+
+// #TODO: Make sure environment checks are not reliant on string checks 
+        if (environments [envIndex].name == "SpaceStation") {
 			Debug.Log ("chosen space station");
 			ExperimentSettings.env = ExperimentSettings.Environment.SpaceStation;
 			camVehicle.transform.localEulerAngles = new Vector3 (0f, 180f, 0f);
@@ -2206,8 +2273,8 @@ public class ShoplifterScript : MonoBehaviour
             Debug.Log("chosen viking village");
             ExperimentSettings.env = ExperimentSettings.Environment.VikingVillage;
             camVehicle.transform.localEulerAngles = new Vector3(0f, 0f, 0f);
-            camVehicle.transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
-            camVehicle.transform.GetChild(0).GetChild(1).gameObject.SetActive(true);
+            camVehicle.transform.GetChild(0).GetChild(0).gameObject.SetActive(true);
+            camVehicle.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
             directionEnv = -1;
         }
         else if (environments [envIndex].name == "Office") { //office
@@ -2406,12 +2473,14 @@ public class ShoplifterScript : MonoBehaviour
             numTrials = 0;
 
             currentPhaseName = "TRAINING";
+            yield return StartCoroutine(ShowIntroInstructions());
             if (ExperimentSettings.isTraining)
             {
-                blackScreen.alpha = 0f;
+                blackScreen.alpha = 1f;
                 yield return StartCoroutine(PickEnvironment(2, true)); //training env
                 RandomizeSuitcases();
                 yield return StartCoroutine(PlayInstructionVideo(false));
+                blackScreen.alpha = 0f;
                 //disable any kind of camera zone interaction
                 CameraZone.isPretraining = true;
                 yield return StartCoroutine(RunSliderTrainingPhase());
@@ -2563,11 +2632,21 @@ public class ShoplifterScript : MonoBehaviour
 	public IEnumerator ShowPositiveFeedback()
 	{
 		Debug.Log ("IN POSITIVE");
-		positiveFeedbackGroup.alpha = 1f;
-//		Debug.Log ("about to wait for 1 second");
-		yield return new WaitForSeconds (1f);
-//		Debug.Log ("turning it off");
-		positiveFeedbackGroup.alpha = 0f; 
+        if (!CameraZone.isTraining)
+        {
+            positiveFeedbackGroup.alpha = 1f;
+            //		Debug.Log ("about to wait for 1 second");
+            yield return new WaitForSeconds(1f);
+            //		Debug.Log ("turning it off");
+            positiveFeedbackGroup.alpha = 0f;
+        }
+        else
+        {
+            incorrectGiantText.alpha = 0f;
+            correctGiantText.alpha = 1f;
+            yield return new WaitForSeconds(1f);
+            correctGiantText.alpha = 0f;
+        }
 		consecutiveIncorrectCameraPresses = 0;
         correctResponses++; //increment correct responses
         Debug.Log("CORRECT RESPONSES " + correctResponses.ToString());
@@ -2576,15 +2655,22 @@ public class ShoplifterScript : MonoBehaviour
 	public IEnumerator ShowNegativeFeedback()
 	{
 		Debug.Log ("IN NEGATIVE");
-		negativeFeedbackGroup.alpha = 1f;
-		negativeFeedbackGroup.gameObject.GetComponent<AudioSource> ().Play ();
-//		Debug.Log ("about to wait for 1 second");
-		yield return new WaitForSeconds (1f);
-
-		consecutiveIncorrectCameraPresses +=1;
-		negativeFeedbackGroup.gameObject.GetComponent<AudioSource> ().Stop ();
-//		Debug.Log ("turning it off");
-		negativeFeedbackGroup.alpha = 0f;
+        if (!CameraZone.isTraining)
+        {
+            negativeFeedbackGroup.alpha = 1f;
+            //negativeFeedbackGroup.gameObject.GetComponent<AudioSource> ().Play ();
+            //		Debug.Log ("about to wait for 1 second");
+            yield return new WaitForSeconds(1f);
+            negativeFeedbackGroup.alpha = 0f;
+        }
+        else
+        {
+            correctGiantText.alpha = 0f;
+            incorrectGiantText.alpha = 1f;
+            yield return new WaitForSeconds(1f);
+            incorrectGiantText.alpha = 0f;
+        }
+            consecutiveIncorrectCameraPresses +=1;
 		yield return null;
 	}
 
@@ -2683,7 +2769,11 @@ public class ShoplifterScript : MonoBehaviour
             timer += Time.deltaTime;
             yield return 0;
         }
+#if SPANISH
         intertrialText.text = "Al día siguiente";
+#else
+        intertrialText.text = "On the next day..";
+#endif
         intertrialGroup.alpha = 0f;
         yield return null;
     }
@@ -2706,10 +2796,18 @@ public class ShoplifterScript : MonoBehaviour
 		EnablePlayerCam (false);
         intertrialGroup.alpha = 1f;
 		if (!isTraining) {
-			intertrialText.text = "Comenzando la siguiente prueba...";
-		} else {
-			intertrialText.text = "Comenzando el siguiente ensayo de práctica...";
-		}
+#if SPANISH
+            intertrialText.text = "Comenzando la siguiente prueba...";
+#else
+            intertrialText.text = "Starting the next test...";
+#endif
+        } else {
+#if SPANISH
+            intertrialText.text = "Comenzando el siguiente ensayo de práctica...";
+#else
+            intertrialText.text = "Starting the next practice trial...";
+#endif
+        }
 		Experiment.Instance.shopLiftLog.LogEndTrial ();
         Experiment.Instance.shopLiftLog.LogEndTrialScreen(true,hasTips);
 		//if (false) {
@@ -2735,7 +2833,11 @@ public class ShoplifterScript : MonoBehaviour
     }
 	IEnumerator ShowEndEnvironmentStageScreen()
 	{ 	intertrialGroup.alpha = 1f;
-		intertrialText.text = "Felicidades, Has terminado. \n Tenga un breve descanso.";
+#if SPANISH
+        intertrialText.text = "Felicidades, Has terminado. \n Tenga un breve descanso.";
+#else
+        intertrialText.text = "Congratulations, you’re done! \n Have a short break";
+#endif
 
         //reset deviation queue before beginning the next environment
         deviationQueue = new Queue<float>();
@@ -2749,8 +2851,12 @@ public class ShoplifterScript : MonoBehaviour
 	IEnumerator ShowEndSessionScreen()
 	{ 
 		intertrialGroup.alpha = 1f;
+#if SPANISH
         intertrialText.text = "Felicidades. Has completado la sesión. \n Presiona Escape para salir de la aplicación.";
-		Experiment.Instance.shopLiftLog.LogEndSession(true);
+#else
+        intertrialText.text = "Congratulations, you have completed a session \n Press Escape key to exit the application.";
+#endif
+        Experiment.Instance.shopLiftLog.LogEndSession(true);
 		yield return new WaitForSeconds(1000f);
 		intertrialGroup.alpha = 0f;
 		yield return null;

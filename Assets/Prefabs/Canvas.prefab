@@ -1,5 +1,110 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &548381906
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 548381907}
+  - component: {fileID: 548381909}
+  - component: {fileID: 548381908}
+  - component: {fileID: 6161264721168869937}
+  - component: {fileID: 6558220118984589068}
+  m_Layer: 5
+  m_Name: CorrectText
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &548381907
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 548381906}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 224502553704297016}
+  m_RootOrder: 18
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 500, y: 300}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &548381909
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 548381906}
+  m_CullTransparentMesh: 0
+--- !u!114 &548381908
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 548381906}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 708705254, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0, g: 1, b: 0.047268867, a: 1}
+  m_RaycastTarget: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
+      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+  m_FontData:
+    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_FontSize: 60
+    m_FontStyle: 1
+    m_BestFit: 0
+    m_MinSize: 0
+    m_MaxSize: 60
+    m_Alignment: 4
+    m_AlignByGeometry: 0
+    m_RichText: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1
+  m_Text: CORRECT
+--- !u!225 &6161264721168869937
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 548381906}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &6558220118984589068
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 548381906}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0883f8717be24a5b8cf35a0d175575e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1000723319088412
 GameObject:
   m_ObjectHideFlags: 0
@@ -276,10 +381,10 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.99999994, y: 0.99999994, z: 0.99999994}
   m_Children:
-  - {fileID: 3351520551377431437}
-  - {fileID: 4714347683558399941}
   - {fileID: 224429521148550076}
   - {fileID: 224633066009208164}
+  - {fileID: 4714347683558399941}
+  - {fileID: 3351520551377431437}
   - {fileID: 224613366137071112}
   - {fileID: 224859067318519642}
   - {fileID: 224174891101273372}
@@ -287,8 +392,8 @@ RectTransform:
   - {fileID: 224770563149809592}
   - {fileID: 224709159970796622}
   - {fileID: 224247083380818616}
-  - {fileID: 224539194190521126}
   - {fileID: 4559856843084067218}
+  - {fileID: 224539194190521126}
   - {fileID: 6009070748898510329}
   m_Father: {fileID: 224502553704297016}
   m_RootOrder: 10
@@ -380,7 +485,9 @@ MonoBehaviour:
   secondGroup:
   - {fileID: 0}
   - {fileID: 0}
-  thirdGroup: []
+  thirdGroup:
+  - {fileID: 0}
+  - {fileID: 0}
   correctFeedback: {fileID: 2186254149216714245}
   incorrectFeedback: {fileID: 5677781966915951298}
   leftSliderRange: {fileID: 5835705760101680817}
@@ -565,7 +672,7 @@ RectTransform:
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -1058,8 +1165,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\xBFPara sacar la m\xE1xima cantidad de dinero, \ncuanto prefieres pasar
-    por esta sala?"
+  m_Text: "How confident are you that this\n room leads to higher room?"
 --- !u!1 &1143389232961968
 GameObject:
   m_ObjectHideFlags: 0
@@ -1090,7 +1196,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 224425967870042924}
-  m_RootOrder: 2
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -1138,7 +1244,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\xBFCu\xE1l sala te llevara a m\xE1s dinero?"
+  m_Text: Which room will lead you to more cash?
 --- !u!1 &1148402621569540
 GameObject:
   m_ObjectHideFlags: 0
@@ -1514,7 +1620,7 @@ RectTransform:
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -1915,8 +2021,9 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "Siguiente, veras una sala.\nImag\xEDnate atravesando la sala hasta la maleta
-    y recoger el dinero.\nSe le preguntara cuanto prefiere comenzar su viaje all\xED."
+  m_Text: "You will see a room next. \nImagine going through the room until the briefcase,
+    and collecting the cash!\nYou will be asked how much you prefer starting your
+    journey there\n"
 --- !u!1 &1200704805170790
 GameObject:
   m_ObjectHideFlags: 0
@@ -1995,9 +2102,11 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'El joystick izquierdo mueve el control.
+  m_Text: 'Left joystick moves slider
 
-    Presiona (X) para continuar'
+    Press (X) to confirm
+
+'
 --- !u!1 &1206053190039512
 GameObject:
   m_ObjectHideFlags: 0
@@ -2269,7 +2378,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: No es seguro
+  m_Text: Not Sure
 --- !u!1 &1258396217854866
 GameObject:
   m_ObjectHideFlags: 0
@@ -2302,7 +2411,7 @@ RectTransform:
   - {fileID: 224123904790650570}
   - {fileID: 224137582484216966}
   m_Father: {fileID: 224425967870042924}
-  m_RootOrder: 3
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -2507,7 +2616,7 @@ RectTransform:
   m_Children:
   - {fileID: 224695648583586958}
   m_Father: {fileID: 224502553704297016}
-  m_RootOrder: 18
+  m_RootOrder: 20
   m_LocalEulerAnglesHint: {x: 16.2, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -2643,8 +2752,8 @@ RectTransform:
   m_Father: {fileID: 224382003040400972}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0}
-  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -2909,6 +3018,8 @@ MonoBehaviour:
   imgGroup:
   - {fileID: 0}
   - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!1 &1336435727891330
 GameObject:
   m_ObjectHideFlags: 0
@@ -2957,6 +3068,8 @@ RectTransform:
   - {fileID: 224530530563889734}
   - {fileID: 224282205103989230}
   - {fileID: 224196329799535080}
+  - {fileID: 548381907}
+  - {fileID: 1092895574834457930}
   - {fileID: 224219629899833418}
   - {fileID: 224574943135982742}
   - {fileID: 224756733522367396}
@@ -3380,8 +3493,9 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "CONSEJO:\nIntente presionar el bot\xF3n (X) antes de que se agote el temporizador
-    la pr\xF3xima vez"
+  m_Text: 'TIPS:
+
+    Keep in mind the sequence of rooms which leads to higher reward'
 --- !u!114 &114919300370119506
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3551,7 +3665,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "No has desactivado la c\xE1mara"
+  m_Text: You did not deactivate the camera
 --- !u!1 &1387666322355118
 GameObject:
   m_ObjectHideFlags: 0
@@ -4095,7 +4209,7 @@ RectTransform:
   m_LocalScale: {x: 1.0000001, y: 1.0000001, z: 1.0000001}
   m_Children: []
   m_Father: {fileID: 224425967870042924}
-  m_RootOrder: 11
+  m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -4143,7 +4257,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Sala B
+  m_Text: Room B
 --- !u!1 &1443139555122200
 GameObject:
   m_ObjectHideFlags: 0
@@ -4323,12 +4437,29 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "Inicio de Sesi\xF3n \u2013 \n\xA1Ahora, est\xE1s listo para ir a un robo!\n\nSiga
-    las instrucciones en la pantalla.\nPresta atenci\xF3n a tu ubicaci\xF3n y aprende
-    las rutas as\xED como las recompensas que recoges en las maletas al final.\nMantente
-    vigilante. Rutas y premios pueden cambiar.\nComo acabas de aprender, presiona
-    (X) sobre las zonas de cameras para desactivar las c\xE1maras.\nPresiona (X) para
-    continuar"
+  m_Text: 'SESSION STARTING
+
+
+    Now, you are ready to go on a heist!
+
+
+    Just follow the on-screen instructions!
+
+    Pay attention to your location, and learn the routes
+
+    as well as the rewards you collect from briefcases at the end!
+
+    Stay watchful! Routes and rewards may change...
+
+
+    As you just learnt, make sure to press (X) over
+
+    camera zones to deactivate the cameras!
+
+
+    Press (X) to proceed!
+
+'
 --- !u!1 &1458852748013926
 GameObject:
   m_ObjectHideFlags: 0
@@ -4362,7 +4493,7 @@ RectTransform:
   m_Children:
   - {fileID: 224519754113473946}
   m_Father: {fileID: 224502553704297016}
-  m_RootOrder: 21
+  m_RootOrder: 23
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -4463,7 +4594,7 @@ RectTransform:
   m_Children:
   - {fileID: 224869796204656386}
   m_Father: {fileID: 224502553704297016}
-  m_RootOrder: 20
+  m_RootOrder: 22
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -4867,8 +4998,8 @@ RectTransform:
   m_Father: {fileID: 224137582484216966}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0}
-  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -5066,7 +5197,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Sala B
+  m_Text: Room B
 --- !u!1 &1558959339421162
 GameObject:
   m_ObjectHideFlags: 0
@@ -5230,7 +5361,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Sala A
+  m_Text: Room A
 --- !u!1 &1600619713656960
 GameObject:
   m_ObjectHideFlags: 0
@@ -5309,9 +5440,11 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Elige la sala con el joystick izquierdo.
+  m_Text: 'Choose room with left joystick
 
-    Presiona (X) para continuar'
+    Press (X) to confirm
+
+'
 --- !u!1 &1605240220510170
 GameObject:
   m_ObjectHideFlags: 0
@@ -5390,7 +5523,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Sala A
+  m_Text: Room A
 --- !u!1 &1607267797508308
 GameObject:
   m_ObjectHideFlags: 0
@@ -5548,9 +5681,11 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'El joystick izquierdo mueve el control.
+  m_Text: 'Left joystick moves slider
 
-    Presiona (X) para continuar'
+    Press (X) to confirm
+
+'
 --- !u!1 &1633557525206158
 GameObject:
   m_ObjectHideFlags: 0
@@ -5744,8 +5879,8 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "En lo que sigue escuchar\xE1s m\xFAsica del juego.\nPor favor mantenga
-    su mirada en la cruz de fijaci\xF3n, rel\xE1jese y preste atenci\xF3n a la m\xFAsica."
+  m_Text: "In what follows you will hear music from the game.\nPlease maintain your
+    gaze at the fixation cross, \nrelax, and pay attention to the music."
 --- !u!1 &1673745263620392
 GameObject:
   m_ObjectHideFlags: 0
@@ -5905,7 +6040,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: JUEGO PAUSADO
+  m_Text: GAME PAUSED
 --- !u!1 &1694218515044930
 GameObject:
   m_ObjectHideFlags: 0
@@ -6242,10 +6377,10 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\nBienvenidos\nEn este juego, eres un ladr\xF3n.\nPasaras por diferentes
-    rutas que pasan por diferentes salas.\nAl final de cada ruta hay una maleta con
-    dinero.\nSu objetivo es aprender qu\xE9 rutas conducen a la mayor cantidad de
-    dinero\nM\xE1s instrucciones seguir\xE1n\nPresiona (X) para continuar"
+  m_Text: "WELCOME!\n\nIn this game, you are a thief!\nYou will go through different
+    routes that pass through different rooms. \nAt the end of each route there is
+    a briefcase with money. \n\nYour goal is to learn which routes lead to the most
+    money!\nMore instructions will follow\n\nPress (X) to continue\n"
 --- !u!1 &1741548050824458
 GameObject:
   m_ObjectHideFlags: 0
@@ -6276,7 +6411,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 224502553704297016}
-  m_RootOrder: 22
+  m_RootOrder: 24
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -6549,7 +6684,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Confidente
+  m_Text: Confident
 --- !u!1 &1802961851672254
 GameObject:
   m_ObjectHideFlags: 0
@@ -6628,7 +6763,10 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Imagina pasar por esta sala hasta la maleta al final de la cadena de salas.
+  m_Text: 'Imagine going through this room to the briefcase at the end of the chain
+    of rooms
+
+'
 --- !u!1 &1811731645996188
 GameObject:
   m_ObjectHideFlags: 0
@@ -6786,7 +6924,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "por favor presione el (X) bot\xF3n solo en el lugar exacto"
+  m_Text: "\uFEFF\uFEFF\uFEFF\uFEFFPlease press (X) only at the exact spot!"
 --- !u!1 &1823334722849000
 GameObject:
   m_ObjectHideFlags: 0
@@ -6939,7 +7077,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: No Confidente
+  m_Text: Not Confident
 --- !u!1 &1829943688920900
 GameObject:
   m_ObjectHideFlags: 0
@@ -7436,7 +7574,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Entrenamiento
+  m_Text: TRAINING PERIOD
 --- !u!1 &1875952379286428
 GameObject:
   m_ObjectHideFlags: 0
@@ -7515,7 +7653,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\xBFQu\xE9 sala viene despu\xE9s de la sala de arriba?"
+  m_Text: Which room immediately follows the room above?
 --- !u!1 &1902251975118858
 GameObject:
   m_ObjectHideFlags: 0
@@ -7943,7 +8081,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "usted desactiv\xF3 la c\xE1mara"
+  m_Text: You deactivated the camera
 --- !u!1 &1957691616035076
 GameObject:
   m_ObjectHideFlags: 0
@@ -8124,11 +8262,11 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "Entrenamiento \u2013 \nPrimero, en cada sala necesitas desactivar la c\xE1mara
-    de seguridad presionando (X) cuando pases su ubicaci\xF3n.\nSolo veras la c\xE1mara
-    de seguridad la primera vez que pases por la sala. \nRecuerda esta ubicaci\xF3n,
-    la \u201Czona de c\xE1mara\u201D.\nPresiona (X) cada vez que pases una zona de
-    c\xE1mara.\nSi fallas, te atrapan y pierdes dinero.\nPresiona (X) para continuar\n"
+  m_Text: "TRAINING\n\nFirst, in each room you must deactivate its security camera
+    \nby pressing (X) when you pass its location.\n\nYou\u2019ll see the camera only
+    the first time you pass through the room. \nRemember this location, the \u201Ccamera
+    zone\u201D! \n\nPress (X) each time you pass a camera zone!\nIf you fail, you
+    get caught & lose money.\n\nPress (X) to Proceed!\n"
 --- !u!1 &1980696829542986
 GameObject:
   m_ObjectHideFlags: 0
@@ -8236,7 +8374,7 @@ RectTransform:
   m_Children:
   - {fileID: 224569547430745500}
   m_Father: {fileID: 224502553704297016}
-  m_RootOrder: 19
+  m_RootOrder: 21
   m_LocalEulerAnglesHint: {x: 16.2, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -8336,7 +8474,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 224425967870042924}
-  m_RootOrder: 12
+  m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -8489,7 +8627,7 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2965865990939766186}
   m_Enabled: 1
-  m_Alpha: 1
+  m_Alpha: 0
   m_Interactable: 1
   m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
@@ -8701,7 +8839,7 @@ RectTransform:
   m_Children:
   - {fileID: 6042688003975095497}
   m_Father: {fileID: 224425967870042924}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -9077,11 +9215,11 @@ RectTransform:
   m_Children:
   - {fileID: 3527262914668484585}
   m_Father: {fileID: 224425967870042924}
-  m_RootOrder: 0
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 34.8, y: -50.59996}
+  m_AnchoredPosition: {x: 5.8499756, y: -47}
   m_SizeDelta: {x: 518.5, y: 63.7}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5929724644792487824
@@ -9240,6 +9378,111 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6081545417696345524}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0883f8717be24a5b8cf35a0d175575e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &6490961997503043034
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1092895574834457930}
+  - component: {fileID: 6650794437867934811}
+  - component: {fileID: 2109528858431685454}
+  - component: {fileID: 6071158501139231074}
+  - component: {fileID: 2484308423458928043}
+  m_Layer: 5
+  m_Name: IncorrectText
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1092895574834457930
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6490961997503043034}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 224502553704297016}
+  m_RootOrder: 19
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -0.000030517578, y: 0.000015258789}
+  m_SizeDelta: {x: 500, y: 300}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &6650794437867934811
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6490961997503043034}
+  m_CullTransparentMesh: 0
+--- !u!114 &2109528858431685454
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6490961997503043034}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 708705254, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 0, b: 0.11694193, a: 1}
+  m_RaycastTarget: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
+      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+  m_FontData:
+    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_FontSize: 60
+    m_FontStyle: 1
+    m_BestFit: 0
+    m_MinSize: 0
+    m_MaxSize: 60
+    m_Alignment: 4
+    m_AlignByGeometry: 0
+    m_RichText: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1
+  m_Text: INCORRECT
+--- !u!225 &6071158501139231074
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6490961997503043034}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &2484308423458928043
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6490961997503043034}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f0883f8717be24a5b8cf35a0d175575e, type: 3}
@@ -9503,8 +9746,9 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "Correct! Please make sure the slider is \ninside the green zone and press
-    (X) again"
+  m_Text: 'Correct! Please move the slider into the green zone and
+
+    press (X) again'
 --- !u!1 &7215136435562805792
 GameObject:
   m_ObjectHideFlags: 0
@@ -9543,7 +9787,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 20.399872, y: 193.7999}
+  m_AnchoredPosition: {x: 20.399902, y: 193.79993}
   m_SizeDelta: {x: -250.80005, y: -447.5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8844747765626789302
@@ -9740,7 +9984,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 34.799957, y: -50.600037}
+  m_AnchoredPosition: {x: 34.799957, y: -50.600098}
   m_SizeDelta: {x: 518.5, y: 63.7}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8312364565532081349
@@ -9942,7 +10186,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 20.399826, y: 193.7999}
+  m_AnchoredPosition: {x: 20.399902, y: 193.79993}
   m_SizeDelta: {x: -250.80005, y: -447.5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1775507657679653066
@@ -9990,7 +10234,7 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8337923698177125098}
   m_Enabled: 1
-  m_Alpha: 1
+  m_Alpha: 0
   m_Interactable: 1
   m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0

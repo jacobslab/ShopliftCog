@@ -103,6 +103,7 @@ public class CameraZone : MonoBehaviour {
                     Debug.Log ("SHOWING POSITIVE FEEDBACK");
 					Sneak ();
 					hasSneaked = true;
+                    StopCoroutine(Experiment.Instance.shopLift.ShowNegativeFeedback());
 					StartCoroutine (Experiment.Instance.shopLift.ShowPositiveFeedback ());
 				} else if (isFocus && !activateCam && !hasSneaked) {
 					pressCount++;
@@ -110,6 +111,7 @@ public class CameraZone : MonoBehaviour {
 					Experiment.Instance.shopLift.infoGroup.alpha = 0f;
                     TCPServer.Instance.SetState(TCP_Config.DefineStates.CAM_INCORRECT_PRESS, true);
                     Debug.Log ("SHOWING NEGATIVE FEEDBACK in update");
+                    StopCoroutine(Experiment.Instance.shopLift.ShowPositiveFeedback());
 					StartCoroutine (Experiment.Instance.shopLift.ShowNegativeFeedback ());
 					alreadyShown = true;
 				}
