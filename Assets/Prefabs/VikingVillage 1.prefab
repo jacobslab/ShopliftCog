@@ -209,6 +209,7 @@ GameObject:
   - component: {fileID: 290222040705664874}
   - component: {fileID: 373371883871681850}
   - component: {fileID: 405239223639913342}
+  - component: {fileID: 1745690112}
   m_Layer: 0
   m_Name: Phase1Door_L
   m_TagString: Untagged
@@ -342,6 +343,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   doorSound: {fileID: 8300000, guid: 80a2ba0f65dd94be2b98af7288e3d7e4, type: 3}
+  openClip: {fileID: 7400000, guid: 3f8bc52ae56cd4ec78bdb84297c23cb2, type: 2}
+  closeClip: {fileID: 7400000, guid: 92b26673e33704a96900263b9b72135c, type: 2}
+--- !u!111 &1745690112
+Animation:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 292130456131216264}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Animation: {fileID: 0}
+  m_Animations:
+  - {fileID: 7400000, guid: 3f8bc52ae56cd4ec78bdb84297c23cb2, type: 2}
+  - {fileID: 7400000, guid: 92b26673e33704a96900263b9b72135c, type: 2}
+  m_WrapMode: 0
+  m_PlayAutomatically: 0
+  m_AnimatePhysics: 0
+  m_CullingType: 0
 --- !u!1 &292156933659530578
 GameObject:
   m_ObjectHideFlags: 0
@@ -38385,6 +38405,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   doorSound: {fileID: 8300000, guid: 80a2ba0f65dd94be2b98af7288e3d7e4, type: 3}
+  openClip: {fileID: 0}
+  closeClip: {fileID: 0}
 --- !u!1 &2818719520117526655
 GameObject:
   m_ObjectHideFlags: 0
@@ -74174,7 +74196,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2818719521067896152}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -890.17365, y: -437.16528, z: -13.438267}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -80267,6 +80289,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   doorSound: {fileID: 8300000, guid: 80a2ba0f65dd94be2b98af7288e3d7e4, type: 3}
+  openClip: {fileID: 0}
+  closeClip: {fileID: 0}
 --- !u!1 &2818719521143946887
 GameObject:
   m_ObjectHideFlags: 0
@@ -95745,6 +95769,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   doorSound: {fileID: 8300000, guid: 80a2ba0f65dd94be2b98af7288e3d7e4, type: 3}
+  openClip: {fileID: 0}
+  closeClip: {fileID: 0}
 --- !u!1 &2818719521328731535
 GameObject:
   m_ObjectHideFlags: 0
@@ -96274,6 +96300,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   doorSound: {fileID: 8300000, guid: 80a2ba0f65dd94be2b98af7288e3d7e4, type: 3}
+  openClip: {fileID: 0}
+  closeClip: {fileID: 0}
 --- !u!1 &2818719521337319896
 GameObject:
   m_ObjectHideFlags: 0
@@ -105266,6 +105294,7 @@ GameObject:
   - component: {fileID: 4849160839854581047}
   - component: {fileID: 4783604277984517991}
   - component: {fileID: 4815209547571974435}
+  - component: {fileID: 1511001923}
   m_Layer: 0
   m_Name: Phase2Door_L
   m_TagString: Untagged
@@ -105399,6 +105428,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   doorSound: {fileID: 8300000, guid: 80a2ba0f65dd94be2b98af7288e3d7e4, type: 3}
+  openClip: {fileID: 7400000, guid: 3f8bc52ae56cd4ec78bdb84297c23cb2, type: 2}
+  closeClip: {fileID: 7400000, guid: 92b26673e33704a96900263b9b72135c, type: 2}
+--- !u!111 &1511001923
+Animation:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4846267258772799957}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Animation: {fileID: 0}
+  m_Animations:
+  - {fileID: 7400000, guid: 3f8bc52ae56cd4ec78bdb84297c23cb2, type: 2}
+  - {fileID: 7400000, guid: 92b26673e33704a96900263b9b72135c, type: 2}
+  m_WrapMode: 0
+  m_PlayAutomatically: 1
+  m_AnimatePhysics: 0
+  m_CullingType: 0
 --- !u!1 &4846590988318298153
 GameObject:
   m_ObjectHideFlags: 0
@@ -105631,6 +105679,7 @@ GameObject:
   - component: {fileID: 5477051366766420121}
   - component: {fileID: 5560553126666443465}
   - component: {fileID: 5591998176534107277}
+  - component: {fileID: 229803619}
   m_Layer: 0
   m_Name: Phase2Door_R
   m_TagString: Untagged
@@ -105764,6 +105813,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   doorSound: {fileID: 8300000, guid: 80a2ba0f65dd94be2b98af7288e3d7e4, type: 3}
+  openClip: {fileID: 7400000, guid: 3f8bc52ae56cd4ec78bdb84297c23cb2, type: 2}
+  closeClip: {fileID: 7400000, guid: 92b26673e33704a96900263b9b72135c, type: 2}
+--- !u!111 &229803619
+Animation:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5478819444185105531}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Animation: {fileID: 0}
+  m_Animations:
+  - {fileID: 7400000, guid: 3f8bc52ae56cd4ec78bdb84297c23cb2, type: 2}
+  - {fileID: 7400000, guid: 92b26673e33704a96900263b9b72135c, type: 2}
+  m_WrapMode: 0
+  m_PlayAutomatically: 1
+  m_AnimatePhysics: 0
+  m_CullingType: 0
 --- !u!1 &5478971238616316037
 GameObject:
   m_ObjectHideFlags: 0
@@ -106444,6 +106512,7 @@ GameObject:
   - component: {fileID: 6368568841612592353}
   - component: {fileID: 6433633092857675441}
   - component: {fileID: 6483233046952423669}
+  - component: {fileID: 2008384644}
   m_Layer: 0
   m_Name: Phase1Door_R
   m_TagString: Untagged
@@ -106577,3 +106646,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   doorSound: {fileID: 8300000, guid: 80a2ba0f65dd94be2b98af7288e3d7e4, type: 3}
+  openClip: {fileID: 7400000, guid: 3f8bc52ae56cd4ec78bdb84297c23cb2, type: 2}
+  closeClip: {fileID: 7400000, guid: 92b26673e33704a96900263b9b72135c, type: 2}
+--- !u!111 &2008384644
+Animation:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6371322351932841987}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Animation: {fileID: 0}
+  m_Animations:
+  - {fileID: 7400000, guid: 3f8bc52ae56cd4ec78bdb84297c23cb2, type: 2}
+  - {fileID: 7400000, guid: 92b26673e33704a96900263b9b72135c, type: 2}
+  m_WrapMode: 0
+  m_PlayAutomatically: 1
+  m_AnimatePhysics: 0
+  m_CullingType: 0

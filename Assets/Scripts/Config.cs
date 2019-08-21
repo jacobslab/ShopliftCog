@@ -48,6 +48,11 @@ public class Config : MonoBehaviour
     public static bool isDayThree = false;
 
 #endif
+#if CONTROL
+    public static bool shouldForceControl = true;
+#else
+    public static bool shouldForceControl = false;
+#endif
 
     //recall
     public static int recallTime = 30;

@@ -1422,7 +1422,7 @@ public class ShoplifterScript : MonoBehaviour
 		bool leftChoice = false;
 
         //do revaluation only if they have learned; otherwise it will be control
-        if (hasLearned)
+        if (hasLearned && !Config.shouldForceControl)
         {
             switch (reevalConditionIndex)
             {
@@ -2483,12 +2483,12 @@ public class ShoplifterScript : MonoBehaviour
                 blackScreen.alpha = 0f;
                 //disable any kind of camera zone interaction
                 CameraZone.isPretraining = true;
-                yield return StartCoroutine(RunSliderTrainingPhase());
-                yield return StartCoroutine(RunMultipleChoiceTrainingPhase());
+                //yield return StartCoroutine(RunSliderTrainingPhase());
+                //yield return StartCoroutine(RunMultipleChoiceTrainingPhase());
                 //enable camera zone interaction before camera training
                 CameraZone.isPretraining = false;
                 Debug.Log("running cam training");
-                yield return StartCoroutine(RunCamTrainingPhase());
+                //yield return StartCoroutine(RunCamTrainingPhase());
             }
 
             yield return StartCoroutine(PickEnvironment(i, true));
