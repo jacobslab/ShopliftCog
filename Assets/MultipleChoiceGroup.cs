@@ -59,7 +59,7 @@ public class MultipleChoiceGroup : MonoBehaviour {
         bool isCorrect = false;
 
         //highlight the correct response
-        HighlightCorrectResponse(correctIndex);
+        int correctPositionIndex  = HighlightCorrectResponse(correctIndex);
         correctIndicator.alpha = 1f;
 
         if (roomMappings[chosenIndex + 1] == correctIndex)
@@ -80,10 +80,18 @@ public class MultipleChoiceGroup : MonoBehaviour {
         if (waitForButtonPress)
         {
             bool pressed = false;
-            yield return StartCoroutine(ShoplifterScript.Instance.WaitForButtonPress(100000f, didPress =>
+            int selecterPos = 0;
+            while (!pressed || correctPositionIndex != selecterPos)
             {
-                pressed = didPress;
-            }));
+                yield return StartCoroutine(ShoplifterScript.Instance.WaitForButtonPress(100000f, didPress =>
+                {
+                    pressed = didPress;
+                }));
+                selecterPos = gameObject.GetComponent<AnswerSelector>().ReturnSelectorPosition();
+                Debug.Log("correct index " + correctPositionIndex.ToString());
+                Debug.Log("selecter pos " + selecterPos.ToString());
+                yield return 0;
+            }
         }
         else
         {
@@ -95,7 +103,7 @@ public class MultipleChoiceGroup : MonoBehaviour {
         yield return null;
     }
 
-    public void HighlightCorrectResponse(int correctIndex)
+    public int HighlightCorrectResponse(int correctIndex)
     {
         Debug.Log("correct index " + correctIndex.ToString());
 
@@ -103,6 +111,7 @@ public class MultipleChoiceGroup : MonoBehaviour {
         texturePositionToRoomMapping.TryGetValue(correctIndex,out int correctPositionIndex);
         Debug.Log("correct position index is " + correctPositionIndex.ToString());
         gameObject.GetComponent<AnswerSelector>().MoveDirectlyTo(correctIndicator.gameObject, correctPositionIndex);
+        return correctPositionIndex;
     }
 
     public void UpdateRoomMappings(Dictionary<int,int> newMapping)

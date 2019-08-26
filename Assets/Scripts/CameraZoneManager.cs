@@ -5,10 +5,30 @@ using UnityEngine;
 public class CameraZoneManager : MonoBehaviour
 {
     public List<GameObject> camZoneObjList;
+
+    private CameraZone activeCamZone;
     // Start is called before the first frame update
     void Start()
     {
         
+    }
+
+    public void SetActiveCameraZone(CameraZone currentCamZone)
+    {
+        activeCamZone = currentCamZone;
+    }
+
+    public CameraZone GetActiveCameraZone()
+    {
+        return activeCamZone;
+    }
+
+    void SetCamZoneManagerReferences()
+    {
+        for(int i=0;i<camZoneObjList.Count;i++)
+        {
+            camZoneObjList[i].GetComponent<CameraZone>().camZoneManager = this.gameObject.GetComponent<CameraZoneManager>();
+        }
     }
 
     public void SetCameraObjects()
@@ -25,6 +45,14 @@ public class CameraZoneManager : MonoBehaviour
         for(int i=0;i< camZoneObjList.Count;i++)
         {
             camZoneObjList[i].GetComponent<CameraZone>().ToggleCamObjects(shouldEnable);
+        }
+    }
+
+    public void MakeAllCamInvisible(bool isInvisible)
+    {
+        for(int i=0;i<camZoneObjList.Count;i++)
+        {
+            camZoneObjList[i].GetComponent<CameraZone>().MakeCamInvisible(isInvisible);
         }
     }
 

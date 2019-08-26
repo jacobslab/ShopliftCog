@@ -127,6 +127,11 @@ public class ShoplifterScript : MonoBehaviour
     float suggestedSpeed = 0f;
 
     float directionEnv = -1f; //-1 for space station, +1 for western town
+
+
+    private int currentPathIndex = 0;
+    private int currentRoomIndex = 0;
+
     private int phase1Choice = 0;
     private int phase2Choice = 0;
     private int choiceOutput = 0;
@@ -547,6 +552,7 @@ public class ShoplifterScript : MonoBehaviour
                 break;
         }
         activeCamZone.GetComponent<CameraZone>().isFocus = true;
+        cameraZoneManager.SetActiveCameraZone(activeCamZone.GetComponent<CameraZone>());
 
         //		Debug.Log ("cam index is: " + camIndex.ToString ());
         //		if (camIndex <= 1) {
@@ -857,7 +863,7 @@ public class ShoplifterScript : MonoBehaviour
         Debug.Log("turning off all cam zones");
 
         //show instructions first
-        intertrialText.text = "We will first practice remembering which rooms lead to higher cash rewards. \n You will then be asked to respond to questions about that. \n Press (X) to begin!";
+        intertrialText.text = "Welcome to PRE-TRAINING 1/3!\n Let's practice which rooms lead to higher cash!\n You will learn how to use sliders to respond.\n Press(X) to begin!";
         intertrialGroup.alpha = 1f;
         yield return StartCoroutine(WaitForButtonPress(10000f, didPress =>
         {
@@ -898,7 +904,7 @@ public class ShoplifterScript : MonoBehaviour
     IEnumerator RunMultipleChoiceTrainingPhase()
     {
         //show instructions
-        intertrialText.text = "We will now practice remembering about the arrangement of rooms. \n You will then be asked questions about that. \n Press (X) to begin!";
+        intertrialText.text = "Welcome to PRE-TRAINING 2/3!\n Learning room arrangements.\n Where does each room's door open to?\n You will answer by choosing a room.\n Press(X) to begin!";
         intertrialGroup.alpha = 1f;
         yield return StartCoroutine(WaitForButtonPress(10000f, didPress =>
         {
@@ -945,28 +951,42 @@ public class ShoplifterScript : MonoBehaviour
 	IEnumerator RunCamTrainingPhase()
 	{
         //blackScreen.alpha = 1f;
-        intertrialText.text = "We will now practice remembering the location of camera and \n deactivating it by pressing (X) when we are at that position.  \n Press (X) to begin!";
-        intertrialGroup.alpha = 1f;
-        yield return StartCoroutine(WaitForButtonPress(10000f, didPress =>
+        if (ExperimentSettings.isPretraining)
         {
-            Debug.Log("did press: " + didPress);
+            intertrialText.text = "Welcome to PRE-TRAINING 3/3!\n In each room, PRESS(X) as you pass \n camera location, &*memorize cam location*!\n When cam is invisible, PRESS(X)\n as you pass remembered cam location.\n Press(X) to begin!";
+            intertrialGroup.alpha = 1f;
+            positiveFeedbackGroup.alpha = 0f;
+            negativeFeedbackGroup.alpha = 0f;
+            trainingPeriodGroup.transform.GetChild(0).gameObject.GetComponent<Text>().text = "PRE-TRAINING \n PERIOD";
+            yield return StartCoroutine(WaitForButtonPress(10000f, didPress =>
+            {
+                Debug.Log("did press: " + didPress);
+            }
+            ));
+            intertrialGroup.alpha = 0f;
         }
-        ));
-        intertrialGroup.alpha = 0f;
+        else if(ExperimentSettings.isTraining)
+        {
+            Debug.Log("starting cam training phase");
+            Experiment.Instance.shopLiftLog.LogTextInstructions(2, true);
+            trainingInstructionsGroup.alpha = 1f;
+            trainingPeriodGroup.transform.GetChild(0).gameObject.GetComponent<Text>().text = "TRAINING \n PERIOD";
+            yield return StartCoroutine(WaitForButtonPress(10000f, didPress =>
+            {
+                Debug.Log("did press: " + didPress);
+            }
+            ));
+            trainingInstructionsGroup.alpha = 0f;
+
+            Experiment.Instance.shopLiftLog.LogTextInstructions(2, false);
+
+        }
+
+
         cameraZoneManager.ResetAllCamZones();
         cameraZoneManager.ToggleAllCamZones(true); //temporarily turn on all cameras
         RandomizeSpeedChangeZones ();
-		Debug.Log ("starting cam training phase");
-        Experiment.Instance.shopLiftLog.LogTextInstructions(2, true);
-        trainingInstructionsGroup.alpha = 1f;
-		yield return StartCoroutine(WaitForButtonPress (10000f,didPress =>
-			{
-				Debug.Log("did press: " + didPress);
-			}
-		));
-		trainingInstructionsGroup.alpha = 0f;
-
-        Experiment.Instance.shopLiftLog.LogTextInstructions(2, false);
+		
         TCPServer.Instance.SetState(TCP_Config.DefineStates.INSTRUCTIONS, false);
 
         //training begins here
@@ -980,6 +1000,7 @@ public class ShoplifterScript : MonoBehaviour
 
         CameraZone.isTraining = true;
 
+        CameraZone.isPretraining = false;
 
         while (numTraining < 4) {
 
@@ -1005,6 +1026,13 @@ public class ShoplifterScript : MonoBehaviour
             else
                 yield return StartCoroutine(ShowEndTrialScreen(false, ShouldShowTips()));
 			numTraining++;
+
+            if (numTraining >= 2)
+            {
+                //make cameras invisible 
+                cameraZoneManager.MakeAllCamInvisible(true);
+                CameraZone.firstTime = false;
+            }
 			yield return 0;
 		}
 //		ResetCamZone ();
@@ -1071,6 +1099,8 @@ public class ShoplifterScript : MonoBehaviour
 	IEnumerator RunPhaseOne(int pathIndex, bool terminateWithChoice)
 	{
 		Experiment.Instance.shopLiftLog.LogPathIndex (pathIndex);
+        currentPathIndex = pathIndex;
+        currentRoomIndex = 1;
 		EnablePlayerCam (true);
 
 		ChangeCamZoneFocus ((pathIndex == 0) ? 0 : 3);
@@ -1104,10 +1134,14 @@ public class ShoplifterScript : MonoBehaviour
 		yield return StartCoroutine(VelocityPlayerTo (startPos,endPos, phase1Factor));
 
 		Experiment.Instance.shopLiftLog.LogMoveEvent (1,false);
-
 		clearCameraZoneFlags = true;
 		if(activeCamZone!=null)
 			activeCamZone.GetComponent<CameraZone> ().isFocus = false;
+       while(ExperimentSettings.isPretraining && !activeCamZone.GetComponent<CameraZone>().hasSneaked)
+        {
+            yield return StartCoroutine(VelocityPlayerTo(startPos, endPos, phase1Factor));
+            yield return 0;
+        }
 		yield return StartCoroutine(WaitForDoorOpenPress (doorText));
 		float delayTwo = 0f;
 		if (!terminateWithChoice) {
@@ -1173,7 +1207,11 @@ public class ShoplifterScript : MonoBehaviour
 	{
 		EnablePlayerCam (true);
 		ChangeCamZoneFocus ((pathIndex == 0) ? 1 : 4);
-		GameObject targetDoor = (pathIndex==0) ? phase2Door_L : phase2Door_R;
+
+        currentPathIndex = pathIndex;
+        currentRoomIndex = 2;
+
+        GameObject targetDoor = (pathIndex==0) ? phase2Door_L : phase2Door_R;
 		Vector3 startPos = (pathIndex == 0) ? phase2Start_L.transform.position : phase2Start_R.transform.position;
 		Vector3 endPos = (pathIndex == 0) ? phase2End_L.transform.position : phase2End_R.transform.position;
 		if (isDirect) {
@@ -1235,7 +1273,12 @@ public class ShoplifterScript : MonoBehaviour
             SpawnSuitcase(pathIndex); //this will only run for slider training phase where we are directly spawned into the last room in the corridor
         }
 		ChangeCamZoneFocus ((pathIndex == 0) ? 2 : 5);
-		Vector3 startPos = (pathIndex == 0) ? phase3Start_L.transform.position : phase3Start_R.transform.position;
+
+
+        currentPathIndex = pathIndex;
+        currentRoomIndex = 3;
+
+        Vector3 startPos = (pathIndex == 0) ? phase3Start_L.transform.position : phase3Start_R.transform.position;
 		Vector3 endPos = (pathIndex == 0) ? phase3End_L.transform.position : phase3End_R.transform.position;
 		if (isDirect) {
 			currentAudio = (pathIndex == 0) ? three_L_Audio : three_R_Audio;
@@ -2412,6 +2455,20 @@ public class ShoplifterScript : MonoBehaviour
 		yield return null;
 	}
 
+    IEnumerator ShowInstructionsTillButtonPress(string text)
+    {
+        intertrialText.text = text;
+        intertrialGroup.alpha = 1f;
+        yield return StartCoroutine(WaitForButtonPress(10000f, didPress =>
+        {
+            Debug.Log("did press: " + didPress);
+        }
+        ));
+        intertrialGroup.alpha = 0f;
+
+        yield return null;
+    }
+
     IEnumerator RunTask()
     {
 		stageIndex = 1;
@@ -2474,24 +2531,37 @@ public class ShoplifterScript : MonoBehaviour
 
             currentPhaseName = "TRAINING";
             yield return StartCoroutine(ShowIntroInstructions());
-            if (ExperimentSettings.isTraining)
+
+            //pretraining; will only run before the first environment
+            if (ExperimentSettings.isPretraining)
             {
+                CameraZone.enableCamZones = false;
                 blackScreen.alpha = 1f;
                 yield return StartCoroutine(PickEnvironment(2, true)); //training env
                 RandomizeSuitcases();
-                yield return StartCoroutine(PlayInstructionVideo(false));
+                yield return StartCoroutine(PlayInstructionVideo(true));
                 blackScreen.alpha = 0f;
                 //disable any kind of camera zone interaction
-                CameraZone.isPretraining = true;
-                //yield return StartCoroutine(RunSliderTrainingPhase());
-                //yield return StartCoroutine(RunMultipleChoiceTrainingPhase());
+
+                yield return StartCoroutine(RunSliderTrainingPhase());
+                yield return StartCoroutine(RunMultipleChoiceTrainingPhase());
+                CameraZone.enableCamZones = true;
                 //enable camera zone interaction before camera training
-                CameraZone.isPretraining = false;
-                Debug.Log("running cam training");
-                //yield return StartCoroutine(RunCamTrainingPhase());
+                Debug.Log("running cam pretraining");
+                CameraZone.isPretraining = true;
+                yield return StartCoroutine(RunCamTrainingPhase());
+                string pretrainingEndText = "Congrats! You've completed PRE-TRAINING!\n GOAL: learn which rooms lead to*more cash*!! \n But first, let's memorize *cam locations*\n to deactivate cams too! \n Press(X) to begin camera practice!";
+                yield return StartCoroutine(ShowInstructionsTillButtonPress(pretrainingEndText));
+                ExperimentSettings.isPretraining = false;
             }
 
             yield return StartCoroutine(PickEnvironment(i, true));
+            if(ExperimentSettings.isTraining)
+            {
+                //enable camera zone interaction before camera training
+                Debug.Log("running cam training");
+                yield return StartCoroutine(RunCamTrainingPhase());
+            }
             RandomizeSuitcases();
             cameraZoneManager.ResetAllCamZones();
             cameraZoneManager.ToggleAllCamZones(false);
@@ -2537,6 +2607,7 @@ public class ShoplifterScript : MonoBehaviour
                 TCPServer.Instance.SetState(TCP_Config.DefineStates.LEARNING, true);
                 yield return StartCoroutine(RunLearningPhase(false, maxTrials_Learning));
                 TCPServer.Instance.SetState(TCP_Config.DefineStates.LEARNING, false);
+                ExperimentSettings.isLearning = false;
             }
 
             //shuffle rewards
@@ -2551,6 +2622,7 @@ public class ShoplifterScript : MonoBehaviour
                 TCPServer.Instance.SetState(TCP_Config.DefineStates.REEVALUATION, true);
                 yield return StartCoroutine(RunReevaluationPhase(currentReevalCondition));
                 TCPServer.Instance.SetState(TCP_Config.DefineStates.REEVALUATION, false);
+                ExperimentSettings.isReeval = false;
             }
 
 
@@ -2563,6 +2635,7 @@ public class ShoplifterScript : MonoBehaviour
                 TCPServer.Instance.SetState(TCP_Config.DefineStates.TESTING, true);
                 yield return StartCoroutine(RunTestingPhase());
                 TCPServer.Instance.SetState(TCP_Config.DefineStates.TESTING, false);
+                ExperimentSettings.isTesting = false;
             }
 
 
@@ -2574,6 +2647,7 @@ public class ShoplifterScript : MonoBehaviour
                 TCPServer.Instance.SetState(TCP_Config.DefineStates.POST_TEST, true);
                 yield return StartCoroutine(RunLearningPhase(true, maxTrials_PostTest));
                 TCPServer.Instance.SetState(TCP_Config.DefineStates.POST_TEST, true);
+                
             }
             //skip if it is the final environment
             if (i != totalEnvCount - 1)
@@ -2632,7 +2706,7 @@ public class ShoplifterScript : MonoBehaviour
 	public IEnumerator ShowPositiveFeedback()
 	{
 		Debug.Log ("IN POSITIVE");
-        if (!CameraZone.isTraining)
+        if (!ExperimentSettings.isPretraining)
         {
             positiveFeedbackGroup.alpha = 1f;
             //		Debug.Log ("about to wait for 1 second");
@@ -2642,6 +2716,8 @@ public class ShoplifterScript : MonoBehaviour
         }
         else
         {
+            negativeFeedbackGroup.alpha = 0f;
+            positiveFeedbackGroup.alpha = 0f;
             incorrectGiantText.alpha = 0f;
             correctGiantText.alpha = 1f;
             yield return new WaitForSeconds(1f);
@@ -2655,16 +2731,20 @@ public class ShoplifterScript : MonoBehaviour
 	public IEnumerator ShowNegativeFeedback()
 	{
 		Debug.Log ("IN NEGATIVE");
-        if (!CameraZone.isTraining)
+        if (!ExperimentSettings.isPretraining)
         {
+            Debug.Log("turning negative on");
             negativeFeedbackGroup.alpha = 1f;
             //negativeFeedbackGroup.gameObject.GetComponent<AudioSource> ().Play ();
-            //		Debug.Log ("about to wait for 1 second");
+            Debug.Log("about to wait for 1 second");
             yield return new WaitForSeconds(1f);
             negativeFeedbackGroup.alpha = 0f;
+            Debug.Log("turned negative off");
         }
         else
         {
+            negativeFeedbackGroup.alpha = 0f;
+            positiveFeedbackGroup.alpha = 0f;
             correctGiantText.alpha = 0f;
             incorrectGiantText.alpha = 1f;
             yield return new WaitForSeconds(1f);
@@ -2673,6 +2753,30 @@ public class ShoplifterScript : MonoBehaviour
             consecutiveIncorrectCameraPresses +=1;
 		yield return null;
 	}
+
+    public IEnumerator RepeatRoom()
+    {
+        yield return StartCoroutine(ShowNegativeFeedback());
+
+        //repeat room
+        Vector3 startPos = Vector3.zero; //where to move the camera back to
+        switch(currentRoomIndex)
+        {
+            case 1:
+                startPos = (currentPathIndex == 0) ? phase1Start_L.transform.position: phase1Start_R.transform.position;
+                break;
+            case 2:
+                startPos = (currentPathIndex == 0) ? phase2Start_L.transform.position : phase2Start_R.transform.position;
+                break;
+            case 3:
+                startPos = (currentPathIndex == 0) ? phase3Start_L.transform.position : phase3Start_R.transform.position;
+                break;
+        }
+        Debug.Log("TRANSPORTING PLAYER BACK TO ROOM START");
+        camVehicle.transform.position = startPos;
+
+        yield return null;
+    }
 
 	public IEnumerator ShowWarning()
 	{

@@ -64,6 +64,7 @@ public class ExperimentSettings : MonoBehaviour {
 	public Text gamifiedText;
 	public Dropdown sessionType;
 
+    public static bool isPretraining = true;
 	public static bool isTraining=true;
 	public static bool isLearning=true;
 	public static bool isReeval=true;

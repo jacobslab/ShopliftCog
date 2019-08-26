@@ -26,9 +26,9 @@ public class PrefGroupSetup : MonoBehaviour {
 	void OnEnable () {
         //update on enable
 #if KEYBOARD
-        instructionText.text = "Left and right arrow keys moves the slider \n Press (X) to confirm";
+        instructionText.text = "Left and right arrow keys moves the slider";
 #else
-        instructionText.text = "Left joystick moves slider \n Press (X) to confirm";
+        instructionText.text = "Left joystick moves slider";
 #endif
         active = true;
 

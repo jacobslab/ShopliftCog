@@ -25,9 +25,9 @@ public class PrefSoloSetup : MonoBehaviour
     void OnEnable () {
 
 #if KEYBOARD
-        instructionText.text = "Left and right arrow keys moves slider \nPress(X) to confirm";
+        instructionText.text = "Left and right arrow keys moves slider";
 #else
-        instructionText.text = "El joystick izquierdo mueve el control. \n Presiona(X) para continuar";
+        instructionText.text = "El joystick izquierdo mueve el control";
 #endif
 
         correctFeedback.alpha = 0f;

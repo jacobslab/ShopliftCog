@@ -11,11 +11,13 @@ public class CameraZone : MonoBehaviour {
 	public static bool isTraining= false; //for camera training
 	public bool isFocus = false;
 
-	private bool hasSneaked = false;
+	public bool hasSneaked = false;
 	private bool alreadyShown = false;
 
 	private int pressCount = 0;
 	public static bool showingWarning=false;
+
+    public static bool enableCamZones = true;
 
     private GameObject activeCamObj;
 
@@ -23,6 +25,11 @@ public class CameraZone : MonoBehaviour {
 	public GameObject securityCam;
 	public GameObject magnifyingGlass;
 	public GameObject wirelessCam;
+
+
+    public CameraZoneManager camZoneManager;
+
+
 
 	// Use this for initialization
 	void OnEnable () {
@@ -66,6 +73,16 @@ public class CameraZone : MonoBehaviour {
         }
     }
 
+    public void MakeCamInvisible(bool isInvisible)
+    {
+        if(activeCamObj!=null)
+        {
+            //activeCamObj.GetComponent<Renderer>().enabled = !isInvisible;
+            activeCamObj.SetActive(!isInvisible);
+        }
+
+    }
+
 
     public void ToggleCamObjects(bool shouldEnable)
     {
@@ -89,43 +106,52 @@ public class CameraZone : MonoBehaviour {
 	// Update is called once per frame
 	void LateUpdate () {
 
-//		Debug.Log ("activate cam: " + activateCam.ToString ());
-		if (Input.GetButtonDown("Action Button") && isFocus && !showingWarning && !hasSneaked && !isPretraining) {
-			Debug.Log ("showing warning is: " + showingWarning.ToString ());
-			Debug.Log ("press count is: " + pressCount.ToString ());
-            ShoplifterScript.haltPlayer = false;
-            Experiment.Instance.shopLiftLog.LogButtonPress();
-            if (pressCount <= 1) {
-				Debug.Log ("activate cam: " + activateCam.ToString () + " isFocus : " + isFocus.ToString ());
-				if (activateCam && isFocus) {
-					Experiment.Instance.shopLift.infoGroup.alpha = 0f;
-                    TCPServer.Instance.SetState(TCP_Config.DefineStates.CAM_CORRECT_PRESS, true);
-                    Debug.Log ("SHOWING POSITIVE FEEDBACK");
-					Sneak ();
-					hasSneaked = true;
-                    StopCoroutine(Experiment.Instance.shopLift.ShowNegativeFeedback());
-					StartCoroutine (Experiment.Instance.shopLift.ShowPositiveFeedback ());
-				} else if (isFocus && !activateCam && !hasSneaked) {
-					pressCount++;
-					Debug.Log ("PRESSED ONCE");
-					Experiment.Instance.shopLift.infoGroup.alpha = 0f;
-                    TCPServer.Instance.SetState(TCP_Config.DefineStates.CAM_INCORRECT_PRESS, true);
-                    Debug.Log ("SHOWING NEGATIVE FEEDBACK in update");
-                    StopCoroutine(Experiment.Instance.shopLift.ShowPositiveFeedback());
-					StartCoroutine (Experiment.Instance.shopLift.ShowNegativeFeedback ());
-					alreadyShown = true;
-				}
-			} else if (!isTraining) {
-                //only show warning if it is not training
-				showingWarning = true;
-				StartCoroutine (Experiment.Instance.shopLift.ShowWarning ());
-		}
-//		if (activateCam &&  !firstTime && Input.GetButtonDown("Sneak Button")) {
-//			Sneak ();
-//			activateCam = false;
-//		}
+        //		Debug.Log ("activate cam: " + activateCam.ToString ());
+        if (enableCamZones)
+        {
+            if (Input.GetButtonDown("Action Button") && isFocus && !showingWarning && !hasSneaked && !isPretraining)
+            {
+                Debug.Log("showing warning is: " + showingWarning.ToString());
+                Debug.Log("press count is: " + pressCount.ToString());
+                ShoplifterScript.haltPlayer = false;
+                Experiment.Instance.shopLiftLog.LogButtonPress();
+                if (pressCount <= 1)
+                {
+                    Debug.Log("activate cam: " + activateCam.ToString() + " isFocus : " + isFocus.ToString());
+                    if (activateCam && isFocus)
+                    {
+                        Experiment.Instance.shopLift.infoGroup.alpha = 0f;
+                        TCPServer.Instance.SetState(TCP_Config.DefineStates.CAM_CORRECT_PRESS, true);
+                        Debug.Log("SHOWING POSITIVE FEEDBACK");
+                        Sneak();
+                        StopCoroutine(Experiment.Instance.shopLift.ShowNegativeFeedback());
+                        StartCoroutine(Experiment.Instance.shopLift.ShowPositiveFeedback());
+                    }
+                    else if (isFocus && !activateCam && !hasSneaked)
+                    {
+                        pressCount++;
+                        Debug.Log("PRESSED ONCE");
+                        Experiment.Instance.shopLift.infoGroup.alpha = 0f;
+                        TCPServer.Instance.SetState(TCP_Config.DefineStates.CAM_INCORRECT_PRESS, true);
+                        Debug.Log("SHOWING NEGATIVE FEEDBACK in update");
+                        StopCoroutine(Experiment.Instance.shopLift.ShowPositiveFeedback());
+                        StartCoroutine(Experiment.Instance.shopLift.ShowNegativeFeedback());
+                        alreadyShown = true;
+                    }
+                }
+                else if (!isTraining)
+                {
+                    //only show warning if it is not training
+                    showingWarning = true;
+                    StartCoroutine(Experiment.Instance.shopLift.ShowWarning());
+                }
+                //		if (activateCam &&  !firstTime && Input.GetButtonDown("Sneak Button")) {
+                //			Sneak ();
+                //			activateCam = false;
+                //		}
 
-	}
+            }
+        }
 
 		
 	}
@@ -138,43 +164,62 @@ public class CameraZone : MonoBehaviour {
     }
 
 	void Sneak()
-	{
-		Experiment.Instance.shopLiftLog.LogSneaking (Experiment.Instance.shopLift.camVehicle.transform.position, camIndex);
+    {
+        hasSneaked = true;
+        Experiment.Instance.shopLiftLog.LogSneaking (Experiment.Instance.shopLift.camVehicle.transform.position, camIndex);
 		Debug.Log ("SNEAKING NOW");
 	}
 
 	void OnTriggerEnter(Collider col)
 	{
-		if (col.gameObject.tag == "Player" && !isPretraining) {
-			hasSneaked = false;
-			activateCam = true;
-			pressCount = 0;
-			activateCam = true;
-			if (isTraining) {
-                ShoplifterScript.haltPlayer = true;
-                StartCoroutine(ShoplifterScript.Instance.HaltPlayerMovement());
-                Experiment.Instance.shopLift.infoText.text = "Press (X) to deactivate the camera";
-				activateCam = true;
-				Experiment.Instance.shopLift.infoGroup.alpha = 1f;
-			}
-		}
-		
+        if (enableCamZones)
+        {
+            if (col.gameObject.tag == "Player" && !isPretraining)
+            {
+                hasSneaked = false;
+                activateCam = true;
+                pressCount = 0;
+                activateCam = true;
+                if (ExperimentSettings.isPretraining && firstTime)
+                {
+                    ShoplifterScript.haltPlayer = true;
+                    StartCoroutine(ShoplifterScript.Instance.HaltPlayerMovement());
+                    Experiment.Instance.shopLift.infoText.text = "Press (X) to deactivate the camera";
+                    activateCam = true;
+                    Experiment.Instance.shopLift.infoGroup.alpha = 1f;
+                }
+            }
+        }
 		
 	}
 
 	void OnTriggerExit(Collider col)
 	{
-		if (col.gameObject.tag == "Player" && !isPretraining) {
-			//firstTime = false;
-			activateCam = false;
-			if (!hasSneaked && !alreadyShown) {
-				Debug.Log ("showing negative feedback on trigger exit");
-				StartCoroutine (Experiment.Instance.shopLift.ShowNegativeFeedback ());
-				isFocus = false;
-				pressCount = 0;
-			}
-		}
+        if (enableCamZones)
+        {
+            if (col.gameObject.tag == "Player")
+            {
+                if (ExperimentSettings.isPretraining && !hasSneaked)
+                {
 
+                    activateCam = false;
+                    //make them repeat that room
+                    StartCoroutine(ShoplifterScript.Instance.RepeatRoom());
+                }
+                else
+                {
+                    //firstTime = false;
+                    activateCam = false;
+                    if (!hasSneaked && !alreadyShown)
+                    {
+                        Debug.Log("showing negative feedback on trigger exit");
+                        StartCoroutine(Experiment.Instance.shopLift.ShowNegativeFeedback());
+                        isFocus = false;
+                        pressCount = 0;
+                    }
+                }
+            }
+        }
 		Experiment.Instance.shopLift.infoGroup.alpha = 0f;
 
 	}

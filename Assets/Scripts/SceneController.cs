@@ -13,9 +13,11 @@ public class SceneController : MonoBehaviour
     //SINGLETON
     private static SceneController _instance;
 
+    public VideoClip keyboard_control_video;
     public VideoClip keyboard_video;
     public AudioClip keyboard_audio;
 
+    public VideoClip controller_control_video;
     public VideoClip controller_video;
     public AudioClip controller_audio;
 
@@ -55,11 +57,19 @@ public class SceneController : MonoBehaviour
 #endif
 
 #if KEYBOARD
-
+#if CONTROL
+        instructionVideoPlayer.GetComponent<VideoPlayer>().clip = keyboard_control_video;
+#else
         instructionVideoPlayer.GetComponent<VideoPlayer>().clip = keyboard_video;
-        //instructionVideoPlayer.GetComponent<AudioSource>().clip = keyboard_audio;
+#endif
+
+//instructionVideoPlayer.GetComponent<AudioSource>().clip = keyboard_audio;
+#else
+#if CONTROL
+        instructionVideoPlayer.GetComponent<VideoPlayer>().clip = controller_control_video;
 #else
         instructionVideoPlayer.GetComponent<VideoPlayer>().clip = controller_video;
+#endif
         //instructionVideoPlayer.GetComponent<AudioSource>().clip = controller_audio;
 
 #endif
