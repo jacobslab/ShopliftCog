@@ -187,9 +187,12 @@ public class Experiment : MonoBehaviour {
 		leftReward = int.Parse (checkpointData [5]);
 		rightRoomName = checkpointData [6];
 		rightReward = int.Parse (checkpointData [7]);
+        ExperimentSettings.isPretraining = false;
 
-		switch (checkpointedPhaseName) {
+        switch (checkpointedPhaseName) {
 		case "TRAINING":
+                ExperimentSettings.isPretraining = false;
+            ExperimentSettings.isTraining = true;
 			//no action needed, assuming all the flags point to true, as they do by default
 			break;
 		case "LEARNING":

@@ -89,8 +89,11 @@ public class ShoplifterScript : MonoBehaviour
 
     //stage 1 learning variables
     private int numTrials_Learning = 0;
+#if !FAST_TEST
     private int maxTrials_Learning = 24;
-
+#else
+    private int maxTrials_Learning = 2;
+#endif
 
     //variables for additional learning phase
     private int numAdditionalTrials = 0;
@@ -98,15 +101,21 @@ public class ShoplifterScript : MonoBehaviour
 
     //stage 2 reevaulation variables
     private int maxTrials_Reeval = 2;
+#if !FAST_TEST
     private int maxBlocks_Reeval = 6;
-
+#else
+    private int maxBlocks_Reeval = 1;
+#endif
     private int envIndex = 0;
 
     private List<float> camZoneFactors;
 
     //stage 4 post-test variables
+#if !FAST_TEST
     private int maxTrials_PostTest = 10;
-
+#else
+    private int maxTrials_PostTest = 1;
+#endif
     public GameObject leftDoorPos;
     public GameObject rightDoorPos;
     public float phase1Factor = 5f;
@@ -1380,7 +1389,7 @@ public class ShoplifterScript : MonoBehaviour
         int maxDeviationQueueLength = 2;
         float deviationThreshold = 0.4f;
 
-        while(numTrials_Learning < maxTrials || (!isPostTest && !hasLearned && numAdditionalTrials < maxAdditionalTrials))
+        while(numTrials_Learning < maxTrials || (!isPostTest && !Config.shouldForceControl && !hasLearned && numAdditionalTrials < maxAdditionalTrials))
 		{ 
 			Debug.Log ("about to run phase 1");
 			if (randOrder [0] == 0)
@@ -1423,7 +1432,7 @@ public class ShoplifterScript : MonoBehaviour
 #if SPANISH
                 intertrialText.text = "Por favor, tenga en cuenta la estructura de las habitaciones y las recompensas al responder";
 #else
-                intertrialText.text = "Please, consider the structure of the rooms and the rewards when responding";
+                //intertrialText.text = "Please, consider the structure of the rooms and the rewards when responding";
 #endif
                 intertrialText.text = "";
                 intertrialGroup.alpha = 0f;
@@ -2499,7 +2508,7 @@ public class ShoplifterScript : MonoBehaviour
             sys2ConnectionGroup.alpha = 0f;
         }
 
-        int totalEnvCount = environments.Count;
+        int totalEnvCount = environments.Count-1; //since we're excluding Viking-village
 		int currentReevalCondition = 0;
 
         if (!Config.isDayThree)
@@ -2531,6 +2540,7 @@ public class ShoplifterScript : MonoBehaviour
 
             currentPhaseName = "TRAINING";
             yield return StartCoroutine(ShowIntroInstructions());
+            blackScreen.alpha = 0f;
 
             //pretraining; will only run before the first environment
             if (ExperimentSettings.isPretraining)
@@ -2558,6 +2568,7 @@ public class ShoplifterScript : MonoBehaviour
             yield return StartCoroutine(PickEnvironment(i, true));
             if(ExperimentSettings.isTraining)
             {
+                blackScreen.alpha = 0f;
                 //enable camera zone interaction before camera training
                 Debug.Log("running cam training");
                 yield return StartCoroutine(RunCamTrainingPhase());
@@ -2603,7 +2614,7 @@ public class ShoplifterScript : MonoBehaviour
             CheckpointSession(i, true);
             if (ExperimentSettings.isLearning)
             {
-
+                Debug.Log("MAX TRIALS " + maxTrials_Learning.ToString()); 
                 TCPServer.Instance.SetState(TCP_Config.DefineStates.LEARNING, true);
                 yield return StartCoroutine(RunLearningPhase(false, maxTrials_Learning));
                 TCPServer.Instance.SetState(TCP_Config.DefineStates.LEARNING, false);
@@ -2639,8 +2650,8 @@ public class ShoplifterScript : MonoBehaviour
             }
 
 
-            //if transition phase, play 10-trial additional learning
-            if (currentReevalCondition == 1)
+            //if transition phase and not forced control, play 10-trial additional learning
+            if (currentReevalCondition == 1 && !Config.shouldForceControl)
             {
                 Debug.Log("RUNNING ADDITIONAL LEARN PHASE");
                 currentPhaseName = "POST-TEST";
@@ -2659,9 +2670,12 @@ public class ShoplifterScript : MonoBehaviour
 
             //reset variables
              ResetEnvironmentVariables();
-//			SceneManager.LoadScene (0); //load main menu
-//			SceneManager.UnloadSceneAsync (1); //then destroy all objects of the current scene
-			yield return null;
+            //turn off this
+            Experiment.shouldCheckpoint = false;
+
+            //			SceneManager.LoadScene (0); //load main menu
+            //			SceneManager.UnloadSceneAsync (1); //then destroy all objects of the current scene
+            yield return null;
 
 			environments [envIndex].SetActive (false);
 			//remove the environment
@@ -2873,11 +2887,6 @@ public class ShoplifterScript : MonoBehaviour
             timer += Time.deltaTime;
             yield return 0;
         }
-#if SPANISH
-        intertrialText.text = "Al día siguiente";
-#else
-        intertrialText.text = "On the next day..";
-#endif
         intertrialGroup.alpha = 0f;
         yield return null;
     }
@@ -2887,8 +2896,12 @@ public class ShoplifterScript : MonoBehaviour
 
 		EnablePlayerCam (false);
 		intertrialGroup.alpha = 1f;
-		intertrialText.text = "";
-		Experiment.Instance.shopLiftLog.LogEndTrial ();
+#if SPANISH
+        intertrialText.text = "Al día siguiente";
+#else
+        intertrialText.text = "On the next day..";
+#endif
+        Experiment.Instance.shopLiftLog.LogEndTrial ();
 		yield return new WaitForSeconds(2f);
 		intertrialGroup.alpha = 0f;
 		yield return null;
