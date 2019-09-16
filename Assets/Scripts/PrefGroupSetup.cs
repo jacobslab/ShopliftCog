@@ -25,11 +25,12 @@ public class PrefGroupSetup : MonoBehaviour {
 	// Use this for initialization
 	void OnEnable () {
         //update on enable
-#if KEYBOARD
-        instructionText.text = "Left and right arrow keys moves the slider";
-#else
+        if (ExperimentSettings.Instance.connectionMethod == ExperimentSettings.ConnectionMethod.Photosync)
+            instructionText.text = "Left and right arrow keys moves the slider";
+        else
         instructionText.text = "Left joystick moves slider";
-#endif
+
+
         active = true;
 
         correctFeedback.alpha = 0f;

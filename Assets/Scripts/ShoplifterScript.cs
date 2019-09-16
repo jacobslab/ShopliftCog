@@ -8,6 +8,9 @@ using UnityStandardAssets.Characters.FirstPerson;
 public class ShoplifterScript : MonoBehaviour
 {
 
+    Experiment exp { get { return Experiment.Instance; } }
+    ExperimentSettings expSettings { get { return ExperimentSettings.Instance; } }
+
     public GameObject camVehicle;
     public Camera mainCam;
     public GameObject animBody;
@@ -158,16 +161,9 @@ public class ShoplifterScript : MonoBehaviour
     bool firstTime = true;
 
     string currentPhaseName = "NONE";
-#if !SPANISH
     private string pressToContinueInstruction = "Press (X) button to continue";
     private string musicBaselineInstruction = "In what follows you will hear music from the game. \n Please maintain your gaze at the fixation cross, relax, and pay attention to the music.";
     private string imageSlideshowInstruction = "In what follows you will see images from the game. \n Please maintain your gaze on the screen, relax, and pay attention to different images that appear on the screen.";
-#else
-    private string pressToContinueInstruction = "Presiona (X) para continuar";
-    private string musicBaselineInstruction = "A continuar escucharas música del juego.\n Por favor mantenga su mirada en la cruz. \n Relájate y preste atención a la música.";
-    private string imageSlideshowInstruction = "A continuar escucharas imagenes del juego.\n Por favor mantenga su mirada en la cruz. \n Relájate y preste atención a la imagenes.";
-    
-#endif
 
     //tip metrics
     private int consecutiveIncorrectCameraPresses = 0; //activated when >=4
@@ -207,7 +203,7 @@ public class ShoplifterScript : MonoBehaviour
 
     //TRAINING environment
     public GameObject vikingEnv;
-    
+
 
 
 
@@ -215,14 +211,8 @@ public class ShoplifterScript : MonoBehaviour
     private GameObject roomTwo;
 
     //instr strings
-#if !SPANISH
     private string doorText = "Press (X) to open the door";
     private string registerText = "Press (X) to open the suitcase";
-#else
-    private string doorText = "Presiona el botón (X) para abrir la puertar";
-    private string registerText = "Presiona el botón (X) para abrir la maleta";
-#endif
-
 
     //audio
     private AudioSource one_L_Audio;
@@ -342,6 +332,28 @@ public class ShoplifterScript : MonoBehaviour
         EnablePlayerCam(false);
         Application.targetFrameRate = 60;
         deviationQueue = new Queue<float>();
+
+        InitializeInstructionsByLanguage();
+    }
+
+    void InitializeInstructionsByLanguage()
+    {
+        if (expSettings.currentLanguage == ExperimentSettings.Language.English)
+        {
+            pressToContinueInstruction = "Press (X) button to continue";
+            musicBaselineInstruction = "In what follows you will hear music from the game. \n Please maintain your gaze at the fixation cross, relax, and pay attention to the music.";
+            imageSlideshowInstruction = "In what follows you will see images from the game. \n Please maintain your gaze on the screen, relax, and pay attention to different images that appear on the screen.";
+            doorText = "Press (X) to open the door";
+            registerText = "Press (X) to open the suitcase";
+        }
+        else
+        {
+            pressToContinueInstruction = "Presiona (X) para continuar";
+            musicBaselineInstruction = "A continuar escucharas música del juego.\n Por favor mantenga su mirada en la cruz. \n Relájate y preste atención a la música.";
+            imageSlideshowInstruction = "A continuar escucharas imagenes del juego.\n Por favor mantenga su mirada en la cruz. \n Relájate y preste atención a la imagenes.";
+            doorText = "Presiona el botón (X) para abrir la puertar";
+            registerText = "Presiona el botón (X) para abrir la maleta";   
+        }
     }
 
     void EnablePlayerCam(bool shouldEnable)
@@ -960,7 +972,7 @@ public class ShoplifterScript : MonoBehaviour
 	IEnumerator RunCamTrainingPhase()
 	{
         //blackScreen.alpha = 1f;
-        if (ExperimentSettings.isPretraining)
+        if (expSettings.stage== ExperimentSettings.Stage.Pretraining)
         {
             intertrialText.text = "Welcome to PRE-TRAINING 3/3!\n In each room, PRESS(X) as you pass \n camera location, &*memorize cam location*!\n When cam is invisible, PRESS(X)\n as you pass remembered cam location.\n Press(X) to begin!";
             intertrialGroup.alpha = 1f;
@@ -974,7 +986,7 @@ public class ShoplifterScript : MonoBehaviour
             ));
             intertrialGroup.alpha = 0f;
         }
-        else if(ExperimentSettings.isTraining)
+        else if(expSettings.stage == ExperimentSettings.Stage.Training)
         {
             Debug.Log("starting cam training phase");
             Experiment.Instance.shopLiftLog.LogTextInstructions(2, true);
@@ -1105,7 +1117,19 @@ public class ShoplifterScript : MonoBehaviour
         yield return null;
     }
 
-	IEnumerator RunPhaseOne(int pathIndex, bool terminateWithChoice)
+    void RemoveIndex(List<int> valueList, int matchedInt)
+    {
+        for(int i=0;i<valueList.Count;i++)
+        {
+            if(valueList[i]==matchedInt)
+            {
+                valueList.RemoveAt(i);
+            }
+        }
+    }
+
+
+    IEnumerator RunPhaseOne(int pathIndex, bool terminateWithChoice)
 	{
 		Experiment.Instance.shopLiftLog.LogPathIndex (pathIndex);
         currentPathIndex = pathIndex;
@@ -1146,7 +1170,7 @@ public class ShoplifterScript : MonoBehaviour
 		clearCameraZoneFlags = true;
 		if(activeCamZone!=null)
 			activeCamZone.GetComponent<CameraZone> ().isFocus = false;
-       while(ExperimentSettings.isPretraining && !activeCamZone.GetComponent<CameraZone>().hasSneaked)
+       while(expSettings.stage == ExperimentSettings.Stage.Pretraining && !activeCamZone.GetComponent<CameraZone>().hasSneaked)
         {
             yield return StartCoroutine(VelocityPlayerTo(startPos, endPos, phase1Factor));
             yield return 0;
@@ -1424,16 +1448,15 @@ public class ShoplifterScript : MonoBehaviour
 			}
 
 
-            if (numTrials_Learning >= maxTrials && !hasLearned && showOnce)
+            if (numTrials_Learning >= maxTrials && !hasLearned && showOnce && !Config.shouldForceControl)
             {
                 intertrialGroup.alpha = 1f;
                 maxDeviationQueueLength = 1;
                 deviationThreshold = 0.35f;
-#if SPANISH
-                intertrialText.text = "Por favor, tenga en cuenta la estructura de las habitaciones y las recompensas al responder";
-#else
-                //intertrialText.text = "Please, consider the structure of the rooms and the rewards when responding";
-#endif
+                if(expSettings.currentLanguage == ExperimentSettings.Language.Spanish)
+                    intertrialText.text = "Por favor, tenga en cuenta la estructura de las habitaciones y las recompensas al responder";
+                else
+                    intertrialText.text = "Please, consider the structure of the rooms and the rewards when responding";
                 intertrialText.text = "";
                 intertrialGroup.alpha = 0f;
                 showOnce = false;
@@ -1528,7 +1551,9 @@ public class ShoplifterScript : MonoBehaviour
         Experiment.Instance.shopLiftLog.LogPhaseEvent("SILENT_TRAVERSAL", true);
 
         bool isLeft = (Random.value >0.5f) ?  true : false;
-        for (int i = 0; i < environments.Count;i++)
+
+        //we only want to run the silent traversal on all environments except the Pre-Training environment (which is the last one by default in "environments" List)
+        for (int i = 0; i < environments.Count-1;i++)
         {
 
             yield return StartCoroutine(PickEnvironment(i,false)); //change environment
@@ -2012,11 +2037,10 @@ public class ShoplifterScript : MonoBehaviour
                 tElapsed += Time.deltaTime;
                 if(Input.GetButtonDown("Action Button"))
                 {
-#if SPANISH
+            if(expSettings.currentLanguage == ExperimentSettings.Language.Spanish)
                     infoText.text = "Por favor tómese su tiempo para hacer una elección";
-#else
+            else
                     infoText.text = "Please take your time to make a choice";
-#endif
                     infoGroup.alpha = 1f;
                 }
                 yield return 0;
@@ -2024,11 +2048,10 @@ public class ShoplifterScript : MonoBehaviour
             //wait for them to select something on the slider
             while (!Input.GetKeyDown(KeyCode.LeftArrow) && !Input.GetKeyDown(KeyCode.RightArrow) && Mathf.Abs(Input.GetAxis("Horizontal")) == 0f)
             {
-#if SPANISH
-                infoText.text = "Por favor, mueva el control deslizante para hacer una elección";
-#else
-                infoText.text = "Please move the slider to make a choice";
-#endif
+                if(expSettings.currentLanguage == ExperimentSettings.Language.Spanish)
+                    infoText.text = "Por favor, mueva el control deslizante para hacer una elección";               
+                else
+                    infoText.text = "Please move the slider to make a choice";
                 infoGroup.alpha = 1f;
                 yield return 0;
             }
@@ -2044,11 +2067,11 @@ public class ShoplifterScript : MonoBehaviour
                 Debug.Log("about to ask them to make a choice");
             if (isTraining)
             {
-#if SPANISH
-                infoText.text = "Por favor, haga una elección";
-#else
-                infoText.text = "Please make a choice";
-#endif
+                if(expSettings.currentLanguage == ExperimentSettings.Language.Spanish)
+                    infoText.text = "Por favor, haga una elección";
+                else
+                    infoText.text = "Please make a choice";
+
                 infoGroup.alpha = 1f;
             }
                 if(!pressed)
@@ -2508,7 +2531,7 @@ public class ShoplifterScript : MonoBehaviour
             sys2ConnectionGroup.alpha = 0f;
         }
 
-        int totalEnvCount = environments.Count-1; //since we're excluding Viking-village
+        int totalEnvCount = environments.Count-1; //since we're excluding VikingVillage which is used only for Pre-Training
 		int currentReevalCondition = 0;
 
         if (!Config.isDayThree)
@@ -2531,7 +2554,12 @@ public class ShoplifterScript : MonoBehaviour
             registerVals.Add(Experiment.Instance.leftReward);
 			registerVals.Add(Experiment.Instance.rightReward);
 
-		}
+            //remove rewards from the existing pool of rewards so they don't get reused in the future
+            RemoveIndex(registerVal1, Experiment.Instance.leftReward);
+            RemoveIndex(registerVal2, Experiment.Instance.rightReward);
+
+
+        }
 
         for (int i = startingIndex; i < totalEnvCount; i++)
         {
@@ -2543,7 +2571,7 @@ public class ShoplifterScript : MonoBehaviour
             blackScreen.alpha = 0f;
 
             //pretraining; will only run before the first environment
-            if (ExperimentSettings.isPretraining)
+            if (expSettings.stage == ExperimentSettings.Stage.Pretraining)
             {
                 CameraZone.enableCamZones = false;
                 blackScreen.alpha = 1f;
@@ -2562,11 +2590,10 @@ public class ShoplifterScript : MonoBehaviour
                 yield return StartCoroutine(RunCamTrainingPhase());
                 string pretrainingEndText = "Congrats! You've completed PRE-TRAINING!\n GOAL: learn which rooms lead to*more cash*!! \n But first, let's memorize *cam locations*\n to deactivate cams too! \n Press(X) to begin camera practice!";
                 yield return StartCoroutine(ShowInstructionsTillButtonPress(pretrainingEndText));
-                ExperimentSettings.isPretraining = false;
             }
 
             yield return StartCoroutine(PickEnvironment(i, true));
-            if(ExperimentSettings.isTraining)
+            if(expSettings.stage == ExperimentSettings.Stage.Training)
             {
                 blackScreen.alpha = 0f;
                 //enable camera zone interaction before camera training
@@ -2612,13 +2639,12 @@ public class ShoplifterScript : MonoBehaviour
 
             currentPhaseName = "LEARNING";
             CheckpointSession(i, true);
-            if (ExperimentSettings.isLearning)
+            if (expSettings.stage==ExperimentSettings.Stage.Learning)
             {
                 Debug.Log("MAX TRIALS " + maxTrials_Learning.ToString()); 
                 TCPServer.Instance.SetState(TCP_Config.DefineStates.LEARNING, true);
                 yield return StartCoroutine(RunLearningPhase(false, maxTrials_Learning));
                 TCPServer.Instance.SetState(TCP_Config.DefineStates.LEARNING, false);
-                ExperimentSettings.isLearning = false;
             }
 
             //shuffle rewards
@@ -2628,25 +2654,23 @@ public class ShoplifterScript : MonoBehaviour
             //re-evaluation phase
             currentPhaseName = "REEVALUATION";
             CheckpointSession(i, true);
-            if (ExperimentSettings.isReeval)
+            if (expSettings.stage == ExperimentSettings.Stage.Reevaluation)
             {
                 TCPServer.Instance.SetState(TCP_Config.DefineStates.REEVALUATION, true);
                 yield return StartCoroutine(RunReevaluationPhase(currentReevalCondition));
                 TCPServer.Instance.SetState(TCP_Config.DefineStates.REEVALUATION, false);
-                ExperimentSettings.isReeval = false;
             }
 
 
             //testing phase
             currentPhaseName = "TESTING";
             CheckpointSession(i, true);
-            if (ExperimentSettings.isTesting)
+            if (expSettings.stage == ExperimentSettings.Stage.Test)
             {
 
                 TCPServer.Instance.SetState(TCP_Config.DefineStates.TESTING, true);
                 yield return StartCoroutine(RunTestingPhase());
                 TCPServer.Instance.SetState(TCP_Config.DefineStates.TESTING, false);
-                ExperimentSettings.isTesting = false;
             }
 
 
@@ -2654,6 +2678,7 @@ public class ShoplifterScript : MonoBehaviour
             if (currentReevalCondition == 1 && !Config.shouldForceControl)
             {
                 Debug.Log("RUNNING ADDITIONAL LEARN PHASE");
+                expSettings.stage = ExperimentSettings.Stage.PostTest;
                 currentPhaseName = "POST-TEST";
                 TCPServer.Instance.SetState(TCP_Config.DefineStates.POST_TEST, true);
                 yield return StartCoroutine(RunLearningPhase(true, maxTrials_PostTest));
@@ -2682,13 +2707,24 @@ public class ShoplifterScript : MonoBehaviour
 //			environments.RemoveAt (envIndex);
 		}
 
-		CheckpointSession (totalEnvCount-1,false);
-
         //run baseline
         yield return StartCoroutine(MakeCompleteBaselineList(2));
-		yield return StartCoroutine(RunMusicBaseline());
+
+        currentPhaseName = "MUSIC_BASELINE";
+        CheckpointSession(totalEnvCount - 1, true);
+        yield return StartCoroutine(RunMusicBaseline());
+
+
+        currentPhaseName = "IMAGE_BASELINE";
+        CheckpointSession(totalEnvCount - 1, true);
         yield return StartCoroutine(RunImageSlideshow());
+
+
+        currentPhaseName = "SILENT_TRAVERSAL";
+        CheckpointSession(totalEnvCount - 1, true);
         yield return StartCoroutine(RunSilentTraversal());
+
+        CheckpointSession(totalEnvCount - 1, false);
 
         //show the end session screen
         yield return StartCoroutine (ShowEndSessionScreen());
@@ -2699,10 +2735,11 @@ public class ShoplifterScript : MonoBehaviour
     {
         correctResponses = 0;
         CameraZone.firstTime = true;
-        ExperimentSettings.isTraining = true;
-        ExperimentSettings.isLearning = true;
-        ExperimentSettings.isReeval = true;
-        ExperimentSettings.isTesting = true;
+        expSettings.stage = ExperimentSettings.Stage.None;
+        //ExperimentSettings.isTraining = true;
+        //ExperimentSettings.isLearning = true;
+        //ExperimentSettings.isReeval = true;
+        //ExperimentSettings.isTesting = true;
     }
 
 	void TurnOffRooms()
@@ -2720,7 +2757,7 @@ public class ShoplifterScript : MonoBehaviour
 	public IEnumerator ShowPositiveFeedback()
 	{
 		Debug.Log ("IN POSITIVE");
-        if (!ExperimentSettings.isPretraining)
+        if (expSettings.stage != ExperimentSettings.Stage.Pretraining)
         {
             positiveFeedbackGroup.alpha = 1f;
             //		Debug.Log ("about to wait for 1 second");
@@ -2745,7 +2782,7 @@ public class ShoplifterScript : MonoBehaviour
 	public IEnumerator ShowNegativeFeedback()
 	{
 		Debug.Log ("IN NEGATIVE");
-        if (!ExperimentSettings.isPretraining)
+        if (expSettings.stage !=ExperimentSettings.Stage.Pretraining)
         {
             Debug.Log("turning negative on");
             negativeFeedbackGroup.alpha = 1f;
@@ -2896,11 +2933,11 @@ public class ShoplifterScript : MonoBehaviour
 
 		EnablePlayerCam (false);
 		intertrialGroup.alpha = 1f;
-#if SPANISH
-        intertrialText.text = "Al día siguiente";
-#else
-        intertrialText.text = "On the next day..";
-#endif
+        if(expSettings.currentLanguage == ExperimentSettings.Language.Spanish)
+            intertrialText.text = "Al día siguiente";
+        else
+            intertrialText.text = "On the next day..";
+
         Experiment.Instance.shopLiftLog.LogEndTrial ();
 		yield return new WaitForSeconds(2f);
 		intertrialGroup.alpha = 0f;
@@ -2913,17 +2950,18 @@ public class ShoplifterScript : MonoBehaviour
 		EnablePlayerCam (false);
         intertrialGroup.alpha = 1f;
 		if (!isTraining) {
-#if SPANISH
+        if(expSettings.currentLanguage == ExperimentSettings.Language.Spanish)
             intertrialText.text = "Comenzando la siguiente prueba...";
-#else
+         else
             intertrialText.text = "Starting the next test...";
-#endif
+
         } else {
-#if SPANISH
-            intertrialText.text = "Comenzando el siguiente ensayo de práctica...";
-#else
-            intertrialText.text = "Starting the next practice trial...";
-#endif
+
+            if(expSettings.currentLanguage == ExperimentSettings.Language.Spanish)
+                intertrialText.text = "Comenzando el siguiente ensayo de práctica...";
+            else
+                intertrialText.text = "Starting the next practice trial...";
+
         }
 		Experiment.Instance.shopLiftLog.LogEndTrial ();
         Experiment.Instance.shopLiftLog.LogEndTrialScreen(true,hasTips);
@@ -2950,11 +2988,11 @@ public class ShoplifterScript : MonoBehaviour
     }
 	IEnumerator ShowEndEnvironmentStageScreen()
 	{ 	intertrialGroup.alpha = 1f;
-#if SPANISH
-        intertrialText.text = "Felicidades, Has terminado. \n Tenga un breve descanso.";
-#else
-        intertrialText.text = "Congratulations, you’re done! \n Have a short break";
-#endif
+        if(expSettings.currentLanguage == ExperimentSettings.Language.Spanish)
+            intertrialText.text = "Felicidades, Has terminado. \n Tenga un breve descanso.";
+        else
+            intertrialText.text = "Congratulations, you’re done! \n Have a short break";
+
 
         //reset deviation queue before beginning the next environment
         deviationQueue = new Queue<float>();
@@ -2968,11 +3006,11 @@ public class ShoplifterScript : MonoBehaviour
 	IEnumerator ShowEndSessionScreen()
 	{ 
 		intertrialGroup.alpha = 1f;
-#if SPANISH
+    if(expSettings.currentLanguage == ExperimentSettings.Language.Spanish)
         intertrialText.text = "Felicidades. Has completado la sesión. \n Presiona Escape para salir de la aplicación.";
-#else
+    else
         intertrialText.text = "Congratulations, you have completed a session \n Press Escape key to exit the application.";
-#endif
+
         Experiment.Instance.shopLiftLog.LogEndSession(true);
 		yield return new WaitForSeconds(1000f);
 		intertrialGroup.alpha = 0f;

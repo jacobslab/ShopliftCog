@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 using UnityEngine.Video;
 
 public class SceneController : MonoBehaviour
@@ -15,11 +16,9 @@ public class SceneController : MonoBehaviour
 
     public VideoClip keyboard_control_video;
     public VideoClip keyboard_video;
-    public AudioClip keyboard_audio;
 
     public VideoClip controller_control_video;
     public VideoClip controller_video;
-    public AudioClip controller_audio;
 
     public GameObject instructionVideoPlayer;
 
@@ -38,41 +37,8 @@ public class SceneController : MonoBehaviour
         //			Destroy(transform.gameObject);
         //			return;
         //		}
-#if PHOTOSYNC
-        syncPulser.SetActive(true);
-        syncPulsingImage.SetActive(true);
+ 
 
-#else
-        if (!Config.isSyncbox)
-        {
-            syncPulser.SetActive(false);
-        }
-        else
-        {
-            syncPulser.SetActive(true);
-            syncPulser.GetComponent<SyncPulser>().enabled = false;
-            syncPulser.GetComponent<SyncboxControl>().enabled = true;
-        }
-        syncPulsingImage.SetActive(false);
-#endif
-
-#if KEYBOARD
-#if CONTROL
-        instructionVideoPlayer.GetComponent<VideoPlayer>().clip = keyboard_control_video;
-#else
-        instructionVideoPlayer.GetComponent<VideoPlayer>().clip = keyboard_video;
-#endif
-
-//instructionVideoPlayer.GetComponent<AudioSource>().clip = keyboard_audio;
-#else
-#if CONTROL
-        instructionVideoPlayer.GetComponent<VideoPlayer>().clip = controller_control_video;
-#else
-        instructionVideoPlayer.GetComponent<VideoPlayer>().clip = controller_video;
-#endif
-        //instructionVideoPlayer.GetComponent<AudioSource>().clip = controller_audio;
-
-#endif
         _instance = this;
 	}
 
@@ -90,6 +56,45 @@ public class SceneController : MonoBehaviour
 
 	}
 
+    public void UpdateSceneConfig()
+    {
+        if (ExperimentSettings.Instance.connectionMethod == ExperimentSettings.ConnectionMethod.Photosync)
+        {
+            syncPulser.SetActive(true);
+            syncPulsingImage.SetActive(true);
+            syncPulser.GetComponent<SyncPulser>().enabled = true;
+        }
+        else
+        {
+            if (!Config.isSyncbox)
+            {
+                syncPulser.SetActive(false);
+            }
+            else
+            {
+                syncPulser.SetActive(true);
+                syncPulser.GetComponent<SyncPulser>().enabled = false;
+                syncPulser.GetComponent<SyncboxControl>().enabled = true;
+            }
+            syncPulsingImage.SetActive(false);
+        }
+
+        if (ExperimentSettings.Instance.controlDevice == ExperimentSettings.ControlDevice.Keyboard)
+        {
+            if (Config.shouldForceControl)
+                instructionVideoPlayer.GetComponent<VideoPlayer>().clip = keyboard_control_video;
+            else
+                instructionVideoPlayer.GetComponent<VideoPlayer>().clip = keyboard_video;
+        }
+        else
+        {
+            if (Config.shouldForceControl)
+                instructionVideoPlayer.GetComponent<VideoPlayer>().clip = controller_control_video;
+            else
+                instructionVideoPlayer.GetComponent<VideoPlayer>().clip = controller_video;
+        }
+    }
+
 	public void LoadMainMenu(){
 		if(Experiment.Instance != null){
 			Experiment.Instance.OnExit();
@@ -97,7 +102,7 @@ public class SceneController : MonoBehaviour
 
 		Debug.Log("loading main menu!");
 		//SubjectReaderWriter.Instance.RecordSubjects();
-		Application.LoadLevel(0);
+		SceneManager.LoadScene(0);
 	}
 
 	public void CheckForPreviousSessions()
@@ -149,7 +154,7 @@ public class SceneController : MonoBehaviour
 			sceneObj.SetActive (true);
 		} else {
 			Debug.Log ("Subject has already finished all blocks! Loading end menu.");
-			Application.LoadLevel (2);
+			SceneManager.LoadScene(2);
 		}
 	}
 
@@ -160,7 +165,7 @@ public class SceneController : MonoBehaviour
 
 		//SubjectReaderWriter.Instance.RecordSubjects();
 		Debug.Log("loading end menu!");
-		Application.LoadLevel(2);
+		SceneManager.LoadScene(2);
 	}
 
 	public void Quit(){

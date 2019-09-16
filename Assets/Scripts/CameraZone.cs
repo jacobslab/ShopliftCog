@@ -180,7 +180,7 @@ public class CameraZone : MonoBehaviour {
                 activateCam = true;
                 pressCount = 0;
                 activateCam = true;
-                if (ExperimentSettings.isPretraining && firstTime)
+                if (ExperimentSettings.Instance.stage == ExperimentSettings.Stage.Pretraining && firstTime)
                 {
                     ShoplifterScript.haltPlayer = true;
                     StartCoroutine(ShoplifterScript.Instance.HaltPlayerMovement());
@@ -199,7 +199,7 @@ public class CameraZone : MonoBehaviour {
         {
             if (col.gameObject.tag == "Player")
             {
-                if (ExperimentSettings.isPretraining && !hasSneaked)
+                if (ExperimentSettings.Instance.stage == ExperimentSettings.Stage.Pretraining && !hasSneaked)
                 {
 
                     activateCam = false;

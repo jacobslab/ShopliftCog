@@ -14,11 +14,16 @@ public class ExperimentSettings : MonoBehaviour {
 
 //	public bool isRelease { get { return GetIsRelease (); } }
 	public static bool shouldStim=false;
-
-
 	public static bool isLogging = true;
 
-	public enum Environment
+    //build info
+    string buildDate;
+    public Text buildType;
+
+    //CONFIG ENUMS
+
+    //which environment
+    public enum Environment
 	{
 		Cybercity,
 		SpaceStation,
@@ -27,20 +32,41 @@ public class ExperimentSettings : MonoBehaviour {
 		Office,
 		Apartment,
 	}
-
 	public static Environment env;
 	public static int envDropdownIndex=0;
 
+    //what re-evaluation type
 	public enum ReevalType
 	{
 		Transition,
 		Reward
 	}
-
 	public static ReevalType reevalType;
-	//build info
-	string buildDate;
-	public Text buildType;
+
+    //to specify the type of connection method used for EEG synchronization
+    public enum ConnectionMethod
+    {
+        BlackrockSync,
+        Syncbox,
+        Photosync,
+        Demo
+    }
+    public ConnectionMethod connectionMethod;
+
+    //to specify the type of control device to be used
+    public enum ControlDevice
+    {
+        Controller,
+        Keyboard
+    }
+    public ControlDevice controlDevice;
+
+    public enum Language
+    {
+        English,
+        Spanish
+    }
+    public Language currentLanguage;
 
 	//LOGGING
 	public static string defaultLoggingPath = ""; //SET IN RESETDEFAULTLOGGINGPATH();
@@ -64,13 +90,21 @@ public class ExperimentSettings : MonoBehaviour {
 	public Text gamifiedText;
 	public Dropdown sessionType;
 
-    public static bool isPretraining = true;
-	public static bool isTraining=true;
-	public static bool isLearning=true;
-	public static bool isReeval=true;
-	public static bool isTesting=true;
+    public enum Stage
+    {
+        Pretraining,
+        Training,
+        Learning,
+        Reevaluation,
+        Test,
+        PostTest,
+        Baseline,
+        None
+    }
 
-	public static bool isRewardReeval = false;
+    public Stage stage;
+
+    public static bool isRewardReeval = false;
 	public static bool isTransitionReeval = false;
 
 	public Toggle trainingToggle;
@@ -89,7 +123,17 @@ public class ExperimentSettings : MonoBehaviour {
 	public Text checkpointDataText;
 	public bool checkpointExists = false;
 
-	public static int envIndex= 0;
+    //scene controller reference
+    public SceneController sceneController;
+
+
+    //session config options
+    public Dropdown connectionMethodDropdown;
+    public Dropdown controlDeviceDropdown;
+    public Dropdown languageDropdown;
+    public Toggle isControlToggle;
+
+    public static int envIndex= 0;
 
 	bool isWeb = false;
 
@@ -118,14 +162,19 @@ public class ExperimentSettings : MonoBehaviour {
         //		CheckGamifiedStatus ();
         //		if (SceneManager.GetActiveScene ().name == "EndMenu") {
         //			AttachSceneController ();
-#if SYNCBOX
+
         sys2Toggle.gameObject.SetActive(false);
-#endif
+
         ChangeFirstEnvironment ();
         //		ChangeReevalType ();
         ToggleSystem2();
         reevalType = ReevalType.Transition;
         InitMainMenuLabels();
+
+        SetConnectionMethod();
+        SetControlDevice();
+        SetControlToggle();
+
 //		reevalType = ReevalType.Reward;
 //		}
 	}
@@ -335,22 +384,121 @@ public class ExperimentSettings : MonoBehaviour {
 		}
 	}
 
-	public void ChangeTestingStatus()
-	{
-		isTesting = testingToggle.isOn;
-	}
-	public void ChangeLearningStatus()
-	{
-		isLearning = learningToggle.isOn;
-	}
-	public void ChangeReevalStatus()
-	{
-		isReeval = reevalToggle.isOn;
-	}
-	public void ChangeTrainingStatus()
-	{
-		isTraining = trainingToggle.isOn;
-	}
+	//public void ChangeTestingStatus()
+	//{
+	//	isTesting = testingToggle.isOn;
+	//}
+	//public void ChangeLearningStatus()
+	//{
+	//	isLearning = learningToggle.isOn;
+	//}
+	//public void ChangeReevalStatus()
+	//{
+	//	isReeval = reevalToggle.isOn;
+	//}
+	//public void ChangeTrainingStatus()
+	//{
+	//	isTraining = trainingToggle.isOn;
+	//}
+
+
+    public void SetConnectionMethod()
+    {
+        Debug.Log("setting connection method: " + connectionMethodDropdown.value.ToString());
+        switch(connectionMethodDropdown.value)
+        {
+            case 0:
+                connectionMethod = ConnectionMethod.BlackrockSync;
+                break;
+            case 1:
+                connectionMethod = ConnectionMethod.Syncbox;
+                break;
+            case 2:
+                connectionMethod = ConnectionMethod.Photosync;
+                break;
+            case 3:
+                connectionMethod = ConnectionMethod.Demo;
+                break;
+            default:
+                connectionMethod = ConnectionMethod.BlackrockSync;
+                break;
+        }
+
+        //then update the connection method
+        UpdateConnectionMethod();
+    }
+
+    void UpdateConnectionMethod()
+    {
+        if (connectionMethod == ConnectionMethod.BlackrockSync)
+        {
+            Config.isSystem2 = true;
+            Config.isSyncbox = true;
+            Config.isSystem3 = false;
+        }
+        else if (connectionMethod == ConnectionMethod.Syncbox || connectionMethod == ConnectionMethod.Photosync)
+        {
+            Config.isSyncbox = true;
+            Config.isSystem2 = false;
+            Config.isSystem3 = false;
+        }
+        //demo
+        else
+        {
+            Config.isSyncbox = false;
+            Config.isSystem2 = false;
+            Config.isSystem3 = false;
+        }
+
+
+           sceneController.UpdateSceneConfig();
+    }
+
+    public void SetControlDevice()
+    {
+        Debug.Log("setting control device: " + controlDeviceDropdown.value.ToString());
+        switch (controlDeviceDropdown.value)
+        {
+            case 0:
+                controlDevice = ControlDevice.Keyboard;
+                break;
+            case 1:
+                controlDevice = ControlDevice.Controller;
+                break;
+            default:
+                controlDevice = ControlDevice.Keyboard;
+                break;
+
+        }
+
+        sceneController.UpdateSceneConfig();
+    }
+
+
+    public void SetControlToggle()
+    {
+        Debug.Log("setting control toggle:  " + isControlToggle.isOn.ToString());
+        Config.shouldForceControl = isControlToggle.isOn;
+
+        sceneController.UpdateSceneConfig();
+        
+    }
+
+    public void SetLanguage()
+    {
+        switch(languageDropdown.value)
+        {
+            case 0:
+                currentLanguage = Language.English;
+                break;
+            case 1:
+                currentLanguage = Language.Spanish;
+                break;
+            default:
+                currentLanguage = Language.English;
+                break;
+        }
+    }
 
 
 	// Use this for initialization

@@ -21,38 +21,17 @@ public class Config : MonoBehaviour
 
     public static bool isGamified = false;
 
-#if SYS3
-	public static bool isSystem3 = true;
-	public static bool isSyncbox=false;
-#elif PHOTOSYNC
-    public static bool isSystem2 = false;
-    public static bool isSyncbox = true;
-	public static bool isSystem3=false;
-#elif SYNCBOX
-    public static bool isSystem2 = false;
-    public static bool isSyncbox = true;
-    public static bool isSystem3=false;
-#elif BLACKROCK_SYNC
-    public static bool isSystem2 = true;
-    public static bool isSyncbox = true;
-    public static bool isSystem3 = false;
-#else
+
     public static bool isSystem2 = false;
     public static bool isSyncbox = false;
-    public static bool isSystem3 = false;
-#endif
-
+	public static bool isSystem3=false;
 #if DAY_THREE
     public static bool isDayThree=true;
 #else
     public static bool isDayThree = false;
 
 #endif
-#if CONTROL
-    public static bool shouldForceControl = true;
-#else
     public static bool shouldForceControl = false;
-#endif
 
     //recall
     public static int recallTime = 30;

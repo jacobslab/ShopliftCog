@@ -4,8 +4,10 @@ using System.IO;
 
 public class Experiment : MonoBehaviour {
 
-	//logging
-	private string subjectLogfile; //gets set based on the current subject in Awake()
+    ExperimentSettings expSettings { get { return ExperimentSettings.Instance; } }
+    
+    //logging
+    private string subjectLogfile; //gets set based on the current subject in Awake()
 	public Logger_Threading subjectLog;
 	private string eegLogfile; //gets set based on the current subject in Awake()
 	public Logger_Threading eegLog;
@@ -39,6 +41,8 @@ public class Experiment : MonoBehaviour {
 
 
 	public SubjectSelectionController subjectController;
+
+
 	private string wordsLogged="";
 	public enum ExperimentState
 	{
@@ -187,37 +191,40 @@ public class Experiment : MonoBehaviour {
 		leftReward = int.Parse (checkpointData [5]);
 		rightRoomName = checkpointData [6];
 		rightReward = int.Parse (checkpointData [7]);
-        ExperimentSettings.isPretraining = false;
+        expSettings.stage = ExperimentSettings.Stage.None;
 
         switch (checkpointedPhaseName) {
 		case "TRAINING":
-                ExperimentSettings.isPretraining = false;
-            ExperimentSettings.isTraining = true;
+              expSettings.stage = ExperimentSettings.Stage.Training;
 			//no action needed, assuming all the flags point to true, as they do by default
 			break;
 		case "LEARNING":
-			ExperimentSettings.isTraining = false;
+                expSettings.stage = ExperimentSettings.Stage.Learning;
 			break;
 		case "REEVALUATION":
-			ExperimentSettings.isTraining = false;
-			ExperimentSettings.isLearning = false;
+                expSettings.stage = ExperimentSettings.Stage.Reevaluation;
 			break;
 		case "TESTING":
-			ExperimentSettings.isTraining = false;
-			ExperimentSettings.isLearning = false;
-			ExperimentSettings.isReeval = false;
+                expSettings.stage = ExperimentSettings.Stage.Test;
 			break;
 		case "POST-TEST":
-			ExperimentSettings.isTraining = false;
-			ExperimentSettings.isLearning = false;
-			ExperimentSettings.isReeval = false;
-			ExperimentSettings.isTesting = false;
+                expSettings.stage = ExperimentSettings.Stage.PostTest;
 			break;
+        case "MUSIC_BASELINE":
+                expSettings.stage = ExperimentSettings.Stage.Baseline;
+                break;
+        case "IMAGE_BASELINE":
+                expSettings.stage = ExperimentSettings.Stage.Baseline;
+                break;
+        case "SILENT_TRAVERSAL":
+                expSettings.stage = ExperimentSettings.Stage.Baseline;
+                break;
 		case "NONE":
-			//do nothing
-		default:
-			//do nothing
-			break;
+                expSettings.stage = ExperimentSettings.Stage.None;
+                break;
+        default:
+                expSettings.stage = ExperimentSettings.Stage.None;
+			    break;
 		}
 	}
 
