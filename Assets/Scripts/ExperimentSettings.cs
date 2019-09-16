@@ -107,11 +107,6 @@ public class ExperimentSettings : MonoBehaviour {
     public static bool isRewardReeval = false;
 	public static bool isTransitionReeval = false;
 
-	public Toggle trainingToggle;
-	public Toggle learningToggle;
-	public Toggle reevalToggle;
-	public Toggle testingToggle;
-    public Toggle sys2Toggle;
 
 	public Dropdown firstEnvDropdown;
 	public Dropdown reevalDropdown;
@@ -163,11 +158,9 @@ public class ExperimentSettings : MonoBehaviour {
         //		if (SceneManager.GetActiveScene ().name == "EndMenu") {
         //			AttachSceneController ();
 
-        sys2Toggle.gameObject.SetActive(false);
 
         ChangeFirstEnvironment ();
         //		ChangeReevalType ();
-        ToggleSystem2();
         reevalType = ReevalType.Transition;
         InitMainMenuLabels();
 
@@ -258,21 +251,21 @@ public class ExperimentSettings : MonoBehaviour {
 	void InitMainMenuLabels()
 	{
 
-        Debug.Log("syncbox " + Config.isSyncbox.ToString());
-		if (Config.isSyncbox) {
-			buildType.text = "Syncbox";
-		}
-        else if(Config.isSystem2)
-        {
-            buildType.text = "Blackrock";
-        }
-		else
-		    buildType.text = "Demo";
+  //      Debug.Log("syncbox " + Config.isSyncbox.ToString());
+		//if (Config.isSyncbox) {
+		//	buildType.text = "Syncbox";
+		//}
+  //      else if(Config.isSystem2)
+  //      {
+  //          buildType.text = "Blackrock";
+  //      }
+		//else
+		//    buildType.text = "Demo";
 
 		buildDate = 
 			new FileInfo(Assembly.GetExecutingAssembly().Location).LastWriteTime.ToString();
 		UnityEngine.Debug.Log (buildDate);
-		buildType.text += " [ " + buildDate + " ] ";
+		buildType.text = " [ " + buildDate + " ] ";
 
 	}
 
@@ -362,11 +355,6 @@ public class ExperimentSettings : MonoBehaviour {
 			break;
 		}
 	}
-
-    public void ToggleSystem2()
-    {
-        Config.isSystem2 = sys2Toggle.isOn;
-    }
 
 	public void ChangeReevalType()
 	{
