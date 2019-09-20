@@ -90,6 +90,15 @@ public class ExperimentSettings : MonoBehaviour {
 	public Text gamifiedText;
 	public Dropdown sessionType;
 
+
+    public enum EnvironmentType
+    {
+        WA,
+        SO
+    }
+
+    public EnvironmentType currentEnvironmentType; 
+
     public enum Stage
     {
         Pretraining,
@@ -126,6 +135,7 @@ public class ExperimentSettings : MonoBehaviour {
     public Dropdown connectionMethodDropdown;
     public Dropdown controlDeviceDropdown;
     public Dropdown languageDropdown;
+    public Dropdown sessionDayDropdown;
     public Toggle isControlToggle;
 
     public static int envIndex= 0;
@@ -165,6 +175,7 @@ public class ExperimentSettings : MonoBehaviour {
         InitMainMenuLabels();
 
         SetConnectionMethod();
+        SetSessionDay();
         SetControlDevice();
         SetControlToggle();
 
@@ -265,7 +276,7 @@ public class ExperimentSettings : MonoBehaviour {
 		buildDate = 
 			new FileInfo(Assembly.GetExecutingAssembly().Location).LastWriteTime.ToString();
 		UnityEngine.Debug.Log (buildDate);
-		buildType.text = " [ " + buildDate + " ] ";
+		buildType.text = "v" + Config.BuildVersion.ToString() + " [ " + buildDate + " ] ";
 
 	}
 
@@ -438,7 +449,6 @@ public class ExperimentSettings : MonoBehaviour {
             Config.isSystem3 = false;
         }
 
-
            sceneController.UpdateSceneConfig();
     }
 
@@ -486,6 +496,25 @@ public class ExperimentSettings : MonoBehaviour {
                 currentLanguage = Language.English;
                 break;
         }
+    }
+
+    public void SetSessionDay()
+    {
+        switch(sessionDayDropdown.value)
+        {
+            case 0:
+                currentEnvironmentType = EnvironmentType.WA; 
+                break;
+            case 1:
+                currentEnvironmentType = EnvironmentType.SO;
+                break;
+            default:
+                currentEnvironmentType = EnvironmentType.WA;
+                break;
+        }
+        sceneController.UpdateSessionEnvironments(); //directly updates the environments for that particular day
+
+        sceneController.UpdateSessionReevalConditions(sessionDayDropdown.value); // Day 1 = RR first, TR second ; Day 2 = TR first, RR second
     }
 
 

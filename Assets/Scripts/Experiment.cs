@@ -194,6 +194,9 @@ public class Experiment : MonoBehaviour {
         expSettings.stage = ExperimentSettings.Stage.None;
 
         switch (checkpointedPhaseName) {
+            case "PRE-TRAINING":
+                expSettings.stage = ExperimentSettings.Stage.Pretraining;
+                break;
 		case "TRAINING":
               expSettings.stage = ExperimentSettings.Stage.Training;
 			//no action needed, assuming all the flags point to true, as they do by default

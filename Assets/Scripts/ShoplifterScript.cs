@@ -432,8 +432,17 @@ public class ShoplifterScript : MonoBehaviour
     {
         string separator = "\t";
         int currentBlockCount = blockCount;
+        string line = "";
         //environment + phase + reeval type + leftroom + leftreward + rightroom +  rightreward
-        string line = ((isOngoing) ? "ONGOING" : "FINISHED") + separator + envIndex.ToString() + separator + currentPhaseName + separator + reevalConditions[currentBlockCount].ToString() + separator + leftRoom.name + separator + registerVals[0].ToString() + separator + rightRoom.name + separator + registerVals[1].ToString();
+        if (currentPhaseName != "PRE-TRAINING")
+        {
+            line = ((isOngoing) ? "ONGOING" : "FINISHED") + separator + envIndex.ToString() + separator + currentPhaseName + separator + reevalConditions[currentBlockCount].ToString() + separator + leftRoom.name + separator + registerVals[0].ToString() + separator + rightRoom.name + separator + registerVals[1].ToString();
+        }
+        //for pre-training, we just log the phase 
+        else
+        {
+            line = ((isOngoing) ?"ONGOING": "FINISHED") + separator + currentPhaseName;
+        }
         Debug.Log("checkpointed line is: " + line);
         System.IO.File.WriteAllText(Experiment.Instance.sessionDirectory + "checkpoint.txt", line);
     }
@@ -2566,7 +2575,8 @@ public class ShoplifterScript : MonoBehaviour
             numTrials_Learning = 0;
             numTrials = 0;
 
-            currentPhaseName = "TRAINING";
+            currentPhaseName = "PRE-TRAINING";
+            CheckpointSession(i, true);
             yield return StartCoroutine(ShowIntroInstructions());
             blackScreen.alpha = 0f;
 
@@ -2593,7 +2603,10 @@ public class ShoplifterScript : MonoBehaviour
             }
 
             yield return StartCoroutine(PickEnvironment(i, true));
-            if(expSettings.stage == ExperimentSettings.Stage.Training)
+
+            currentPhaseName = "TRAINING";
+            CheckpointSession(i, true);
+            if (expSettings.stage == ExperimentSettings.Stage.Training)
             {
                 blackScreen.alpha = 0f;
                 //enable camera zone interaction before camera training

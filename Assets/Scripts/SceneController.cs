@@ -1,16 +1,24 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
 using UnityEngine.Video;
 
 public class SceneController : MonoBehaviour
 { //there can be a separate scene controller in each scene
+    ExperimentSettings expSettings { get { return ExperimentSettings.Instance; } }
 
     public GameObject menuObj;
     public GameObject sceneObj;
 
     public GameObject syncPulser;
     public GameObject syncPulsingImage;
+
+    public List<GameObject> environmentList_SO;
+    public List<GameObject> environmentList_WA;
+
+    public ShoplifterScript shoplifterRef; 
+
     //SINGLETON
     private static SceneController _instance;
 
@@ -58,7 +66,7 @@ public class SceneController : MonoBehaviour
 
     public void UpdateSceneConfig()
     {
-        if (ExperimentSettings.Instance.connectionMethod == ExperimentSettings.ConnectionMethod.Photosync)
+        if (expSettings.connectionMethod == ExperimentSettings.ConnectionMethod.Photosync)
         {
             syncPulser.SetActive(true);
             syncPulsingImage.SetActive(true);
@@ -79,7 +87,7 @@ public class SceneController : MonoBehaviour
             syncPulsingImage.SetActive(false);
         }
 
-        if (ExperimentSettings.Instance.controlDevice == ExperimentSettings.ControlDevice.Keyboard)
+        if (expSettings.controlDevice == ExperimentSettings.ControlDevice.Keyboard)
         {
             if (Config.shouldForceControl)
                 instructionVideoPlayer.GetComponent<VideoPlayer>().clip = keyboard_control_video;
@@ -95,7 +103,50 @@ public class SceneController : MonoBehaviour
         }
     }
 
-	public void LoadMainMenu(){
+    public void UpdateSessionEnvironments()
+    {
+        if(expSettings.currentEnvironmentType == ExperimentSettings.EnvironmentType.WA)
+        {
+            shoplifterRef.environments[0] = environmentList_WA[0];
+            shoplifterRef.environments[1] = environmentList_WA[1];
+
+        }
+        else if(expSettings.currentEnvironmentType == ExperimentSettings.EnvironmentType.SO)
+        {
+            shoplifterRef.environments[0] = environmentList_SO[0];
+            shoplifterRef.environments[1] = environmentList_SO[1];
+        }
+        else
+        {
+            shoplifterRef.environments[0] = environmentList_WA[0];
+            shoplifterRef.environments[1] = environmentList_WA[1];
+
+
+        }
+    }
+
+
+    public void UpdateSessionReevalConditions(int reevalConditionIndex)
+    {
+        switch(reevalConditionIndex)
+        {
+            case 0:
+                shoplifterRef.reevalConditions[0] = 0;
+                shoplifterRef.reevalConditions[1] = 1;
+                break;
+            case 1:
+                shoplifterRef.reevalConditions[0] = 1;
+                shoplifterRef.reevalConditions[1] = 0;
+                break;
+            default:
+                shoplifterRef.reevalConditions[0] = 0;
+                shoplifterRef.reevalConditions[1] = 1;
+                break;
+        }
+    }
+
+
+    public void LoadMainMenu(){
 		if(Experiment.Instance != null){
 			Experiment.Instance.OnExit();
 		}

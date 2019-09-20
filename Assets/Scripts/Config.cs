@@ -17,7 +17,7 @@ public class Config : MonoBehaviour
 
     public static SessionType sessionType = SessionType.NonAdaptive;
     public static Version BuildVersion = Version.SpaceHeist; //TODO: change this for your experiment!
-    public static string VersionNumber = "2.1"; //TODO: change this for your experiment!
+    public static string VersionNumber = "2.3"; //TODO: change this for your experiment!
 
     public static bool isGamified = false;
 
