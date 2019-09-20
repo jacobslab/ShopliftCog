@@ -25,10 +25,20 @@ public class PrefGroupSetup : MonoBehaviour {
 	// Use this for initialization
 	void OnEnable () {
         //update on enable
-        if (ExperimentSettings.Instance.connectionMethod == ExperimentSettings.ConnectionMethod.Photosync)
-            instructionText.text = "Left and right arrow keys moves the slider";
+        if (ExperimentSettings.Instance.controlDevice == ExperimentSettings.ControlDevice.Keyboard)
+        {
+            if (ExperimentSettings.Instance.currentLanguage == ExperimentSettings.Language.English)
+                instructionText.text = "Left and right arrow keys moves the slider";
+            else
+                instructionText.text = "Teclas de flecha izquierda y derecha \n mueve el control deslizante";
+        }
         else
-        instructionText.text = "Left joystick moves slider";
+        {
+            if (ExperimentSettings.Instance.currentLanguage == ExperimentSettings.Language.English)
+                instructionText.text = "Left joystick moves slider";
+            else
+                instructionText.text = "El joystick izquierdo mueve el control";
+        }
 
 
         active = true;

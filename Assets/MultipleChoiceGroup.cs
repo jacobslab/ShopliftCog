@@ -22,10 +22,20 @@ public class MultipleChoiceGroup : MonoBehaviour {
     public Text instructionText;
 	// Use this for initialization
 	void Start () {
-        if(ExperimentSettings.Instance.controlDevice==ExperimentSettings.ControlDevice.Keyboard)
-             instructionText.text = "Choose room with left and right arrow keys";
+        if (ExperimentSettings.Instance.controlDevice == ExperimentSettings.ControlDevice.Keyboard)
+        {
+            if (ExperimentSettings.Instance.currentLanguage == ExperimentSettings.Language.English)
+                instructionText.text = "Choose room with left and right arrow keys";
+            else
+                instructionText.text = "Elegir habitación con las teclas de flecha izquierda y derecha";
+        }
         else
-             instructionText.text = "Choose room with left joystick";
+        {
+            if (ExperimentSettings.Instance.currentLanguage == ExperimentSettings.Language.English)
+                instructionText.text = "Choose room with left joystick";
+            else
+                instructionText.text = "Elige la sala con el joystick izquierdo";
+        }
 
         roomMappings = new Dictionary<int, int>();
         CreateDefaultRoomMappings();

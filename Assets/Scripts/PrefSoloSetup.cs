@@ -24,10 +24,21 @@ public class PrefSoloSetup : MonoBehaviour
 
     void OnEnable () {
 
-        if (ExperimentSettings.Instance.connectionMethod == ExperimentSettings.ConnectionMethod.Photosync)
-            instructionText.text = "Left and right arrow keys moves slider";
+        if (ExperimentSettings.Instance.controlDevice == ExperimentSettings.ControlDevice.Keyboard)
+        {
+            if (ExperimentSettings.Instance.currentLanguage == ExperimentSettings.Language.English)
+                instructionText.text = "Left and right arrow keys moves slider";
+            else
+                instructionText.text = "Teclas de flecha izquierda y derecha \n mueve el control deslizante";
+
+        }
         else
-        instructionText.text = "El joystick izquierdo mueve el control";
+        {
+            if (ExperimentSettings.Instance.currentLanguage == ExperimentSettings.Language.English)
+                instructionText.text = "Left joystick moves the slider";
+            else
+                instructionText.text = "El joystick izquierdo mueve el control.";
+        }
 
         correctFeedback.alpha = 0f;
         incorrectFeedback.alpha = 0f;
