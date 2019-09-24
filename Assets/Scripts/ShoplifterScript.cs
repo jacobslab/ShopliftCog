@@ -2290,7 +2290,7 @@ public class ShoplifterScript : MonoBehaviour
         completeImageList = new List<Texture>();
 
         EnvironmentManager tempEnv;
-        for (int i = 0; i<environments.Count*repeatCount; i++) {
+        for (int i = 0; i<(environments.Count-1)*repeatCount; i++) {
 			tempEnv = environments [i%2].GetComponent<EnvironmentManager> ();
 			completeAudioList.Add (tempEnv.one_L_Audio.clip);
 			completeAudioList.Add (tempEnv.one_R_Audio.clip);

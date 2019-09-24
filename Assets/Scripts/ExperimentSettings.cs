@@ -276,7 +276,7 @@ public class ExperimentSettings : MonoBehaviour {
 		buildDate = 
 			new FileInfo(Assembly.GetExecutingAssembly().Location).LastWriteTime.ToString();
 		UnityEngine.Debug.Log (buildDate);
-		buildType.text = "v" + Config.BuildVersion.ToString() + " [ " + buildDate + " ] ";
+		buildType.text = "v" + Config.VersionNumber + " [ " + buildDate + " ] ";
 
 	}
 
