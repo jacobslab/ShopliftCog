@@ -10,7 +10,7 @@ public class CameraZoneManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        SetCamZoneManagerReferences();
     }
 
     public void SetActiveCameraZone(CameraZone currentCamZone)

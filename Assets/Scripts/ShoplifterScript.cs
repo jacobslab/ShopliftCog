@@ -212,7 +212,7 @@ public class ShoplifterScript : MonoBehaviour
 
     //instr strings
     private string doorText = "Press (X) to open the door";
-    private string registerText = "Press (X) to open the suitcase";
+    private string registerText = "Press (X) to open the ";
 
     //audio
     private AudioSource one_L_Audio;
@@ -257,6 +257,7 @@ public class ShoplifterScript : MonoBehaviour
     public bool isPaused = false;
 
 
+    private string registerType = "suitcase";
     //for baseline music sequence at the end
     private List<AudioClip> completeAudioList;
     public AudioSource musicBaselinePlayer;
@@ -344,7 +345,7 @@ public class ShoplifterScript : MonoBehaviour
             musicBaselineInstruction = "In what follows you will hear music from the game. \n Please maintain your gaze at the fixation cross, relax, and pay attention to the music.";
             imageSlideshowInstruction = "In what follows you will see images from the game. \n Please maintain your gaze on the screen, relax, and pay attention to different images that appear on the screen.";
             doorText = "Press (X) to open the door";
-            registerText = "Press (X) to open the suitcase";
+            registerText = "Press (X) to open the ";
         }
         else
         {
@@ -1346,7 +1347,9 @@ public class ShoplifterScript : MonoBehaviour
 			Experiment.Instance.shopLiftLog.LogWaitEvent ("REGISTER", true);
 			if(activeCamZone!=null)
 				activeCamZone.GetComponent<CameraZone> ().isFocus = false;
-			yield return StartCoroutine (WaitForDoorOpenPress (registerText));
+
+            string newText = registerText + registerType;
+			yield return StartCoroutine (WaitForDoorOpenPress (newText));
 			Experiment.Instance.shopLiftLog.LogWaitEvent ("REGISTER", false);
 			yield return StartCoroutine (ShowRegisterReward (pathIndex,isDirect));
 			Debug.Log ("closing the third door now");
@@ -2313,6 +2316,18 @@ public class ShoplifterScript : MonoBehaviour
 		yield return null;
 	}
 
+    void ActivateEnvironmentAvatar(int activeEnvIndex)
+    {
+        //first deactivate all of them
+        for (int i = 0; i < 4; i++)
+        {
+            camVehicle.transform.GetChild(0).GetChild(i).gameObject.SetActive(false);
+        }
+
+
+        camVehicle.transform.GetChild(0).GetChild(activeEnvIndex).gameObject.SetActive(true);
+    }
+
 
 	IEnumerator PickEnvironment(int blockCount, bool pickNew)
 	{
@@ -2340,16 +2355,16 @@ public class ShoplifterScript : MonoBehaviour
 			Debug.Log ("chosen space station");
 			ExperimentSettings.env = ExperimentSettings.Environment.SpaceStation;
 			camVehicle.transform.localEulerAngles = new Vector3 (0f, 180f, 0f);
-			camVehicle.transform.GetChild (0).GetChild (0).gameObject.SetActive (true);
-			camVehicle.transform.GetChild (0).GetChild (1).gameObject.SetActive (false);
-			directionEnv = -1;
+            ActivateEnvironmentAvatar(2);
+            registerType = "suitcase";
+            directionEnv = -1;
 		} else if (environments [envIndex].name == "WesternTown") { //western town, for now
 			Debug.Log ("chosen western town");
 			ExperimentSettings.env = ExperimentSettings.Environment.WesternTown;
 			camVehicle.transform.localEulerAngles = new Vector3 (0f, 0f, 0f);
-			camVehicle.transform.GetChild (0).GetChild (0).gameObject.SetActive (true);
-			camVehicle.transform.GetChild (0).GetChild (1).gameObject.SetActive (false);
-			camVehicle.GetComponent<CapsuleCollider> ().height =2f;
+            ActivateEnvironmentAvatar(0);
+            registerType = "chest";
+            camVehicle.GetComponent<CapsuleCollider> ().height =2f;
 			directionEnv = 1;
 		}
         else if (environments[envIndex].name == "VikingVillage")
@@ -2357,34 +2372,33 @@ public class ShoplifterScript : MonoBehaviour
             Debug.Log("chosen viking village");
             ExperimentSettings.env = ExperimentSettings.Environment.VikingVillage;
             camVehicle.transform.localEulerAngles = new Vector3(0f, 0f, 0f);
-            camVehicle.transform.GetChild(0).GetChild(0).gameObject.SetActive(true);
-            camVehicle.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+            ActivateEnvironmentAvatar(0);
+            registerType = "chest";
             directionEnv = -1;
         }
         else if (environments [envIndex].name == "Office") { //office
 			Debug.Log ("chosen office");
 			ExperimentSettings.env = ExperimentSettings.Environment.Office;
 			camVehicle.transform.localEulerAngles = new Vector3 (0f, 180f, 0f);
-			camVehicle.transform.GetChild (0).GetChild (0).gameObject.SetActive (false);
-			camVehicle.transform.GetChild (0).GetChild (1).gameObject.SetActive (true);
-			camVehicle.GetComponent<CapsuleCollider> ().height = 1.6f;
+            ActivateEnvironmentAvatar(3);
+            registerType = "safe";
+            camVehicle.GetComponent<CapsuleCollider> ().height = 1.6f;
 			directionEnv = -1;
 		}
 		else if (environments [envIndex].name == "Apartment") { //office
 			Debug.Log ("chosen office");
 			ExperimentSettings.env = ExperimentSettings.Environment.Apartment;
 			camVehicle.transform.localEulerAngles = new Vector3 (0f, 180f, 0f);
-			camVehicle.transform.GetChild (0).GetChild (0).gameObject.SetActive (false);
-			camVehicle.transform.GetChild (0).GetChild (1).gameObject.SetActive (true);
-			camVehicle.GetComponent<CapsuleCollider> ().height = 1.6f;
+            ActivateEnvironmentAvatar(1);
+            registerType = "laundry bag";
+            camVehicle.GetComponent<CapsuleCollider> ().height = 1.6f;
 			directionEnv = -1;
 		}
 		else
 		{
 			camVehicle.transform.localEulerAngles = new Vector3 (0f, 180f, 0f);
-			camVehicle.transform.GetChild (0).GetChild (0).gameObject.SetActive (true);
-			camVehicle.transform.GetChild (0).GetChild (1).gameObject.SetActive (false);
-			directionEnv = -1;
+            ActivateEnvironmentAvatar(0);
+            directionEnv = -1;
 		}
 
 
@@ -2569,6 +2583,11 @@ public class ShoplifterScript : MonoBehaviour
 
 
         }
+           //if not checkpointed, then begin from pre-training
+        else
+        {
+            expSettings.stage = ExperimentSettings.Stage.Pretraining;
+        }
 
         for (int i = startingIndex; i < totalEnvCount; i++)
         {
@@ -2600,18 +2619,25 @@ public class ShoplifterScript : MonoBehaviour
                 yield return StartCoroutine(RunCamTrainingPhase());
                 string pretrainingEndText = "Congrats! You've completed PRE-TRAINING!\n GOAL: learn which rooms lead to*more cash*!! \n But first, let's memorize *cam locations*\n to deactivate cams too! \n Press(X) to begin camera practice!";
                 yield return StartCoroutine(ShowInstructionsTillButtonPress(pretrainingEndText));
+
+                //set for next stage
+                expSettings.SetNextStage();
             }
 
             yield return StartCoroutine(PickEnvironment(i, true));
 
             currentPhaseName = "TRAINING";
             CheckpointSession(i, true);
+            Debug.Log("current stage " + expSettings.stage.ToString());
             if (expSettings.stage == ExperimentSettings.Stage.Training)
             {
                 blackScreen.alpha = 0f;
                 //enable camera zone interaction before camera training
                 Debug.Log("running cam training");
                 yield return StartCoroutine(RunCamTrainingPhase());
+
+                //set for next stage
+                expSettings.SetNextStage();
             }
             RandomizeSuitcases();
             cameraZoneManager.ResetAllCamZones();
@@ -2652,12 +2678,16 @@ public class ShoplifterScript : MonoBehaviour
 
             currentPhaseName = "LEARNING";
             CheckpointSession(i, true);
-            if (expSettings.stage==ExperimentSettings.Stage.Learning)
+            Debug.Log("current stage " + expSettings.stage.ToString());
+            if (expSettings.stage==ExperimentSettings.Stage.Learning || !expSettings.isCheckpointed)
             {
                 Debug.Log("MAX TRIALS " + maxTrials_Learning.ToString()); 
                 TCPServer.Instance.SetState(TCP_Config.DefineStates.LEARNING, true);
                 yield return StartCoroutine(RunLearningPhase(false, maxTrials_Learning));
                 TCPServer.Instance.SetState(TCP_Config.DefineStates.LEARNING, false);
+
+                //set for next stage
+                expSettings.SetNextStage();
             }
 
             //shuffle rewards
@@ -2667,28 +2697,37 @@ public class ShoplifterScript : MonoBehaviour
             //re-evaluation phase
             currentPhaseName = "REEVALUATION";
             CheckpointSession(i, true);
-            if (expSettings.stage == ExperimentSettings.Stage.Reevaluation)
+            Debug.Log("current stage " + expSettings.stage.ToString());
+            if (expSettings.stage == ExperimentSettings.Stage.Reevaluation || !expSettings.isCheckpointed)
             {
                 TCPServer.Instance.SetState(TCP_Config.DefineStates.REEVALUATION, true);
                 yield return StartCoroutine(RunReevaluationPhase(currentReevalCondition));
                 TCPServer.Instance.SetState(TCP_Config.DefineStates.REEVALUATION, false);
+
+                //set for next stage
+                expSettings.SetNextStage();
             }
 
 
             //testing phase
             currentPhaseName = "TESTING";
             CheckpointSession(i, true);
-            if (expSettings.stage == ExperimentSettings.Stage.Test)
+            Debug.Log("current stage " + expSettings.stage.ToString());
+            if (expSettings.stage == ExperimentSettings.Stage.Test || !expSettings.isCheckpointed)
             {
 
                 TCPServer.Instance.SetState(TCP_Config.DefineStates.TESTING, true);
                 yield return StartCoroutine(RunTestingPhase());
                 TCPServer.Instance.SetState(TCP_Config.DefineStates.TESTING, false);
+
+                //set for next stage
+                expSettings.SetNextStage();
             }
 
 
-            //if transition phase and not forced control, play 10-trial additional learning
-            if (currentReevalCondition == 1 && !Config.shouldForceControl)
+            Debug.Log("current stage " + expSettings.stage.ToString());
+            //if transition phase and not control, play 10-trial additional learning
+            if (currentReevalCondition == 1 && !hasLearned && !Config.shouldForceControl)
             {
                 Debug.Log("RUNNING ADDITIONAL LEARN PHASE");
                 expSettings.stage = ExperimentSettings.Stage.PostTest;
@@ -2696,8 +2735,13 @@ public class ShoplifterScript : MonoBehaviour
                 TCPServer.Instance.SetState(TCP_Config.DefineStates.POST_TEST, true);
                 yield return StartCoroutine(RunLearningPhase(true, maxTrials_PostTest));
                 TCPServer.Instance.SetState(TCP_Config.DefineStates.POST_TEST, true);
-                
+
+                //set for next stage
+                expSettings.SetNextStage();
+
             }
+
+            Debug.Log("current stage " + expSettings.stage.ToString());
             //skip if it is the final environment
             if (i != totalEnvCount - 1)
             {
@@ -2735,7 +2779,9 @@ public class ShoplifterScript : MonoBehaviour
 
         currentPhaseName = "SILENT_TRAVERSAL";
         CheckpointSession(totalEnvCount - 1, true);
+        CameraZone.enableCamZones = false;
         yield return StartCoroutine(RunSilentTraversal());
+        CameraZone.enableCamZones = true;
 
         CheckpointSession(totalEnvCount - 1, false);
 
@@ -2748,7 +2794,7 @@ public class ShoplifterScript : MonoBehaviour
     {
         correctResponses = 0;
         CameraZone.firstTime = true;
-        expSettings.stage = ExperimentSettings.Stage.None;
+        expSettings.stage = ExperimentSettings.Stage.Training;
         //ExperimentSettings.isTraining = true;
         //ExperimentSettings.isLearning = true;
         //ExperimentSettings.isReeval = true;

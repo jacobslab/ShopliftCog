@@ -16,6 +16,8 @@ public class ExperimentSettings : MonoBehaviour {
 	public static bool shouldStim=false;
 	public static bool isLogging = true;
 
+    public bool isCheckpointed = false;
+
     //build info
     string buildDate;
     public Text buildType;
@@ -192,8 +194,9 @@ public class ExperimentSettings : MonoBehaviour {
 		string subjName = subjectName.text;
 		checkpointExists=CheckSubjectFolderForCheckpoints (subjName);
 		if (checkpointExists) {
+            isCheckpointed = true;
 
-			checkpointButton.gameObject.SetActive(false);
+            checkpointButton.gameObject.SetActive(false);
 			resumeFromCheckpointButton.gameObject.SetActive(true);
 		}
 		else
@@ -248,6 +251,38 @@ public class ExperimentSettings : MonoBehaviour {
 				checkpointDataText.text = "No checkpoint data found!";
 		return hasCheckpoint;
 	}
+
+    public void SetNextStage()
+    {
+        switch(stage)
+        {
+            case Stage.Pretraining:
+                stage = Stage.Training;
+                Debug.Log("setting stage to " + stage.ToString());
+                break;
+            case Stage.Training:
+                stage = Stage.Learning;
+                Debug.Log("setting stage to " + stage.ToString());
+                break;
+            case Stage.Learning:
+                stage = Stage.Reevaluation;
+                Debug.Log("setting stage to " + stage.ToString());
+                break;
+            case Stage.Reevaluation:
+                stage = Stage.Test;
+                Debug.Log("setting stage to " + stage.ToString());
+                break;
+            case Stage.Test:
+                stage = Stage.Training;
+                Debug.Log("setting stage to " + stage.ToString());
+                break;
+            default:
+                stage = Stage.None;
+                Debug.Log("setting stage to " + stage.ToString());
+                break;
+
+        }
+    }
 
 	public void SetSessionType()
 	{
