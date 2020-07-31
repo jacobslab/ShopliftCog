@@ -1948,7 +1948,7 @@ public class ShoplifterScript : MonoBehaviour
                 AssignRooms(true);
             }
             RandomizeSpeedChangeZones();
-            yield return StartCoroutine(RandomizeCameraZones(blockCount));
+        //    yield return StartCoroutine(RandomizeCameraZones(blockCount));
         }
 
 		yield return null;
@@ -2107,7 +2107,8 @@ public class ShoplifterScript : MonoBehaviour
     {
         correctResponses = 0;
         CameraZone.firstTime = true;
-        ExperimentSettings.isTraining = true;
+        ExperimentSettings.isTraining = false;
+      //  ExperimentSettings.isTraining = true;
         ExperimentSettings.isLearning = true;
         ExperimentSettings.isReeval = true;
         ExperimentSettings.isTesting = true;

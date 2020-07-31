@@ -13,6 +13,8 @@ public class LoadScenePrefabs: MonoBehaviour
     private GameObject experimentObj;
     private List<GameObject> scenePrefabList= new List<GameObject>();
 
+    private string targetSkyboxName = "";
+
     public enum HeistEnv
     { WA,
     SO
@@ -33,17 +35,20 @@ public class LoadScenePrefabs: MonoBehaviour
         Cursor.visible = true;
         if (assetBundleType == AssetBundleType.Native)
         {
+            Debug.Log("loading natively");
             basePrefabObj = LoadPrefabFromNativeAssetBundle("base");
             experimentObj = basePrefabObj.GetComponent<BaseObject>().experimentObj;
             if (heistEnvType == HeistEnv.SO)
             {
                 assetBundleNames[0] = "spacestation";
                 assetBundleNames[1] = "office";
+                targetSkyboxName = "Skybox018";
             }
             else
             {
                 assetBundleNames[0] = "westerntown";
                 assetBundleNames[1] = "apartment";
+                targetSkyboxName = "Skybox018";
             }
             for (int i = 0; i < 2; i++)
             {
@@ -87,6 +92,7 @@ public class LoadScenePrefabs: MonoBehaviour
 
     IEnumerator LoadBundleViaWeb()
     {
+        Debug.Log("loading from web");
         yield return StartCoroutine(LoadPrefabFromWWWAssetBundle("base",-1));
         experimentObj = basePrefabObj.GetComponent<BaseObject>().experimentObj;
         if (heistEnvType == HeistEnv.SO)
@@ -115,7 +121,7 @@ public class LoadScenePrefabs: MonoBehaviour
     { 
         //Debug.Log("datapath " + Application.dataPath);
         //var path = Path.Combine(Application.dataPath, "AssetBundles/WebGL");
-        var path = "http://orion.bme.columbia.edu/jacobs/heist_task_data/AssetBundles/WebGL";
+        var path = "https://spaceheist.s3.us-east-2.amazonaws.com/SH_WEB/AssetBundles/";
         string uri = Path.Combine(path, bundleName);
         Debug.Log("the uri is " + uri);
         UnityWebRequest request = UnityWebRequestAssetBundle.GetAssetBundle(uri, 0);
