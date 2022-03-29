@@ -85,8 +85,7 @@ public class Experiment : MonoBehaviour {
 	}
 
 
-	
-	//TODO: move to logger_threading perhaps?
+	//HANDLES LOGGING AND CHECKS FOR CHECKPOINT FILE
 	void InitLogging(){
 		string subjectDirectory = ExperimentSettings.defaultLoggingPath + ExperimentSettings.currentSubject.name + "/";
 		sessionDirectory = subjectDirectory + "session_0" + "/";
@@ -99,11 +98,15 @@ public class Experiment : MonoBehaviour {
 			Directory.CreateDirectory(subjectDirectory);
 		}
 		Debug.Log ("does " + sessionDirectory + "and" + sessionStartedFileName + " exist");
+
+		//check for directory
         while (File.Exists(sessionDirectory + sessionStartedFileName))
         {
             sessionIDString = "_" + sessionID.ToString();
             sessionDirectory = subjectDirectory + "session" + sessionIDString + "/";
             checkpointFilePath = sessionDirectory + "checkpoint.txt";
+
+			//checking for checkpoint file
             if(File.Exists(checkpointFilePath))
             {
                 chosenCheckpointFile = checkpointFilePath;
@@ -157,30 +160,7 @@ public class Experiment : MonoBehaviour {
 	}
 
 
-	// Use this for initialization
-	void Start () {
-
-	}
-
-	// Update is called once per frame
-	void Update () {
-		//Proceed with experiment if we're not in REPLAY mode
-//		if (!ExperimentSettings.isReplay) { //REPLAY IS HANDLED IN REPLAY.CS VIA LOG FILE PARSING
-////			Debug.Log("not replay");
-//			if (currentState == ExperimentState.instructionsState && !isRunningInstructions) {
-//				Debug.Log("running instructions");
-//
-//				StartCoroutine(RunInstructions());
-//
-//			}
-//			else if (currentState == ExperimentState.inExperiment && !isRunningExperiment) {
-//				Debug.Log("running experiment");
-//				StartCoroutine(BeginExperiment());
-//			}
-//
-//		}
-	}
-
+	//upon loading checkpoint file, update variables accordingly to move the task to the checkpointed state
 	public void UpdateCheckpointedVariables(string[] checkpointData)
 	{
 		Debug.Log ("checkpoint " + checkpointData [3].ToString ());
@@ -231,15 +211,6 @@ public class Experiment : MonoBehaviour {
 		}
 	}
 
-	public IEnumerator RunOutOfTrials(){
-	//	yield return StartCoroutine(ShowSingleInstruction("You have finished your trials! \nPress the button to proceed.", true, true, false, 0.0f));
-//		instructionsController.SetInstructionsColorful(); //want to keep a dark screen before transitioning to the end!
-//		instructionsController.DisplayText("...loading end screen...");
-		EndExperiment();
-
-		yield return 0;
-	}
-
 	public IEnumerator RunInstructions(){
 		isRunningInstructions = true;
 
@@ -253,15 +224,6 @@ public class Experiment : MonoBehaviour {
 	}
 
 
-	public IEnumerator BeginExperiment(){
-		isRunningExperiment = true;
-		Debug.Log ("about to begin experiment");
-		
-		yield return StartCoroutine(RunOutOfTrials()); //calls EndExperiment()
-
-		yield return 0;
-
-	}
 
 	public void EndExperiment(){
 		Debug.Log ("Experiment Over");
