@@ -267,21 +267,8 @@ public class Experiment : MonoBehaviour {
 		}
 	}
 
-//	public void LogWords(string wordToBeLogged)
-//	{
-//		UnityEngine.Debug.Log ("logging: " + wordToBeLogged);
-//		wordsLogged += wordToBeLogged.ToLower() + "\n";
-//		if (BillboardText.billboardCount >= BillboardText.listLength) {
-//			int trialCount = SceneController.Instance.GetTrialCount ();
-//			string trialTxtName = Experiment.Instance.sessionDirectory + trialCount.ToString () + ".txt";
-//			System.IO.File.WriteAllText (trialTxtName, wordsLogged);
-//			wordsLogged = "";
-//		}
-//	}
-//
 	public IEnumerator WaitForJitter(float minJitter, float maxJitter){
 		float randomJitter = Random.Range(minJitter, maxJitter);
-//		trialController.GetComponent<TrialLogTrack>().LogWaitForJitterStarted(randomJitter);
 		
 		float currentTime = 0.0f;
 		while (currentTime < randomJitter) {
@@ -289,7 +276,6 @@ public class Experiment : MonoBehaviour {
 			yield return 0;
 		}
 
-	//	trialController.GetComponent<TrialLogTrack>().LogWaitForJitterEnded(currentTime);
 	}
 
 
@@ -304,17 +290,18 @@ public class Experiment : MonoBehaviour {
 		if (ExperimentSettings.isLogging) {
 			subjectLog.close ();
 			eegLog.close ();
-//			File.Copy ("/Users/" + System.Environment.UserName + "/Library/Logs/Unity/Player.log", sessionDirectory+"Player.log");
 			Application.Quit ();
 		}
 	}
 
 	void OnApplicationQuit()
 	{
+#if UNITY_STANDALONE_OSX
+			File.Copy ("/Users/" + System.Environment.UserName + "/Library/Logs/Unity/Player.log", sessionDirectory+"Player.log");
+#endif
 		subjectLog.close ();
 		eegLog.close ();
 
-//		File.Copy ("/Users/" + System.Environment.UserName + "/Library/Logs/Unity/Player.log", sessionDirectory+"Player.log");
 	}
 
 

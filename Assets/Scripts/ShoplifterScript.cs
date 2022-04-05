@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
+using System;
 using UnityStandardAssets.Characters.FirstPerson;
 public class ShoplifterScript : MonoBehaviour
 {
@@ -276,6 +277,9 @@ public class ShoplifterScript : MonoBehaviour
 
     private int[] trainingReward = new int[2];
 
+    private int _currentReevalCondition = 0;
+    private int _startingIndex = 0;
+
     enum EnvironmentIndex
     {
         FirstEnv,
@@ -334,26 +338,32 @@ public class ShoplifterScript : MonoBehaviour
         Application.targetFrameRate = 60;
         deviationQueue = new Queue<float>();
 
-        InitializeInstructionsByLanguage();
     }
 
     void InitializeInstructionsByLanguage()
     {
-        if (expSettings.currentLanguage == ExperimentSettings.Language.English)
+        try
         {
-            pressToContinueInstruction = "Press (X) button to continue";
-            musicBaselineInstruction = "In what follows you will hear music from the game. \n Please maintain your gaze at the fixation cross, relax, and pay attention to the music.";
-            imageSlideshowInstruction = "In what follows you will see images from the game. \n Please maintain your gaze on the screen, relax, and pay attention to different images that appear on the screen.";
-            doorText = "Press (X) to open the door";
-            registerText = "Press (X) to open the ";
+            if (expSettings.currentLanguage == ExperimentSettings.Language.English)
+            {
+                pressToContinueInstruction = "Press (X) button to continue";
+                musicBaselineInstruction = "In what follows you will hear music from the game. \n Please maintain your gaze at the fixation cross, relax, and pay attention to the music.";
+                imageSlideshowInstruction = "In what follows you will see images from the game. \n Please maintain your gaze on the screen, relax, and pay attention to different images that appear on the screen.";
+                doorText = "Press (X) to open the door";
+                registerText = "Press (X) to open the ";
+            }
+            else
+            {
+                pressToContinueInstruction = "Presiona (X) para continuar";
+                musicBaselineInstruction = "A continuar escucharas música del juego.\n Por favor mantenga su mirada en la cruz. \n Relájate y preste atención a la música.";
+                imageSlideshowInstruction = "A continuar escucharas imagenes del juego.\n Por favor mantenga su mirada en la cruz. \n Relájate y preste atención a la imagenes.";
+                doorText = "Presiona el botón (X) para abrir la puertar";
+                registerText = "Presiona el botón (X) para abrir la maleta";
+            }
         }
-        else
+        catch(Exception e)
         {
-            pressToContinueInstruction = "Presiona (X) para continuar";
-            musicBaselineInstruction = "A continuar escucharas música del juego.\n Por favor mantenga su mirada en la cruz. \n Relájate y preste atención a la música.";
-            imageSlideshowInstruction = "A continuar escucharas imagenes del juego.\n Por favor mantenga su mirada en la cruz. \n Relájate y preste atención a la imagenes.";
-            doorText = "Presiona el botón (X) para abrir la puertar";
-            registerText = "Presiona el botón (X) para abrir la maleta";   
+            UnityEngine.Debug.Log("Encountered Error: " + e.Message + ": " + e.StackTrace);
         }
     }
 
@@ -370,7 +380,6 @@ public class ShoplifterScript : MonoBehaviour
                                                                //		reevalConditions = new List<int>();
                                                                //		reevalConditions= ShuffleReevalConditions();
         introInstructionGroup.alpha = 0f;
-        //		UpdateFirstEnvironments ();
         infoGroup.alpha = 0f;
         imagineGroup.alpha = 0f;
         positiveFeedbackGroup.alpha = 0f;
@@ -385,22 +394,17 @@ public class ShoplifterScript : MonoBehaviour
         slideshowImage.transform.parent.gameObject.GetComponent<CanvasGroup>().alpha = 0f;
 
         suitcaseObj = null;
-        //        cartAnim.enabled = true;
         camVehicle.SetActive(true);
-        //        animBody.SetActive(false);
-
-        //        cartAnim.Play("Phase1Start");
-        //camVehicle.transform.position = phase1Start.transform.position;
-        //        mouseLook = camVehicle.GetComponent<RigidbodyFirstPersonController>().mouseLook;
         camTrans = camVehicle.GetComponent<RigidbodyFirstPersonController>().cam.transform;
         RandomizeSpeed();
-        //		RandomizeCameraZones ();
         rewardScore.enabled = false;
-        //		mouseLook.XSensitivity = 0f;
 
         Cursor.visible = false;
-        //then start the task
-        //		Debug.Log(ExperimentSettings.env.ToString());
+
+
+        InitializeInstructionsByLanguage();
+
+
         StartCoroutine("RunTask");
     }
 
@@ -417,7 +421,7 @@ public class ShoplifterScript : MonoBehaviour
 
     void RandomizeSuitcases()
     {
-        if (Random.value > 0.5f)
+        if (UnityEngine.Random.value > 0.5f)
         {
             leftSuitcase = suitcases[0];
             rightSuitcase = suitcases[1];
@@ -434,7 +438,6 @@ public class ShoplifterScript : MonoBehaviour
         string separator = "\t";
         int currentBlockCount = blockCount;
         string line = "";
-        //environment + phase + reeval type + leftroom + leftreward + rightroom +  rightreward
         if (currentPhaseName != "PRE-TRAINING")
         {
             line = ((isOngoing) ? "ONGOING" : "FINISHED") + separator + envIndex.ToString() + separator + currentPhaseName + separator + reevalConditions[currentBlockCount].ToString() + separator + leftRoom.name + separator + registerVals[0].ToString() + separator + rightRoom.name + separator + registerVals[1].ToString();
@@ -451,23 +454,23 @@ public class ShoplifterScript : MonoBehaviour
     void RandomizeSpeedChangeZones()
     {
         Debug.Log("randomized speed change zones");
-        phase1SpeedChangeZones_L[0].transform.position = new Vector3(phase1Start_L.transform.position.x, phase1Start_L.transform.position.y, Random.Range(phase1Start_L.transform.position.z, Vector3.Lerp(phase1Start_L.transform.position, phase1End_L.transform.position, 0.5f).z));
-        phase1SpeedChangeZones_L[1].transform.position = new Vector3(phase1Start_L.transform.position.x, phase1Start_L.transform.position.y, Random.Range(Vector3.Lerp(phase1Start_L.transform.position, phase1End_L.transform.position, 0.5f).z, phase1End_L.transform.position.z));
+        phase1SpeedChangeZones_L[0].transform.position = new Vector3(phase1Start_L.transform.position.x, phase1Start_L.transform.position.y, UnityEngine.Random.Range(phase1Start_L.transform.position.z, Vector3.Lerp(phase1Start_L.transform.position, phase1End_L.transform.position, 0.5f).z));
+        phase1SpeedChangeZones_L[1].transform.position = new Vector3(phase1Start_L.transform.position.x, phase1Start_L.transform.position.y, UnityEngine.Random.Range(Vector3.Lerp(phase1Start_L.transform.position, phase1End_L.transform.position, 0.5f).z, phase1End_L.transform.position.z));
 
-        phase1SpeedChangeZones_R[0].transform.position = new Vector3(phase1Start_R.transform.position.x, phase1Start_R.transform.position.y, Random.Range(phase1Start_R.transform.position.z, Vector3.Lerp(phase1Start_R.transform.position, phase1End_R.transform.position, 0.5f).z));
-        phase1SpeedChangeZones_R[1].transform.position = new Vector3(phase1Start_R.transform.position.x, phase1Start_R.transform.position.y, Random.Range(Vector3.Lerp(phase1Start_R.transform.position, phase1End_R.transform.position, 0.5f).z, phase1End_R.transform.position.z));
+        phase1SpeedChangeZones_R[0].transform.position = new Vector3(phase1Start_R.transform.position.x, phase1Start_R.transform.position.y, UnityEngine.Random.Range(phase1Start_R.transform.position.z, Vector3.Lerp(phase1Start_R.transform.position, phase1End_R.transform.position, 0.5f).z));
+        phase1SpeedChangeZones_R[1].transform.position = new Vector3(phase1Start_R.transform.position.x, phase1Start_R.transform.position.y, UnityEngine.Random.Range(Vector3.Lerp(phase1Start_R.transform.position, phase1End_R.transform.position, 0.5f).z, phase1End_R.transform.position.z));
 
-        phase2SpeedChangeZones_L[0].transform.position = new Vector3(envManager.phase2Start_L.transform.position.x, phase2Start_L.transform.position.y, Random.Range(envManager.phase2Start_L.transform.position.z, Vector3.Lerp(envManager.phase2Start_L.transform.position, envManager.phase2End_L.transform.position, 0.5f).z));
-        phase2SpeedChangeZones_L[1].transform.position = new Vector3(envManager.phase2Start_L.transform.position.x, phase2Start_L.transform.position.y, Random.Range(Vector3.Lerp(envManager.phase2Start_L.transform.position, envManager.phase2End_L.transform.position, 0.5f).z, envManager.phase2End_L.transform.position.z));
+        phase2SpeedChangeZones_L[0].transform.position = new Vector3(envManager.phase2Start_L.transform.position.x, phase2Start_L.transform.position.y, UnityEngine.Random.Range(envManager.phase2Start_L.transform.position.z, Vector3.Lerp(envManager.phase2Start_L.transform.position, envManager.phase2End_L.transform.position, 0.5f).z));
+        phase2SpeedChangeZones_L[1].transform.position = new Vector3(envManager.phase2Start_L.transform.position.x, phase2Start_L.transform.position.y, UnityEngine.Random.Range(Vector3.Lerp(envManager.phase2Start_L.transform.position, envManager.phase2End_L.transform.position, 0.5f).z, envManager.phase2End_L.transform.position.z));
 
-        phase2SpeedChangeZones_R[0].transform.position = new Vector3(envManager.phase2Start_R.transform.position.x, phase2Start_R.transform.position.y, Random.Range(envManager.phase2Start_R.transform.position.z, Vector3.Lerp(envManager.phase2Start_R.transform.position, envManager.phase2End_R.transform.position, 0.5f).z));
-        phase2SpeedChangeZones_R[1].transform.position = new Vector3(envManager.phase2Start_R.transform.position.x, phase2Start_R.transform.position.y, Random.Range(Vector3.Lerp(envManager.phase2Start_R.transform.position, envManager.phase2End_R.transform.position, 0.5f).z, envManager.phase2End_R.transform.position.z));
+        phase2SpeedChangeZones_R[0].transform.position = new Vector3(envManager.phase2Start_R.transform.position.x, phase2Start_R.transform.position.y, UnityEngine.Random.Range(envManager.phase2Start_R.transform.position.z, Vector3.Lerp(envManager.phase2Start_R.transform.position, envManager.phase2End_R.transform.position, 0.5f).z));
+        phase2SpeedChangeZones_R[1].transform.position = new Vector3(envManager.phase2Start_R.transform.position.x, phase2Start_R.transform.position.y, UnityEngine.Random.Range(Vector3.Lerp(envManager.phase2Start_R.transform.position, envManager.phase2End_R.transform.position, 0.5f).z, envManager.phase2End_R.transform.position.z));
 
-        phase3SpeedChangeZones_L[0].transform.position = new Vector3(envManager.phase3Start_L.transform.position.x, phase3Start_L.transform.position.y, Random.Range(envManager.phase3Start_L.transform.position.z, Vector3.Lerp(envManager.phase3Start_L.transform.position, envManager.phase3End_L.transform.position, 0.5f).z));
-        phase3SpeedChangeZones_L[1].transform.position = new Vector3(envManager.phase3Start_L.transform.position.x, phase3Start_L.transform.position.y, Random.Range(Vector3.Lerp(envManager.phase3Start_L.transform.position, envManager.phase3End_L.transform.position, 0.5f).z, envManager.phase3End_L.transform.position.z));
+        phase3SpeedChangeZones_L[0].transform.position = new Vector3(envManager.phase3Start_L.transform.position.x, phase3Start_L.transform.position.y, UnityEngine.Random.Range(envManager.phase3Start_L.transform.position.z, Vector3.Lerp(envManager.phase3Start_L.transform.position, envManager.phase3End_L.transform.position, 0.5f).z));
+        phase3SpeedChangeZones_L[1].transform.position = new Vector3(envManager.phase3Start_L.transform.position.x, phase3Start_L.transform.position.y, UnityEngine.Random.Range(Vector3.Lerp(envManager.phase3Start_L.transform.position, envManager.phase3End_L.transform.position, 0.5f).z, envManager.phase3End_L.transform.position.z));
 
-        phase3SpeedChangeZones_R[0].transform.position = new Vector3(envManager.phase3Start_R.transform.position.x, phase3Start_R.transform.position.y, Random.Range(envManager.phase3Start_R.transform.position.z, Vector3.Lerp(envManager.phase3Start_R.transform.position, envManager.phase3End_R.transform.position, 0.5f).z));
-        phase3SpeedChangeZones_R[1].transform.position = new Vector3(envManager.phase3Start_R.transform.position.x, phase3Start_R.transform.position.y, Random.Range(Vector3.Lerp(envManager.phase3Start_R.transform.position, envManager.phase3End_R.transform.position, 0.5f).z, envManager.phase3End_R.transform.position.z));
+        phase3SpeedChangeZones_R[0].transform.position = new Vector3(envManager.phase3Start_R.transform.position.x, phase3Start_R.transform.position.y, UnityEngine.Random.Range(envManager.phase3Start_R.transform.position.z, Vector3.Lerp(envManager.phase3Start_R.transform.position, envManager.phase3End_R.transform.position, 0.5f).z));
+        phase3SpeedChangeZones_R[1].transform.position = new Vector3(envManager.phase3Start_R.transform.position.x, phase3Start_R.transform.position.y, UnityEngine.Random.Range(Vector3.Lerp(envManager.phase3Start_R.transform.position, envManager.phase3End_R.transform.position, 0.5f).z, envManager.phase3End_R.transform.position.z));
 
     }
 
@@ -622,7 +625,7 @@ public class ShoplifterScript : MonoBehaviour
         if (!Config.isDayThree && !isTraining)
         {
 
-            if (Random.value < 0.5f)
+            if (UnityEngine.Random.value < 0.5f)
             {
                 leftRoom = roomOne;
                 three_L_Audio = envManager.three_L_Audio;
@@ -820,7 +823,7 @@ public class ShoplifterScript : MonoBehaviour
 		vals.Clear ();
 		int valListCount = valList.Count;
 		for (int i = 0; i < valListCount; i++) {
-			int randomIndex = Random.Range (0, valList.Count);
+			int randomIndex = UnityEngine.Random.Range (0, valList.Count);
 			vals.Add(valList [randomIndex]);
 			valList.RemoveAt (randomIndex);
 		}
@@ -878,8 +881,8 @@ public class ShoplifterScript : MonoBehaviour
         //get randomized rewards
         while (leftReward == rightReward)
         {
-            leftReward = Mathf.CeilToInt(Random.Range(10f, 90f));
-            rightReward = Mathf.CeilToInt(Random.Range(10f, 90f));
+            leftReward = Mathf.CeilToInt(UnityEngine.Random.Range(10f, 90f));
+            rightReward = Mathf.CeilToInt(UnityEngine.Random.Range(10f, 90f));
         }
         //then add the rewards to a list
         trainingReward = new int[2];
@@ -927,7 +930,7 @@ public class ShoplifterScript : MonoBehaviour
             isLeft = !isLeft;
             yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, true, true));
             //we will randomly pick on whether to query the left or right room
-            yield return StartCoroutine(AskSoloPreference((Random.value > 0.5f)? 2 : 3, true)); // we have assigned Room 5 (left) and Room 6 (right) as 2 and 3 index in the solo img groups
+            yield return StartCoroutine(AskSoloPreference((UnityEngine.Random.value > 0.5f)? 2 : 3, true)); // we have assigned Room 5 (left) and Room 6 (right) as 2 and 3 index in the solo img groups
          }
         yield return null;
     }
@@ -1112,7 +1115,7 @@ public class ShoplifterScript : MonoBehaviour
     {
 		registerLeft = new List<int> ();
 		registerVals = new List<int> ();
-		int index = Random.Range(0,registerVal1.Count);
+		int index = UnityEngine.Random.Range(0,registerVal1.Count);
 		registerVals.Add(registerVal1[index]);
 		registerVals.Add(registerVal2[index]);
 
@@ -1152,7 +1155,7 @@ public class ShoplifterScript : MonoBehaviour
 		clearCameraZoneFlags = false;
 		Debug.Log ("running phase one");
 		AudioSource baseAudio = (pathIndex == 0) ? one_L_Audio : one_R_Audio;
-		float delayOne = Random.Range (0f, baseAudio.clip.length);
+		float delayOne = UnityEngine.Random.Range (0f, baseAudio.clip.length);
 
 		baseAudio.time = delayOne;
 		baseAudio.Play ();
@@ -1209,7 +1212,7 @@ public class ShoplifterScript : MonoBehaviour
 					Debug.Log ("phase 1 door L: " + phase1Door_L.transform.GetChild (0).gameObject.name);
 					yield return StartCoroutine (MovePlayerTo (camVehicle.transform.position, phase1Door_L.transform.GetChild (0).position, 0.5f));
 					baseAudio.Stop ();
-					delayTwo = Random.Range (0f, currentAudio.clip.length);
+					delayTwo = UnityEngine.Random.Range (0f, currentAudio.clip.length);
 					currentAudio.time = delayTwo;
 					currentAudio.Play ();
 					yield return StartCoroutine (MovePlayerTo (phase1Door_L.transform.GetChild (0).position, phase2Start_L.transform.position, 0.5f));
@@ -1229,7 +1232,7 @@ public class ShoplifterScript : MonoBehaviour
 					yield return StartCoroutine (MovePlayerTo (camVehicle.transform.position, phase1Door_R.transform.GetChild (0).position, 0.5f));
 									
 					baseAudio.Stop ();
-					delayTwo = Random.Range (0f, currentAudio.clip.length);
+					delayTwo = UnityEngine.Random.Range (0f, currentAudio.clip.length);
 					currentAudio.time = delayTwo;
 					currentAudio.Play ();
 					yield return StartCoroutine (MovePlayerTo (phase1Door_R.transform.GetChild (0).position, phase2Start_R.transform.position, 0.5f));
@@ -1259,7 +1262,7 @@ public class ShoplifterScript : MonoBehaviour
 		Vector3 endPos = (pathIndex == 0) ? phase2End_L.transform.position : phase2End_R.transform.position;
 		if (isDirect) {
 			currentAudio = (pathIndex == 0) ? two_L_Audio : two_R_Audio;
-			float delay = Random.Range (0f, currentAudio.clip.length);
+			float delay = UnityEngine.Random.Range (0f, currentAudio.clip.length);
 			currentAudio.time = delay;
 			currentAudio.Play ();
             //we set this explicitly for re-evaluation as RunPhaseOne isn't run anymore so we have to log it here
@@ -1289,7 +1292,7 @@ public class ShoplifterScript : MonoBehaviour
 			yield return StartCoroutine (MovePlayerTo (camVehicle.transform.position, phase2Door_L.transform.GetChild(0).position, 0.5f));
 			currentAudio.Stop ();
 			currentAudio = three_L_Audio;
-			delayThree = Random.Range (0f, currentAudio.clip.length);
+			delayThree = UnityEngine.Random.Range (0f, currentAudio.clip.length);
 			currentAudio.time = delayThree;
 			currentAudio.Play (); 
 				yield return StartCoroutine (MovePlayerTo (phase2Door_L.transform.GetChild(0).position, phase3Start_L.transform.position, 0.5f));
@@ -1297,7 +1300,7 @@ public class ShoplifterScript : MonoBehaviour
 		} else if (pathIndex == 1) {			
 			currentAudio.Stop ();
 			currentAudio = three_R_Audio;
-			delayThree = Random.Range (0f, currentAudio.clip.length);
+			delayThree = UnityEngine.Random.Range (0f, currentAudio.clip.length);
 			currentAudio.time = delayThree;
 			currentAudio.Play();
 				yield return StartCoroutine (MovePlayerTo (camVehicle.transform.position, phase2Door_R.transform.GetChild(0).position, 0.5f));
@@ -1325,7 +1328,7 @@ public class ShoplifterScript : MonoBehaviour
 		Vector3 endPos = (pathIndex == 0) ? phase3End_L.transform.position : phase3End_R.transform.position;
 		if (isDirect) {
 			currentAudio = (pathIndex == 0) ? three_L_Audio : three_R_Audio;
-			float delay = Random.Range (0f, currentAudio.clip.length);
+			float delay = UnityEngine.Random.Range (0f, currentAudio.clip.length);
 			currentAudio.time = delay;
 			currentAudio.Play ();
 		}
@@ -1409,7 +1412,7 @@ public class ShoplifterScript : MonoBehaviour
 			maxTrials = maxTrials;
 			Experiment.Instance.shopLiftLog.LogPhaseEvent ("POST-TEST", true);
 		}
-		bool isLeft = (Random.value < 0.5f) ? true: false;
+		bool isLeft = (UnityEngine.Random.value < 0.5f) ? true: false;
 		bool showOneTwo = false;
 
 
@@ -1562,7 +1565,7 @@ public class ShoplifterScript : MonoBehaviour
         TCPServer.Instance.SetState(TCP_Config.DefineStates.SILENT_TRAVERSAL, true);
         Experiment.Instance.shopLiftLog.LogPhaseEvent("SILENT_TRAVERSAL", true);
 
-        bool isLeft = (Random.value >0.5f) ?  true : false;
+        bool isLeft = (UnityEngine.Random.value >0.5f) ?  true : false;
 
         //we only want to run the silent traversal on all environments except the Pre-Training environment (which is the last one by default in "environments" List)
         for (int i = 0; i < environments.Count-1;i++)
@@ -1619,7 +1622,7 @@ public class ShoplifterScript : MonoBehaviour
 			yield return StartCoroutine (AskPreference (0,false,false,false,0,0f));
 		yield return StartCoroutine (RunRestPeriod (2f));
         int caseOrder = 0;
-        if (Random.value > 0.5f)
+        if (UnityEngine.Random.value > 0.5f)
             caseOrder = 1;
         else
             caseOrder = 0;
@@ -1665,7 +1668,7 @@ public class ShoplifterScript : MonoBehaviour
 		}
 		multipleChoiceSequence = ShuffleList (multipleChoiceSequence);
 		for (int i = 0; i < 4; i++) {
-			int randIndex = Random.Range (0, multipleChoiceSequence.Count);
+			int randIndex = UnityEngine.Random.Range (0, multipleChoiceSequence.Count);
             yield return StartCoroutine(AskMultipleChoice(multipleChoiceSequence[randIndex],false));
 			multipleChoiceSequence.RemoveAt (randIndex);
             yield return StartCoroutine(RunRestPeriod(3f));
@@ -1691,7 +1694,7 @@ public class ShoplifterScript : MonoBehaviour
         {
             slideshowImage.transform.parent.gameObject.GetComponent<CanvasGroup>().alpha = 1f;
 
-            int randIndex = Random.Range(0, completeImageList.Count);
+            int randIndex = UnityEngine.Random.Range(0, completeImageList.Count);
             Experiment.Instance.shopLiftLog.LogBaselineImage(completeImageList[randIndex].name);
             slideshowImage.texture = completeImageList[randIndex];
             yield return new WaitForSeconds(imageSlideshowPlaytime);
@@ -1724,7 +1727,7 @@ public class ShoplifterScript : MonoBehaviour
             for (int i = 0; i < totalAudioLength; i++)
             {
                 restGroup.alpha = 1f;
-                int randIndex = Random.Range(0, completeAudioList.Count);
+                int randIndex = UnityEngine.Random.Range(0, completeAudioList.Count);
                 Debug.Log("now playing track no : " + randIndex.ToString());
 
             musicBaselinePlayer.clip = completeAudioList[randIndex];
@@ -2524,11 +2527,8 @@ public class ShoplifterScript : MonoBehaviour
         yield return null;
     }
 
-    IEnumerator RunTask()
+    IEnumerator ConnectToBlackrock ()
     {
-		stageIndex = 1;
-		Experiment.Instance.CreateSessionStartedFile ();
-
 
         //only run if system2 is expected
         if (Config.isSystem2)
@@ -2553,29 +2553,21 @@ public class ShoplifterScript : MonoBehaviour
         {
             sys2ConnectionGroup.alpha = 0f;
         }
+        yield return null;
+    }
 
-        int totalEnvCount = environments.Count-1; //since we're excluding VikingVillage which is used only for Pre-Training
-		int currentReevalCondition = 0;
 
-        if (!Config.isDayThree)
+    IEnumerator LoadCheckpoints()
+    {
+        
+        if (Experiment.shouldCheckpoint)
         {
-            if (Random.value > 0.5f)
-            {
-                isTransition = true;
-            }
-            else
-                isTransition = false;
-        }
-		
-		int startingIndex = 0;
-
-		if (Experiment.shouldCheckpoint) {
-			startingIndex = Experiment.Instance.checkpointedEnvIndex;
-			registerVals=new List<int>();
+            _startingIndex = Experiment.Instance.checkpointedEnvIndex;
+            registerVals = new List<int>();
             Debug.Log("TURNED OFF blackscreen");
             blackScreen.alpha = 0f;
             registerVals.Add(Experiment.Instance.leftReward);
-			registerVals.Add(Experiment.Instance.rightReward);
+            registerVals.Add(Experiment.Instance.rightReward);
 
             //remove rewards from the existing pool of rewards so they don't get reused in the future
             RemoveIndex(registerVal1, Experiment.Instance.leftReward);
@@ -2583,165 +2575,225 @@ public class ShoplifterScript : MonoBehaviour
 
 
         }
-           //if not checkpointed, then begin from pre-training
+        //if not checkpointed, then begin from pre-training
         else
         {
             expSettings.stage = ExperimentSettings.Stage.Pretraining;
         }
+        yield return null;
+    }
 
-        for (int i = startingIndex; i < totalEnvCount; i++)
+    IEnumerator RunPretraining(int index)
+    {
+        currentPhaseName = "PRE-TRAINING";
+        CheckpointSession(index, true);
+        yield return StartCoroutine(ShowIntroInstructions());
+        blackScreen.alpha = 0f;
+
+        //pretraining; will only run before the first environment
+        if (expSettings.stage == ExperimentSettings.Stage.Pretraining)
+        {
+            CameraZone.enableCamZones = false;
+            blackScreen.alpha = 1f;
+            yield return StartCoroutine(PickEnvironment(2, true)); //training env
+            RandomizeSuitcases();
+            yield return StartCoroutine(PlayInstructionVideo(true));
+            blackScreen.alpha = 0f;
+            //disable any kind of camera zone interaction
+
+            yield return StartCoroutine(RunSliderTrainingPhase());
+            yield return StartCoroutine(RunMultipleChoiceTrainingPhase());
+            CameraZone.enableCamZones = true;
+            //enable camera zone interaction before camera training
+            Debug.Log("running cam pretraining");
+            CameraZone.isPretraining = true;
+            yield return StartCoroutine(RunCamTrainingPhase());
+            string pretrainingEndText = "Congrats! You've completed PRE-TRAINING!\n GOAL: learn which rooms lead to*more cash*!! \n But first, let's memorize *cam locations*\n to deactivate cams too! \n Press(X) to begin camera practice!";
+            yield return StartCoroutine(ShowInstructionsTillButtonPress(pretrainingEndText));
+
+            //set for next stage
+            expSettings.SetNextStage();
+        }
+        yield return null;
+    }
+
+    IEnumerator RunTraining(int index)
+    {
+        currentPhaseName = "TRAINING";
+        CheckpointSession(index, true);
+        Debug.Log("current stage " + expSettings.stage.ToString());
+        if (expSettings.stage == ExperimentSettings.Stage.Training)
+        {
+            blackScreen.alpha = 0f;
+            //enable camera zone interaction before camera training
+            Debug.Log("running cam training");
+            yield return StartCoroutine(RunCamTrainingPhase());
+
+            //set for next stage
+            expSettings.SetNextStage();
+        }
+        RandomizeSuitcases();
+        cameraZoneManager.ResetAllCamZones();
+        cameraZoneManager.ToggleAllCamZones(false);
+
+        _currentReevalCondition = reevalConditions[index];
+
+
+        if (!Experiment.shouldCheckpoint)
+        {
+            if (!Config.isDayThree)
+            {
+
+                AssignRooms(false, false);
+                yield return StartCoroutine(PickRegisterValues()); //new reg values to be picked for each environment
+            }
+            else
+            {
+                if (index == 0)
+                {
+                    registerVals[0] = 30;
+                    registerVals[1] = 70;
+                }
+                else if (index == 1)
+                {
+                    registerVals[0] = 50;
+                    registerVals[1] = 90;
+                }
+            }
+        }
+
+        isTransition = !isTransition; //flip the transition condition before the next round
+        yield return null;
+    }
+
+
+    IEnumerator RunLearning(int index)
+    {
+        currentPhaseName = "LEARNING";
+        CheckpointSession(index, true);
+        Debug.Log("current stage " + expSettings.stage.ToString());
+        if (expSettings.stage == ExperimentSettings.Stage.Learning || !expSettings.isCheckpointed)
+        {
+            Debug.Log("MAX TRIALS " + maxTrials_Learning.ToString());
+            TCPServer.Instance.SetState(TCP_Config.DefineStates.LEARNING, true);
+            yield return StartCoroutine(RunLearningPhase(false, maxTrials_Learning));
+            TCPServer.Instance.SetState(TCP_Config.DefineStates.LEARNING, false);
+
+            //set for next stage
+            expSettings.SetNextStage();
+        }
+        yield return null;
+    }
+
+
+    IEnumerator RunReevaluation(int index)
+    {
+        //re-evaluation phase
+        currentPhaseName = "REEVALUATION";
+        CheckpointSession(index, true);
+        Debug.Log("current stage " + expSettings.stage.ToString());
+        if (expSettings.stage == ExperimentSettings.Stage.Reevaluation || !expSettings.isCheckpointed)
+        {
+            TCPServer.Instance.SetState(TCP_Config.DefineStates.REEVALUATION, true);
+            yield return StartCoroutine(RunReevaluationPhase(_currentReevalCondition));
+            TCPServer.Instance.SetState(TCP_Config.DefineStates.REEVALUATION, false);
+
+            //set for next stage
+            expSettings.SetNextStage();
+        }
+
+        yield return null;
+    }
+
+
+    IEnumerator RunTesting(int index)
+    {
+        currentPhaseName = "TESTING";
+        CheckpointSession(index, true);
+        Debug.Log("current stage " + expSettings.stage.ToString());
+        if (expSettings.stage == ExperimentSettings.Stage.Test || !expSettings.isCheckpointed)
+        {
+
+            TCPServer.Instance.SetState(TCP_Config.DefineStates.TESTING, true);
+            yield return StartCoroutine(RunTestingPhase());
+            TCPServer.Instance.SetState(TCP_Config.DefineStates.TESTING, false);
+
+            //set for next stage
+            expSettings.SetNextStage();
+        }
+
+        yield return null;
+    }
+
+    IEnumerator RunPostTest()
+    {
+
+        //if transition phase and not control, play 10-trial additional learning
+        if (_currentReevalCondition == 1 && !hasLearned && !Config.shouldForceControl)
+        {
+            Debug.Log("RUNNING ADDITIONAL LEARN PHASE");
+            expSettings.stage = ExperimentSettings.Stage.PostTest;
+            currentPhaseName = "POST-TEST";
+            TCPServer.Instance.SetState(TCP_Config.DefineStates.POST_TEST, true);
+            yield return StartCoroutine(RunLearningPhase(true, maxTrials_PostTest));
+            TCPServer.Instance.SetState(TCP_Config.DefineStates.POST_TEST, true);
+
+            //set for next stage
+            expSettings.SetNextStage();
+
+        }
+
+        yield return null;
+    }
+
+
+    IEnumerator RunTask()
+    {
+		stageIndex = 1;
+		Experiment.Instance.CreateSessionStartedFile ();
+
+
+        int totalEnvCount = environments.Count-1; //since we're excluding VikingVillage which is used only for Pre-Training
+		_currentReevalCondition = 0;
+
+        yield return StartCoroutine(ConnectToBlackrock());
+
+        if (!Config.isDayThree)
+        {
+            if (UnityEngine.Random.value > 0.5f)
+            {
+                isTransition = true;
+            }
+            else
+                isTransition = false;
+        }
+		
+		_startingIndex = 0;
+
+        yield return StartCoroutine(LoadCheckpoints());
+        
+
+        for (int i = _startingIndex; i < totalEnvCount; i++)
         {
             numTrials_Learning = 0;
             numTrials = 0;
 
-            currentPhaseName = "PRE-TRAINING";
-            CheckpointSession(i, true);
-            yield return StartCoroutine(ShowIntroInstructions());
-            blackScreen.alpha = 0f;
-
-            //pretraining; will only run before the first environment
-            if (expSettings.stage == ExperimentSettings.Stage.Pretraining)
-            {
-                CameraZone.enableCamZones = false;
-                blackScreen.alpha = 1f;
-                yield return StartCoroutine(PickEnvironment(2, true)); //training env
-                RandomizeSuitcases();
-                yield return StartCoroutine(PlayInstructionVideo(true));
-                blackScreen.alpha = 0f;
-                //disable any kind of camera zone interaction
-
-                yield return StartCoroutine(RunSliderTrainingPhase());
-                yield return StartCoroutine(RunMultipleChoiceTrainingPhase());
-                CameraZone.enableCamZones = true;
-                //enable camera zone interaction before camera training
-                Debug.Log("running cam pretraining");
-                CameraZone.isPretraining = true;
-                yield return StartCoroutine(RunCamTrainingPhase());
-                string pretrainingEndText = "Congrats! You've completed PRE-TRAINING!\n GOAL: learn which rooms lead to*more cash*!! \n But first, let's memorize *cam locations*\n to deactivate cams too! \n Press(X) to begin camera practice!";
-                yield return StartCoroutine(ShowInstructionsTillButtonPress(pretrainingEndText));
-
-                //set for next stage
-                expSettings.SetNextStage();
-            }
+            yield return StartCoroutine(RunPretraining(i));
 
             yield return StartCoroutine(PickEnvironment(i, true));
 
-            currentPhaseName = "TRAINING";
-            CheckpointSession(i, true);
-            Debug.Log("current stage " + expSettings.stage.ToString());
-            if (expSettings.stage == ExperimentSettings.Stage.Training)
-            {
-                blackScreen.alpha = 0f;
-                //enable camera zone interaction before camera training
-                Debug.Log("running cam training");
-                yield return StartCoroutine(RunCamTrainingPhase());
+            yield return StartCoroutine(RunTraining(i));
 
-                //set for next stage
-                expSettings.SetNextStage();
-            }
-            RandomizeSuitcases();
-            cameraZoneManager.ResetAllCamZones();
-            cameraZoneManager.ToggleAllCamZones(false);
+            yield return StartCoroutine(RunLearning(i));
 
-            currentReevalCondition = reevalConditions[i];
-
-
-            if (!Experiment.shouldCheckpoint)
-            {
-                if (!Config.isDayThree)
-                {
-
-                    AssignRooms(false,false);
-                    yield return StartCoroutine(PickRegisterValues()); //new reg values to be picked for each environment
-                }
-                else
-                {
-                    if (i == 0)
-                    {
-                        registerVals[0] = 30;
-                        registerVals[1] = 70;
-                    }
-                    else if (i == 1)
-                    {
-                        registerVals[0] = 50;
-                        registerVals[1] = 90;
-                    }
-                }
-            }
-
-            isTransition = !isTransition; //flip the transition condition before the next round
-            //randomize rooms and cam zones again
-            //			AssignRooms ();
-            //			yield return StartCoroutine(RandomizeCameraZones (i)); //we randomize cameras when picking environment now
-
-            //learning phase
-
-            currentPhaseName = "LEARNING";
-            CheckpointSession(i, true);
-            Debug.Log("current stage " + expSettings.stage.ToString());
-            if (expSettings.stage==ExperimentSettings.Stage.Learning || !expSettings.isCheckpointed)
-            {
-                Debug.Log("MAX TRIALS " + maxTrials_Learning.ToString()); 
-                TCPServer.Instance.SetState(TCP_Config.DefineStates.LEARNING, true);
-                yield return StartCoroutine(RunLearningPhase(false, maxTrials_Learning));
-                TCPServer.Instance.SetState(TCP_Config.DefineStates.LEARNING, false);
-
-                //set for next stage
-                expSettings.SetNextStage();
-            }
-
-            //shuffle rewards
-            //		ReassignRooms ();
-            //			ShuffleRegisterRewards ();
-
-            //re-evaluation phase
-            currentPhaseName = "REEVALUATION";
-            CheckpointSession(i, true);
-            Debug.Log("current stage " + expSettings.stage.ToString());
-            if (expSettings.stage == ExperimentSettings.Stage.Reevaluation || !expSettings.isCheckpointed)
-            {
-                TCPServer.Instance.SetState(TCP_Config.DefineStates.REEVALUATION, true);
-                yield return StartCoroutine(RunReevaluationPhase(currentReevalCondition));
-                TCPServer.Instance.SetState(TCP_Config.DefineStates.REEVALUATION, false);
-
-                //set for next stage
-                expSettings.SetNextStage();
-            }
-
+            yield return StartCoroutine(RunReevaluation(i));
 
             //testing phase
-            currentPhaseName = "TESTING";
-            CheckpointSession(i, true);
-            Debug.Log("current stage " + expSettings.stage.ToString());
-            if (expSettings.stage == ExperimentSettings.Stage.Test || !expSettings.isCheckpointed)
-            {
-
-                TCPServer.Instance.SetState(TCP_Config.DefineStates.TESTING, true);
-                yield return StartCoroutine(RunTestingPhase());
-                TCPServer.Instance.SetState(TCP_Config.DefineStates.TESTING, false);
-
-                //set for next stage
-                expSettings.SetNextStage();
-            }
+            yield return StartCoroutine(RunTesting(i));
 
 
-            Debug.Log("current stage " + expSettings.stage.ToString());
-            //if transition phase and not control, play 10-trial additional learning
-            if (currentReevalCondition == 1 && !hasLearned && !Config.shouldForceControl)
-            {
-                Debug.Log("RUNNING ADDITIONAL LEARN PHASE");
-                expSettings.stage = ExperimentSettings.Stage.PostTest;
-                currentPhaseName = "POST-TEST";
-                TCPServer.Instance.SetState(TCP_Config.DefineStates.POST_TEST, true);
-                yield return StartCoroutine(RunLearningPhase(true, maxTrials_PostTest));
-                TCPServer.Instance.SetState(TCP_Config.DefineStates.POST_TEST, true);
+            yield return StartCoroutine(RunPostTest());
 
-                //set for next stage
-                expSettings.SetNextStage();
-
-            }
-
-            Debug.Log("current stage " + expSettings.stage.ToString());
             //skip if it is the final environment
             if (i != totalEnvCount - 1)
             {
@@ -2754,17 +2806,13 @@ public class ShoplifterScript : MonoBehaviour
              ResetEnvironmentVariables();
             //turn off this
             Experiment.shouldCheckpoint = false;
-
-            //			SceneManager.LoadScene (0); //load main menu
-            //			SceneManager.UnloadSceneAsync (1); //then destroy all objects of the current scene
             yield return null;
 
 			environments [envIndex].SetActive (false);
-			//remove the environment
-//			environments.RemoveAt (envIndex);
 		}
 
-        //run baseline
+        //run baseline tests
+
         yield return StartCoroutine(MakeCompleteBaselineList(2));
 
         currentPhaseName = "MUSIC_BASELINE";
@@ -2795,10 +2843,6 @@ public class ShoplifterScript : MonoBehaviour
         correctResponses = 0;
         CameraZone.firstTime = true;
         expSettings.stage = ExperimentSettings.Stage.Training;
-        //ExperimentSettings.isTraining = true;
-        //ExperimentSettings.isLearning = true;
-        //ExperimentSettings.isReeval = true;
-        //ExperimentSettings.isTesting = true;
     }
 
 	void TurnOffRooms()
@@ -2806,11 +2850,6 @@ public class ShoplifterScript : MonoBehaviour
 		roomTwo.SetActive (false);
 		roomOne.SetActive (false);
 
-	}
-
-	void ShowRegisterText()
-	{
-		
 	}
 
 	public IEnumerator ShowPositiveFeedback()
@@ -2917,23 +2956,15 @@ public class ShoplifterScript : MonoBehaviour
 		}
 
 		Debug.Log("chosen register is: " + chosenRegister.name);
-        //		suitcaseObj.GetComponent<Suitcase> ().ChooseTexture (chosenTexture);
-        //first wait for 1 second to show face/scene
-        //		yield return new WaitForSeconds (2f);
 
         //then open the suitcase
         TCPServer.Instance.SetState(TCP_Config.DefineStates.REWARD_OPEN, true);
         suitcaseObj.GetComponent<Animator> ().SetTrigger ("Open");
-//		suitcaseObj.GetComponent<Suitcase>().TurnImageOff();
 
 		//wait until suitcase is fully open
 		yield return new WaitForSeconds (0.5f);
 
 		GameObject coinShowerObj = Instantiate(coinShower,((pathIndex==0) ?  register_L.transform.position : register_R.transform.position ) + (new Vector3(0f,0.2f,directionEnv) * 2f), Quaternion.identity) as GameObject;
-
-        //		if (activeEnvLabel == "Cybercity") {
-        //			coinShowerObj.transform.GetChild (0).transform.localPosition = Vector3.zero;
-        //		}
 
         int reward = 0;
 
@@ -2954,7 +2985,6 @@ public class ShoplifterScript : MonoBehaviour
 
 		Experiment.Instance.shopLiftLog.LogRegisterReward(reward,choiceOutput);
         Experiment.Instance.shopLiftLog.LogRegisterEvent(true);
-        //        infoText.text = "You got $" + registerVals[choiceOutput].ToString() + " from the register";
         Debug.Log("waiting for 2 seconds");
 		yield return StartCoroutine(rewardScore.gameObject.GetComponent<FontChanger> ().GrowText (2f));
 		rewardScore.enabled = false;
@@ -2964,7 +2994,6 @@ public class ShoplifterScript : MonoBehaviour
 //        infoGroup.alpha = 0f;
 		Destroy(coinShowerObj);
 		Destroy (suitcaseObj);
-//		camVehicle.GetComponent<RigidbodyFisurstPersonController> ().enabled = true;
         yield return null;
     }
 
@@ -3024,20 +3053,6 @@ public class ShoplifterScript : MonoBehaviour
         }
 		Experiment.Instance.shopLiftLog.LogEndTrial ();
         Experiment.Instance.shopLiftLog.LogEndTrialScreen(true,hasTips);
-		//if (false) {
-		//	if (consecutiveIncorrectCameraPresses >= 4) {
-		//		tipsText.text = "TIPS:\nPlease pay attention to the camera location and press (X)";
-		//		consecutiveIncorrectCameraPresses = 0;
-		//	} else if (didTimeout) {
-		//		tipsText.text = "TIPS:\nPlease press the (X) button quicker next time";
-		//		didTimeout = false;
-		//	} else {
-		//		tipsText.text = "TIPS:\nPlease keep in mind the structure of rooms and rewards when responding";
-		//		afterSlider = false;
-		//	}
-		//	tipsGroup.alpha = 1f;
-		//	yield return new WaitForSeconds (1f);
-		//} else {
 			tipsGroup.alpha = 0f;
 			yield return new WaitForSeconds(1f);
 		//}
@@ -3080,7 +3095,7 @@ public class ShoplifterScript : MonoBehaviour
 	public void RandomizeSpeed()
 	{
 		Debug.Log ("randomizing speed");
-		suggestedSpeed = Random.Range (minSpeed, maxSpeed);
+		suggestedSpeed = UnityEngine.Random.Range (minSpeed, maxSpeed);
 		StartCoroutine ("UpdateSpeed", suggestedSpeed);
         TCPServer.Instance.SetState(TCP_Config.DefineStates.SPEED_CHANGE, true);
 //		Debug.Log ("randomized speed to: " + currentSpeed.ToString ());
@@ -3105,16 +3120,11 @@ public class ShoplifterScript : MonoBehaviour
         {
 
             camVehicle.SetActive(true);
-//            animBody.SetActive(false);
-//            mouseLook.XSensitivity = 2f;
         }
         else
         {
             camVehicle.SetActive(false);
-//            animBody.SetActive(true);
-//            mouseLook.XSensitivity = 0f;
         }
-//        cartAnim.enabled = !shouldActivate;
     }
 
 	IEnumerator ForcePlayerDecision(Vector3 chosenPoint, Vector3 otherPoint)
@@ -3178,29 +3188,19 @@ public class ShoplifterScript : MonoBehaviour
 	IEnumerator VelocityPlayerTo(Vector3 startPos, Vector3 endPos, float factor)
 	{
 		int sign = (int) ((endPos.z - startPos.z) / Mathf.Abs (endPos.z - startPos.z));
-//		Debug.Log ("the sign is: " + sign.ToString ());
 		Vector3 moveDir = new Vector3 (0f, 0f, sign*1f);
-//		Debug.Log ("move dir: " + moveDir.ToString ());
-		//set some initial current speed
-		currentSpeed = Random.Range(minSpeed,maxSpeed);
-//		Debug.Log ("current speed is " + currentSpeed.ToString ());
+		currentSpeed = UnityEngine.Random.Range(minSpeed,maxSpeed);
 		float distanceLeft = Vector3.Distance(camVehicle.transform.position,endPos);
 
-//		Debug.Log ("distance left is " + distanceLeft.ToString ());
 		camVehicle.GetComponent<RigidbodyFirstPersonController> ().enabled = false;
 		float timer = 0f;
-//		Debug.Log ("velocity player movement");
 		while (distanceLeft > 1.5f) {
 			timer += Time.deltaTime;
-//			Debug.Log ("velocity : " + camVehicle.GetComponent<Rigidbody> ().velocity.ToString ());
 			camVehicle.GetComponent<Rigidbody>().velocity = moveDir * currentSpeed;
 			distanceLeft = Vector3.Distance (camVehicle.transform.position, endPos);
 			yield return 0;
 		}
-//		Debug.Log ("stopping the player");
-//		Debug.Log("final timer: " + timer.ToString());
 		camVehicle.GetComponent<Rigidbody> ().velocity = Vector3.zero;
-//		camVehicle.GetComponent<RigidbodyFirstPersonController> ().enabled = true;
 		yield return null;
 	}
 
