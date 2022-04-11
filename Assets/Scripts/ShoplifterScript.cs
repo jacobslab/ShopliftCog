@@ -1154,11 +1154,13 @@ public class ShoplifterScript : MonoBehaviour
 		camVehicle.GetComponent<RigidbodyFirstPersonController> ().enabled = false;
 		clearCameraZoneFlags = false;
 		Debug.Log ("running phase one");
+        /*
 		AudioSource baseAudio = (pathIndex == 0) ? one_L_Audio : one_R_Audio;
 		float delayOne = UnityEngine.Random.Range (0f, baseAudio.clip.length);
 
 		baseAudio.time = delayOne;
 		baseAudio.Play ();
+        */
 
         //if number of correct responses are greater than 3, then don't show camera in the next practice round
         if (correctResponses > 3)
@@ -1211,10 +1213,11 @@ public class ShoplifterScript : MonoBehaviour
 				if (!terminateWithChoice) {
 					Debug.Log ("phase 1 door L: " + phase1Door_L.transform.GetChild (0).gameObject.name);
 					yield return StartCoroutine (MovePlayerTo (camVehicle.transform.position, phase1Door_L.transform.GetChild (0).position, 0.5f));
-					baseAudio.Stop ();
+					/*baseAudio.Stop ();
 					delayTwo = UnityEngine.Random.Range (0f, currentAudio.clip.length);
 					currentAudio.time = delayTwo;
 					currentAudio.Play ();
+                    */
 					yield return StartCoroutine (MovePlayerTo (phase1Door_L.transform.GetChild (0).position, phase2Start_L.transform.position, 0.5f));
 				}
 
@@ -1231,18 +1234,16 @@ public class ShoplifterScript : MonoBehaviour
 					Debug.Log ("phase 1 door R: " + phase1Door_R.transform.GetChild (0).gameObject.name);
 					yield return StartCoroutine (MovePlayerTo (camVehicle.transform.position, phase1Door_R.transform.GetChild (0).position, 0.5f));
 									
-					baseAudio.Stop ();
+					/*baseAudio.Stop ();
 					delayTwo = UnityEngine.Random.Range (0f, currentAudio.clip.length);
 					currentAudio.time = delayTwo;
 					currentAudio.Play ();
+                    */
 					yield return StartCoroutine (MovePlayerTo (phase1Door_R.transform.GetChild (0).position, phase2Start_R.transform.position, 0.5f));
 				}
 			}
 			Doors.canOpen = false;
-		} else {
-			baseAudio.Stop ();
-		}
-
+		} 
 		if (!terminateWithChoice) {
             yield return StartCoroutine(targetDoor.GetComponent<Doors> ().Close ());
 		}
@@ -1260,16 +1261,19 @@ public class ShoplifterScript : MonoBehaviour
         GameObject targetDoor = (pathIndex==0) ? phase2Door_L : phase2Door_R;
 		Vector3 startPos = (pathIndex == 0) ? phase2Start_L.transform.position : phase2Start_R.transform.position;
 		Vector3 endPos = (pathIndex == 0) ? phase2End_L.transform.position : phase2End_R.transform.position;
-		if (isDirect) {
-			currentAudio = (pathIndex == 0) ? two_L_Audio : two_R_Audio;
-			float delay = UnityEngine.Random.Range (0f, currentAudio.clip.length);
-			currentAudio.time = delay;
-			currentAudio.Play ();
-            //we set this explicitly for re-evaluation as RunPhaseOne isn't run anymore so we have to log it here
-            Experiment.Instance.shopLiftLog.LogMoveEvent(2, true);
+        /*
+                if (isDirect) {
+                    currentAudio = (pathIndex == 0) ? two_L_Audio : two_R_Audio;
+                    float delay = UnityEngine.Random.Range (0f, currentAudio.clip.length);
+                    currentAudio.time = delay;
+                    currentAudio.Play ();
 
-        }
-		clearCameraZoneFlags = false;
+                }
+        */
+
+        //we set this explicitly for re-evaluation as RunPhaseOne isn't run anymore so we have to log it here
+        Experiment.Instance.shopLiftLog.LogMoveEvent(2, true);
+        clearCameraZoneFlags = false;
 		Debug.Log ("running phase two");
 			camVehicle.transform.position = startPos;
 			Debug.Log("velo player in phase 2");
@@ -1290,19 +1294,23 @@ public class ShoplifterScript : MonoBehaviour
 
 			if (pathIndex == 0) {
 			yield return StartCoroutine (MovePlayerTo (camVehicle.transform.position, phase2Door_L.transform.GetChild(0).position, 0.5f));
+            /*
 			currentAudio.Stop ();
 			currentAudio = three_L_Audio;
 			delayThree = UnityEngine.Random.Range (0f, currentAudio.clip.length);
 			currentAudio.time = delayThree;
-			currentAudio.Play (); 
+			currentAudio.Play ();
+            */
 				yield return StartCoroutine (MovePlayerTo (phase2Door_L.transform.GetChild(0).position, phase3Start_L.transform.position, 0.5f));
 		
-		} else if (pathIndex == 1) {			
+		} else if (pathIndex == 1) {
+            /*
 			currentAudio.Stop ();
 			currentAudio = three_R_Audio;
 			delayThree = UnityEngine.Random.Range (0f, currentAudio.clip.length);
 			currentAudio.time = delayThree;
 			currentAudio.Play();
+            */
 				yield return StartCoroutine (MovePlayerTo (camVehicle.transform.position, phase2Door_R.transform.GetChild(0).position, 0.5f));
 				yield return StartCoroutine (MovePlayerTo (phase2Door_R.transform.GetChild(0).position, phase3Start_R.transform.position, 0.5f));
 			}
@@ -1326,13 +1334,15 @@ public class ShoplifterScript : MonoBehaviour
 
         Vector3 startPos = (pathIndex == 0) ? phase3Start_L.transform.position : phase3Start_R.transform.position;
 		Vector3 endPos = (pathIndex == 0) ? phase3End_L.transform.position : phase3End_R.transform.position;
-		if (isDirect) {
-			currentAudio = (pathIndex == 0) ? three_L_Audio : three_R_Audio;
-			float delay = UnityEngine.Random.Range (0f, currentAudio.clip.length);
-			currentAudio.time = delay;
-			currentAudio.Play ();
-		}
-		clearCameraZoneFlags = false;
+        /*if (isDirect) {
+
+        currentAudio = (pathIndex == 0) ? three_L_Audio : three_R_Audio;
+        float delay = UnityEngine.Random.Range (0f, currentAudio.clip.length);
+        currentAudio.time = delay;
+        currentAudio.Play ();
+    }
+        */
+        clearCameraZoneFlags = false;
 		Debug.Log ("running phase three");
 			camVehicle.transform.position = startPos;
 			Debug.Log("velo player in phase 3");
@@ -1357,7 +1367,7 @@ public class ShoplifterScript : MonoBehaviour
 			yield return StartCoroutine (ShowRegisterReward (pathIndex,isDirect));
 			Debug.Log ("closing the third door now");
 		}
-		currentAudio.Stop ();
+	//	currentAudio.Stop ();
 
 		yield return null;
 	}
@@ -2583,10 +2593,10 @@ public class ShoplifterScript : MonoBehaviour
         yield return null;
     }
 
-    IEnumerator RunPretraining(int index)
+    IEnumerator RunPretraining()
     {
         currentPhaseName = "PRE-TRAINING";
-        CheckpointSession(index, true);
+        CheckpointSession(0, true);
         yield return StartCoroutine(ShowIntroInstructions());
         blackScreen.alpha = 0f;
 
@@ -2771,14 +2781,14 @@ public class ShoplifterScript : MonoBehaviour
 		_startingIndex = 0;
 
         yield return StartCoroutine(LoadCheckpoints());
-        
+        yield return StartCoroutine(RunPretraining());
+
 
         for (int i = _startingIndex; i < totalEnvCount; i++)
         {
             numTrials_Learning = 0;
             numTrials = 0;
 
-            yield return StartCoroutine(RunPretraining(i));
 
             yield return StartCoroutine(PickEnvironment(i, true));
 
@@ -3157,7 +3167,6 @@ public class ShoplifterScript : MonoBehaviour
 
 	}
 
-	//uses timer based lerping to move player
 	IEnumerator MovePlayerTo(Vector3 startPos, Vector3 endPos, float factor)
 	{
 		camVehicle.GetComponent<RigidbodyFirstPersonController> ().enabled = false;
@@ -3184,8 +3193,8 @@ public class ShoplifterScript : MonoBehaviour
     }
 
 
-	//uses velocity and distance check to move player
-	IEnumerator VelocityPlayerTo(Vector3 startPos, Vector3 endPos, float factor)
+    //PLAYER MOVEMENT LOGIC
+    IEnumerator VelocityPlayerTo(Vector3 startPos, Vector3 endPos, float factor)
 	{
 		int sign = (int) ((endPos.z - startPos.z) / Mathf.Abs (endPos.z - startPos.z));
 		Vector3 moveDir = new Vector3 (0f, 0f, sign*1f);
