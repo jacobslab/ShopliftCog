@@ -2774,7 +2774,7 @@ public class ShoplifterScript : MonoBehaviour
             yield return StartCoroutine(PlayInstructionVideo(true));
             blackScreen.alpha = 0f;
             //disable any kind of camera zone interaction
-
+            /*
             yield return StartCoroutine(RunSliderTrainingPhase());
             yield return StartCoroutine(RunMultipleChoiceTrainingPhase());
             CameraZone.enableCamZones = true;
@@ -2784,6 +2784,7 @@ public class ShoplifterScript : MonoBehaviour
             yield return StartCoroutine(RunCamTrainingPhase());
             string pretrainingEndText = "Congrats! You've completed PRE-TRAINING!\n GOAL: learn which rooms lead to*more cash*!! \n But first, let's memorize *cam locations*\n to deactivate cams too! \n Press(X) to begin camera practice!";
             yield return StartCoroutine(ShowInstructionsTillButtonPress(pretrainingEndText));
+            */
 
             //set for next stage
             expSettings.SetNextStage();
