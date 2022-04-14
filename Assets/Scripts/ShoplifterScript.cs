@@ -187,6 +187,7 @@ public class ShoplifterScript : MonoBehaviour
     public Text rewardScore;
     public CanvasGroup warningFeedbackGroup;
     public CanvasGroup prefSolo;
+    public CanvasGroup NumRewSolo;
     public CanvasGroup prefGroup;
     public CanvasGroup multipleChoiceGroup;
     public CanvasGroup imagineGroup;
@@ -262,7 +263,7 @@ public class ShoplifterScript : MonoBehaviour
     //for baseline music sequence at the end
     private List<AudioClip> completeAudioList;
     public AudioSource musicBaselinePlayer;
-    public float musicBaselinePlayTime = 15f;
+    public float musicBaselinePlayTime = 0f;    //Here, it is 0f
 
     //for baseline image slideshow sequence at the end
     private List<Texture> completeImageList;
@@ -279,6 +280,7 @@ public class ShoplifterScript : MonoBehaviour
 
     private int _currentReevalCondition = 0;
     private int _startingIndex = 0;
+    public double sigma_t = 1;
 
     enum EnvironmentIndex
     {
@@ -388,6 +390,7 @@ public class ShoplifterScript : MonoBehaviour
         trainingInstructionsGroup.alpha = 0f;
         trainingPeriodGroup.alpha = 0f;
         prefSolo.gameObject.SetActive(false);
+        NumRewSolo.gameObject.SetActive(false);
         prefGroup.gameObject.SetActive(false);
         correctGiantText.alpha = 0f;
         incorrectGiantText.alpha = 0f;
@@ -586,7 +589,7 @@ public class ShoplifterScript : MonoBehaviour
                 break;
         }
         activeCamZone.GetComponent<CameraZone>().isFocus = true;
-        cameraZoneManager.SetActiveCameraZone(activeCamZone.GetComponent<CameraZone>());
+        //cameraZoneManager.SetActiveCameraZone(activeCamZone.GetComponent<CameraZone>());
 
         //		Debug.Log ("cam index is: " + camIndex.ToString ());
         //		if (camIndex <= 1) {
@@ -906,7 +909,7 @@ public class ShoplifterScript : MonoBehaviour
         ));
         intertrialGroup.alpha = 0f;
 
-        cameraZoneManager.ToggleAllCamZones(false); //turn off all cameras
+        //cameraZoneManager.ToggleAllCamZones(false); //turn off all cameras
 
         //comparative sliders
         for (int i = 0; i < 3; i++)
@@ -930,7 +933,7 @@ public class ShoplifterScript : MonoBehaviour
             isLeft = !isLeft;
             yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, true, true));
             //we will randomly pick on whether to query the left or right room
-            yield return StartCoroutine(AskSoloPreference((UnityEngine.Random.value > 0.5f)? 2 : 3, true)); // we have assigned Room 5 (left) and Room 6 (right) as 2 and 3 index in the solo img groups
+            yield return StartCoroutine(NumRewSoloPreference((UnityEngine.Random.value > 0.5f)? 2 : 3, true)); // we have assigned Room 5 (left) and Room 6 (right) as 2 and 3 index in the solo img groups
          }
         yield return null;
     }
@@ -947,7 +950,7 @@ public class ShoplifterScript : MonoBehaviour
         ));
         intertrialGroup.alpha = 0f;
 
-        cameraZoneManager.ToggleAllCamZones(false);
+        //cameraZoneManager.ToggleAllCamZones(false);
         bool isLeft = true;
         for (int i = 0; i < 2; i++)
         {
@@ -1017,8 +1020,8 @@ public class ShoplifterScript : MonoBehaviour
         }
 
 
-        cameraZoneManager.ResetAllCamZones();
-        cameraZoneManager.ToggleAllCamZones(true); //temporarily turn on all cameras
+        //cameraZoneManager.ResetAllCamZones();
+        //cameraZoneManager.ToggleAllCamZones(true); //temporarily turn on all cameras
         RandomizeSpeedChangeZones ();
 		
         TCPServer.Instance.SetState(TCP_Config.DefineStates.INSTRUCTIONS, false);
@@ -1064,7 +1067,7 @@ public class ShoplifterScript : MonoBehaviour
             if (numTraining >= 2)
             {
                 //make cameras invisible 
-                cameraZoneManager.MakeAllCamInvisible(true);
+                //cameraZoneManager.MakeAllCamInvisible(true);
                 CameraZone.firstTime = false;
             }
 			yield return 0;
@@ -1081,7 +1084,7 @@ public class ShoplifterScript : MonoBehaviour
 	}
 
 	//adapted from https://bitbucket.org/Superbest/superbest-random
-	float NextGaussian(System.Random r, double mu = 0,double sigma=1)
+	float NextGaussian(System.Random r, double mu = 0)
 	{
 		var u1 = r.NextDouble();
 		var u2 = r.NextDouble();
@@ -1089,7 +1092,7 @@ public class ShoplifterScript : MonoBehaviour
 		var rand_std_normal = System.Math.Sqrt(-2.0 *  System.Math.Log(u1)) *
 			System.Math.Sin(2.0 *  System.Math.PI * u2);
 
-		float rand_normal =(float) (mu + sigma * rand_std_normal);
+		float rand_normal =(float) (mu + sigma_t * rand_std_normal);
 
 		return rand_normal;
 	}
@@ -1652,14 +1655,14 @@ public class ShoplifterScript : MonoBehaviour
 			case 0:
 				yield return StartCoroutine (RunPhaseOne (0, true));
 				yield return StartCoroutine (RunImaginePeriod (5f));
-				yield return StartCoroutine (AskSoloPreference (0,false));
+				yield return StartCoroutine (NumRewSoloPreference (0,false));
 //				yield return StartCoroutine (AskImageryQualityRating (0));
 				yield return StartCoroutine (RunRestPeriod (2f));
 				break;
 			case 1:
 				yield return StartCoroutine(RunPhaseOne (1, true));
 				yield return StartCoroutine (RunImaginePeriod (5f));
-				yield return StartCoroutine (AskSoloPreference (1,false));
+				yield return StartCoroutine (NumRewSoloPreference (1,false));
 //				yield return StartCoroutine (AskImageryQualityRating (1));
 				yield return StartCoroutine (RunRestPeriod (2f));
 				break;
@@ -1724,7 +1727,7 @@ public class ShoplifterScript : MonoBehaviour
 	IEnumerator RunMusicBaseline()
 	{
         //show music baseline instructions
-        TCPServer.Instance.SetState(TCP_Config.DefineStates.MUSIC_BASELINE, true);
+        /*TCPServer.Instance.SetState(TCP_Config.DefineStates.MUSIC_BASELINE, true);
         Experiment.Instance.shopLiftLog.LogPhaseEvent("MUSIC_BASELINE", true);
 
         intertrialGroup.alpha = 1f;
@@ -1751,7 +1754,7 @@ public class ShoplifterScript : MonoBehaviour
         }
 
         TCPServer.Instance.SetState(TCP_Config.DefineStates.MUSIC_BASELINE, false);
-        Experiment.Instance.shopLiftLog.LogPhaseEvent("MUSIC_BASELINE", false);
+        Experiment.Instance.shopLiftLog.LogPhaseEvent("MUSIC_BASELINE", false);*/
 
         yield return null;
 	}
@@ -1961,7 +1964,168 @@ public class ShoplifterScript : MonoBehaviour
         yield return null;
 	}
 
-	IEnumerator AskMultipleChoice(int prefIndex, bool isTraining)
+    IEnumerator NumRewSoloPreference(int prefIndex, bool isTraining)
+    {
+
+        NumRewSoloSetup NumRewSoloSetup = NumRewSolo.GetComponent<NumRewSoloSetup>();
+
+        NumRewSoloSetup.prefSlider.value = 0.5f;
+        //		Cursor.visible = true;
+        //		Cursor.lockState = CursorLockMode.None;
+        EnablePlayerCam(false);
+        NumRewSolo.gameObject.SetActive(true);
+        NumRewSoloSetup.SetupPrefs(prefIndex);
+
+        TCPServer.Instance.SetState(TCP_Config.DefineStates.SOLO_SLIDER, true);
+        bool pressed = false;
+
+        float tElapsed = 0f;
+        float minSelectTime = 1.5f;
+
+        while (tElapsed < minSelectTime)
+        {
+            tElapsed += Time.deltaTime;
+            if (Input.GetButtonDown("Action Button"))
+            {
+
+                infoText.text = "Please take your time to make a choice";
+                infoGroup.alpha = 1f;
+            }
+            yield return 0;
+        }
+
+        infoText.text = "";
+        infoGroup.alpha = 0f;
+
+
+        yield return StartCoroutine(WaitForButtonPress(9f, didPress =>
+        {
+            pressed = didPress;
+        }
+        ));
+
+        infoText.text = "Please make a choice";
+        infoGroup.alpha = 1f;
+        if (!pressed)
+        {
+            yield return StartCoroutine(WaitForButtonPress(100000f, didPress =>
+            {
+                pressed = didPress;
+            }));
+        }
+        infoText.text = "";
+        infoGroup.alpha = 0f;
+
+        float finalSliderValue = NumRewSoloSetup.prefSlider.value;
+
+        if (isTraining)
+        {
+            string focusImg = NumRewSoloSetup.focusImg.texture.name;
+
+            bool isLeft = false;
+            bool leftHigher = false;
+
+            int leftRegisterReward = trainingReward[0];
+            int rightRegisterReward = trainingReward[1];
+
+            if (leftRegisterReward > rightRegisterReward)
+                leftHigher = true;
+            else
+                leftHigher = false;
+
+            Debug.Log("left higher " + leftHigher.ToString());
+
+            bool rightSliderIsCorrect = false; //keeps track of whether moving the Solo Slider all the way to the right is the correct response or not
+
+            float deviation = 0f; //how much away from the correct answer was the player's response
+
+            if (focusImg.Contains("Five")) //the focus image room was of a left corridor
+            {
+                isLeft = true;
+                if (leftHigher)
+                {
+                    deviation = 1f - finalSliderValue;
+                    rightSliderIsCorrect = true;
+                }
+                else
+                {
+                    deviation = finalSliderValue;
+                    rightSliderIsCorrect = false;
+                }
+
+            }
+            else //the focus image room was of a right corridor
+            {
+                isLeft = false;
+                if (leftHigher)
+                {
+                    deviation = finalSliderValue;
+                    rightSliderIsCorrect = false;
+                }
+                else
+                {
+                    deviation = 1f - finalSliderValue;
+                    rightSliderIsCorrect = true;
+                }
+            }
+
+            Debug.Log("deviation is " + deviation.ToString());
+            Debug.Log("right slider is correct " + rightSliderIsCorrect.ToString());
+
+            if (deviation > 0.5f)
+            {
+                StartCoroutine(NumRewSoloSetup.ShowIncorrectFeedback());
+            }
+            else
+            {
+                StartCoroutine(NumRewSoloSetup.ShowCorrectFeedback());
+            }
+            yield return new WaitForSeconds(1f);
+            CanvasGroup assistiveSliderUI = null;
+            assistiveSliderUI = NumRewSoloSetup.GetAssistiveSliderUI(rightSliderIsCorrect);
+
+            //turn the assistive slider on
+            assistiveSliderUI.alpha = 1f;
+            if (rightSliderIsCorrect)
+            {
+                while (NumRewSoloSetup.prefSlider.value < 0.6f)
+                {
+
+                    yield return 0;
+                }
+                yield return StartCoroutine(WaitForButtonPress(100000f, didPress =>
+                {
+                    pressed = didPress;
+                }));
+            }
+            else
+            {
+                while (1f - NumRewSoloSetup.prefSlider.value < 0.6f)
+                {
+
+                    yield return 0;
+                }
+                yield return StartCoroutine(WaitForButtonPress(100000f, didPress =>
+                {
+                    pressed = didPress;
+                }));
+            }
+
+
+
+
+        }
+
+
+        Experiment.Instance.shopLiftLog.LogFinalSliderValue("SOLO", finalSliderValue, pressed);
+        NumRewSolo.gameObject.SetActive(false);
+        Cursor.visible = false;
+        TCPServer.Instance.SetState(TCP_Config.DefineStates.SOLO_SLIDER, false);
+
+        yield return null;
+    }
+
+    IEnumerator AskMultipleChoice(int prefIndex, bool isTraining)
 	{
         Debug.Log("PREF INDEX IS " + prefIndex.ToString());
 		EnablePlayerCam (false);
@@ -2416,7 +2580,7 @@ public class ShoplifterScript : MonoBehaviour
 
 
         //after env is picked, set the cam object for all Camera Zones
-        cameraZoneManager.SetCameraObjects();
+        //cameraZoneManager.SetCameraObjects();
 
         envManager = environments [envIndex].GetComponent<EnvironmentManager> ();
 		activeEnvLabel = environments [envIndex].name;
@@ -2643,8 +2807,8 @@ public class ShoplifterScript : MonoBehaviour
             expSettings.SetNextStage();
         }
         RandomizeSuitcases();
-        cameraZoneManager.ResetAllCamZones();
-        cameraZoneManager.ToggleAllCamZones(false);
+        //cameraZoneManager.ResetAllCamZones();
+        //cameraZoneManager.ToggleAllCamZones(false);
 
         _currentReevalCondition = reevalConditions[index];
 
@@ -2672,7 +2836,7 @@ public class ShoplifterScript : MonoBehaviour
             }
         }
 
-        isTransition = !isTransition; //flip the transition condition before the next round
+        //isTransition = !isTransition; //flip the transition condition before the next round
         yield return null;
     }
 
@@ -2770,12 +2934,12 @@ public class ShoplifterScript : MonoBehaviour
 
         if (!Config.isDayThree)
         {
-            if (UnityEngine.Random.value > 0.5f)
+            /*if (UnityEngine.Random.value > 0.5f)
             {
                 isTransition = true;
             }
             else
-                isTransition = false;
+                isTransition = false;*/
         }
 		
 		_startingIndex = 0;
@@ -2823,7 +2987,7 @@ public class ShoplifterScript : MonoBehaviour
 
         //run baseline tests
 
-        yield return StartCoroutine(MakeCompleteBaselineList(2));
+        /*yield return StartCoroutine(MakeCompleteBaselineList(2));
 
         currentPhaseName = "MUSIC_BASELINE";
         CheckpointSession(totalEnvCount - 1, true);
@@ -2832,7 +2996,7 @@ public class ShoplifterScript : MonoBehaviour
 
         currentPhaseName = "IMAGE_BASELINE";
         CheckpointSession(totalEnvCount - 1, true);
-        yield return StartCoroutine(RunImageSlideshow());
+        yield return StartCoroutine(RunImageSlideshow());*/
 
 
         currentPhaseName = "SILENT_TRAVERSAL";
@@ -2982,7 +3146,7 @@ public class ShoplifterScript : MonoBehaviour
         if (!isTraining)
         {
             System.Random rand = new System.Random();
-            reward = Mathf.CeilToInt(NextGaussian(rand, registerVals[choiceOutput], 1)); //if not training, then retrieve appropriate reward values
+            reward = Mathf.CeilToInt(NextGaussian(rand, registerVals[choiceOutput])); //if not training, then retrieve appropriate reward values
         }
         else
         {

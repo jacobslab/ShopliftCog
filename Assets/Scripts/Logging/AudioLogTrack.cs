@@ -14,7 +14,7 @@ public class AudioLogTrack : LogTrack {
 	//log on late update so that everything for that frame gets set first
 	void LateUpdate () {
 		if (ExperimentSettings.isLogging) {
-			LogAudio ();
+			//LogAudio ();
 		}
 	}
     public void LogAudioClip(AudioClip audioClip)
