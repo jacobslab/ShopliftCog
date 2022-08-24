@@ -834,6 +834,7 @@ public class ShoplifterScript : MonoBehaviour
     IEnumerator PlayInstructionVideo(bool playVideo)
     {
         //inst video
+        playVideo = false;
         if (playVideo)
         {
             Debug.Log("set video");
@@ -1179,23 +1180,27 @@ public class ShoplifterScript : MonoBehaviour
 		Debug.Log ("start pos " + startPos.ToString ());
 		camVehicle.SetActive (true);
 		Experiment.Instance.shopLiftLog.LogMoveEvent (1,true);
-		yield return StartCoroutine(VelocityPlayerTo (startPos,endPos, phase1Factor));
+        Debug.Log("Hello There!! I am here ");
+        yield return StartCoroutine(VelocityPlayerTo (startPos,endPos, phase1Factor));
+        Debug.Log("Hello There!! I am here 2222222");
 
-		Experiment.Instance.shopLiftLog.LogMoveEvent (1,false);
+        Experiment.Instance.shopLiftLog.LogMoveEvent (1,false);
 		clearCameraZoneFlags = true;
 		if(activeCamZone!=null)
 			activeCamZone.GetComponent<CameraZone> ().isFocus = false;
-       while(expSettings.stage == ExperimentSettings.Stage.Pretraining && !activeCamZone.GetComponent<CameraZone>().hasSneaked)
+       /*while(expSettings.stage == ExperimentSettings.Stage.Pretraining && !activeCamZone.GetComponent<CameraZone>().hasSneaked)
         {
             yield return StartCoroutine(VelocityPlayerTo(startPos, endPos, phase1Factor));
             yield return 0;
-        }
-		yield return StartCoroutine(WaitForDoorOpenPress (doorText));
+        }*/
+     
+        Debug.Log("Hello There!! I am here 22");
+        yield return StartCoroutine(WaitForDoorOpenPress (doorText));
 		float delayTwo = 0f;
 		if (!terminateWithChoice) {
-			Doors.canOpen = true;
+			//Doors.canOpen = true;
             Debug.Log("opening doors");
-			yield return StartCoroutine (targetDoor.GetComponent<Doors> ().Open ());
+			//yield return StartCoroutine (targetDoor.GetComponent<Doors> ().Open ());
 		
 //		ToggleMouseLook(false);
 
@@ -1242,10 +1247,11 @@ public class ShoplifterScript : MonoBehaviour
 					yield return StartCoroutine (MovePlayerTo (phase1Door_R.transform.GetChild (0).position, phase2Start_R.transform.position, 0.5f));
 				}
 			}
-			Doors.canOpen = false;
-		} 
-		if (!terminateWithChoice) {
-            yield return StartCoroutine(targetDoor.GetComponent<Doors> ().Close ());
+			//Doors.canOpen = false;
+		}
+        Debug.Log("Hello There!! I am here 2222");
+        if (!terminateWithChoice) {
+            //yield return StartCoroutine(targetDoor.GetComponent<Doors> ().Close ());
 		}
 		yield return null;
 	}
@@ -1290,7 +1296,7 @@ public class ShoplifterScript : MonoBehaviour
             SpawnSuitcase(pathIndex); //we spawn suitcase here for both learning and relearning phase
 		}
         //open the door
-			yield return StartCoroutine(targetDoor.GetComponent<Doors> ().Open ());
+			//yield return StartCoroutine(targetDoor.GetComponent<Doors> ().Open ());
 
 			if (pathIndex == 0) {
 			yield return StartCoroutine (MovePlayerTo (camVehicle.transform.position, phase2Door_L.transform.GetChild(0).position, 0.5f));
@@ -1315,7 +1321,7 @@ public class ShoplifterScript : MonoBehaviour
 				yield return StartCoroutine (MovePlayerTo (phase2Door_R.transform.GetChild(0).position, phase3Start_R.transform.position, 0.5f));
 			}
 
-        yield return StartCoroutine(targetDoor.GetComponent<Doors>().Close());
+        //yield return StartCoroutine(targetDoor.GetComponent<Doors>().Close());
 		yield return null;
 	}
 
@@ -2600,6 +2606,8 @@ public class ShoplifterScript : MonoBehaviour
         yield return StartCoroutine(ShowIntroInstructions());
         blackScreen.alpha = 0f;
 
+
+        UnityEngine.Debug.Log("Experiment Settings Stage: " + expSettings.stage);
         //pretraining; will only run before the first environment
         if (expSettings.stage == ExperimentSettings.Stage.Pretraining)
         {

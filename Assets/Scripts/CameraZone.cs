@@ -109,10 +109,14 @@ public class CameraZone : MonoBehaviour {
         //		Debug.Log ("activate cam: " + activateCam.ToString ());
         if (enableCamZones)
         {
+            Debug.Log("showing warning is: " + showingWarning.ToString());
+            Debug.Log("press count is: " + pressCount.ToString());
+            Debug.Log("isFocus is: " + isFocus.ToString());
+            Debug.Log("isPreTraining is: " + isPretraining.ToString());
+            Debug.Log("hasSneaked is: " + hasSneaked.ToString());
             if (Input.GetButtonDown("Action Button") && isFocus && !showingWarning && !hasSneaked && !isPretraining)
             {
-                Debug.Log("showing warning is: " + showingWarning.ToString());
-                Debug.Log("press count is: " + pressCount.ToString());
+
                 ShoplifterScript.haltPlayer = false;
                 Experiment.Instance.shopLiftLog.LogButtonPress();
                 if (pressCount <= 1)
@@ -174,7 +178,7 @@ public class CameraZone : MonoBehaviour {
 	{
         if (enableCamZones)
         {
-            if (col.gameObject.tag == "Player" && !isPretraining)
+            /*if (col.gameObject.tag == "Player" && !isPretraining)
             {
                 hasSneaked = false;
                 activateCam = true;
@@ -188,7 +192,7 @@ public class CameraZone : MonoBehaviour {
                     activateCam = true;
                     Experiment.Instance.shopLift.infoGroup.alpha = 1f;
                 }
-            }
+            }*/
         }
 		
 	}
@@ -197,7 +201,7 @@ public class CameraZone : MonoBehaviour {
 	{
         if (enableCamZones)
         {
-            if (col.gameObject.tag == "Player")
+            /*if (col.gameObject.tag == "Player")
             {
                 if (ExperimentSettings.Instance.stage == ExperimentSettings.Stage.Pretraining && !hasSneaked)
                 {
@@ -205,6 +209,7 @@ public class CameraZone : MonoBehaviour {
                     activateCam = false;
                     //make them repeat that room
                     StartCoroutine(ShoplifterScript.Instance.RepeatRoom());
+                    
                 }
                 else
                 {
@@ -218,7 +223,7 @@ public class CameraZone : MonoBehaviour {
                         pressCount = 0;
                     }
                 }
-            }
+            }*/
         }
 		Experiment.Instance.shopLift.infoGroup.alpha = 0f;
 
