@@ -46,27 +46,27 @@ public class CameraZone : MonoBehaviour {
             ToggleCamObjects(false);
             if (ExperimentSettings.env == ExperimentSettings.Environment.SpaceStation)
             {
-                securityCam.SetActive(true);
+                //securityCam.SetActive(true);
                 activeCamObj = securityCam;
             }
             else if (ExperimentSettings.env == ExperimentSettings.Environment.WesternTown)
             {
-                binoculars.SetActive(true);
+                //binoculars.SetActive(true);
                 activeCamObj = binoculars;
             }
             else if (ExperimentSettings.env == ExperimentSettings.Environment.VikingVillage)
             {
-                magnifyingGlass.SetActive(true);
+                //magnifyingGlass.SetActive(true);
                 activeCamObj = magnifyingGlass;
             }
             else if (ExperimentSettings.env == ExperimentSettings.Environment.Office)
             {
-                securityCam.SetActive(true);
+                //securityCam.SetActive(true);
                 activeCamObj = securityCam;
             }
             else if (ExperimentSettings.env == ExperimentSettings.Environment.Apartment)
             {
-                securityCam.SetActive(true);
+                //securityCam.SetActive(true);
                 activeCamObj = securityCam;
                 securityCam.transform.localEulerAngles = new Vector3(securityCam.transform.localEulerAngles.x, securityCam.transform.localEulerAngles.y + 180f, securityCam.transform.localEulerAngles.z);
             }

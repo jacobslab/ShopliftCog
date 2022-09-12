@@ -404,6 +404,7 @@ public class ShoplifterScript : MonoBehaviour
 
         InitializeInstructionsByLanguage();
 
+        UnityEngine.Debug.Log("SAI_DEBUG: Running Task ");
 
         StartCoroutine("RunTask");
     }
@@ -1019,7 +1020,7 @@ public class ShoplifterScript : MonoBehaviour
 
 
         cameraZoneManager.ResetAllCamZones();
-        cameraZoneManager.ToggleAllCamZones(true); //temporarily turn on all cameras
+        //cameraZoneManager.ToggleAllCamZones(true); //temporarily turn on all cameras
         RandomizeSpeedChangeZones ();
 		
         TCPServer.Instance.SetState(TCP_Config.DefineStates.INSTRUCTIONS, false);
@@ -2767,6 +2768,7 @@ public class ShoplifterScript : MonoBehaviour
 
     IEnumerator RunTask()
     {
+        UnityEngine.Debug.Log("SAI_DEBUG: Started the Task");
 		stageIndex = 1;
 		Experiment.Instance.CreateSessionStartedFile ();
 
@@ -2788,33 +2790,42 @@ public class ShoplifterScript : MonoBehaviour
 		
 		_startingIndex = 0;
 
+        UnityEngine.Debug.Log("SAI_DEBUG: Load Checkpoints ");
         yield return StartCoroutine(LoadCheckpoints());
+        UnityEngine.Debug.Log("SAI_DEBUG: Load PReTraining ");
+
         yield return StartCoroutine(RunPretraining());
 
 
         for (int i = _startingIndex; i < totalEnvCount; i++)
         {
+            UnityEngine.Debug.Log("SAI_DEBUG: Environment: " + i);
             numTrials_Learning = 0;
             numTrials = 0;
 
 
             yield return StartCoroutine(PickEnvironment(i, true));
 
+            UnityEngine.Debug.Log("SAI_DEBUG: Running Training ");
             yield return StartCoroutine(RunTraining(i));
 
+            UnityEngine.Debug.Log("SAI_DEBUG: Running Learning ");
             yield return StartCoroutine(RunLearning(i));
 
+            UnityEngine.Debug.Log("SAI_DEBUG: Running Reevaluation ");
             yield return StartCoroutine(RunReevaluation(i));
 
             //testing phase
+            UnityEngine.Debug.Log("SAI_DEBUG: Running Teting ");
             yield return StartCoroutine(RunTesting(i));
 
-
+            UnityEngine.Debug.Log("SAI_DEBUG: Running PostTest ");
             yield return StartCoroutine(RunPostTest());
 
             //skip if it is the final environment
             if (i != totalEnvCount - 1)
             {
+                UnityEngine.Debug.Log("SAI_DEBUG: End Enviroment stage screen ");
                 yield return StartCoroutine(ShowEndEnvironmentStageScreen());
             }
 
@@ -2827,7 +2838,8 @@ public class ShoplifterScript : MonoBehaviour
             yield return null;
 
 			environments [envIndex].SetActive (false);
-		}
+            UnityEngine.Debug.Log("SAI_DEBUG: Looping out ");
+        }
 
         //run baseline tests
 
@@ -2852,7 +2864,9 @@ public class ShoplifterScript : MonoBehaviour
         CheckpointSession(totalEnvCount - 1, false);
 
         //show the end session screen
+        UnityEngine.Debug.Log("SAI_DEBUG: Running Endsession ");
         yield return StartCoroutine (ShowEndSessionScreen());
+
 		yield return null;
 	}
 
@@ -2875,7 +2889,8 @@ public class ShoplifterScript : MonoBehaviour
 		Debug.Log ("IN POSITIVE");
         if (expSettings.stage != ExperimentSettings.Stage.Pretraining)
         {
-            positiveFeedbackGroup.alpha = 1f;
+            //CAMERA is no more present
+            //positiveFeedbackGroup.alpha = 1f;
             //		Debug.Log ("about to wait for 1 second");
             yield return new WaitForSeconds(1f);
             //		Debug.Log ("turning it off");
@@ -2886,7 +2901,8 @@ public class ShoplifterScript : MonoBehaviour
             negativeFeedbackGroup.alpha = 0f;
             positiveFeedbackGroup.alpha = 0f;
             incorrectGiantText.alpha = 0f;
-            correctGiantText.alpha = 1f;
+            //NO MORE RELEVANT
+            //correctGiantText.alpha = 1f;
             yield return new WaitForSeconds(1f);
             correctGiantText.alpha = 0f;
         }
@@ -2901,7 +2917,8 @@ public class ShoplifterScript : MonoBehaviour
         if (expSettings.stage !=ExperimentSettings.Stage.Pretraining)
         {
             Debug.Log("turning negative on");
-            negativeFeedbackGroup.alpha = 1f;
+            //CAMERA is no more present
+            //negativeFeedbackGroup.alpha = 1f;
             //negativeFeedbackGroup.gameObject.GetComponent<AudioSource> ().Play ();
             Debug.Log("about to wait for 1 second");
             yield return new WaitForSeconds(1f);
@@ -2913,7 +2930,8 @@ public class ShoplifterScript : MonoBehaviour
             negativeFeedbackGroup.alpha = 0f;
             positiveFeedbackGroup.alpha = 0f;
             correctGiantText.alpha = 0f;
-            incorrectGiantText.alpha = 1f;
+            //NO MORE RELEVANT
+            //incorrectGiantText.alpha = 1f;
             yield return new WaitForSeconds(1f);
             incorrectGiantText.alpha = 0f;
         }
