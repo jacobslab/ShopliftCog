@@ -11,7 +11,8 @@ public class AnswerSelector : MonoBehaviour {
 
 	bool resetToRandomPosition = true;
 
-	public List<float> positions; //should be put in order of left to right
+	public List<float> ref_positions; //should be put in order of left to right
+	public List<float> positions;
 	public GameObject selectorVisuals;
     private GameObject correctIndicator;
     public float blankPosition;

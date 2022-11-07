@@ -132,10 +132,15 @@ public class SceneController : MonoBehaviour
         {
             case 0:
                 //shoplifterRef.reevalConditions[0] = 0;    //0 - RR; 1 - TR
-                shoplifterRef.reevalConditions[0] = 1;
+                shoplifterRef.reevalConditions[0] = 0;
                 shoplifterRef.reevalConditions[1] = 1;
                 break;
             case 1:
+                shoplifterRef.reevalConditions[0] = 0;
+                //shoplifterRef.reevalConditions[1] = 0;
+                shoplifterRef.reevalConditions[1] = 0;
+                break;
+            case 2:
                 shoplifterRef.reevalConditions[0] = 1;
                 //shoplifterRef.reevalConditions[1] = 0;
                 shoplifterRef.reevalConditions[1] = 1;

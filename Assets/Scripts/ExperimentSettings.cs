@@ -543,6 +543,9 @@ public class ExperimentSettings : MonoBehaviour {
             case 1:
                 currentEnvironmentType = EnvironmentType.SO;
                 break;
+            case 2:
+                currentEnvironmentType = EnvironmentType.SO;
+                break;
             default:
                 currentEnvironmentType = EnvironmentType.WA;
                 break;

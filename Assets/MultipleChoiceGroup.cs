@@ -157,10 +157,78 @@ public class MultipleChoiceGroup : MonoBehaviour {
         }
     }
 
-	public int SetupMultipleChoice(int focusIndex)
+    public int SetupMultipleChoice_v2(int focusIndex, bool isLastRoom)
+    {
+        gameObject.GetComponent<AnswerSelector>().ResetSelectorPosition();
+        Debug.Log("roomMappings KEys Count: " + roomMappings.Keys.Count);
+
+        //we will store texture position to the actual rooms contained in those textures in this dictionary
+        if (texturePositionToRoomMapping == null)
+            texturePositionToRoomMapping = new Dictionary<int, int>();
+        else
+            texturePositionToRoomMapping.Clear();
+
+        PrintRoomMappings();
+
+        List<int> intVals = new List<int>();
+        for (int i = 0; i < roomTextureList.Count; i++)
+        {
+            intVals.Add(i);
+        }
+
+        //shuffled indices
+        intVals = Experiment.Instance.shopLift.ShuffleList(intVals);
+
+        //focus index is zero-inclusive (0 is the first index) while roomMapping keys begin with 1
+        Debug.Log("focus index is " + focusIndex.ToString());
+        int correctChoice;
+        if (isLastRoom)
+            correctChoice = roomMappings[roomMappings[focusIndex + 1]];
+        else
+            correctChoice = roomMappings[focusIndex + 1];
+
+
+        //first pick the focus index
+        focusImage.texture = roomTextureList[focusIndex];
+        Debug.Log("FOCUS IMAGE IS " + focusImage.texture.name);
+        Experiment.Instance.shopLiftLog.LogMultipleChoiceFocusImage(roomTextureList[focusIndex].name);
+
+        choiceImageList[0].gameObject.SetActive(false);
+        choiceImageList[2].gameObject.SetActive(false);
+        choiceImageList[4].gameObject.SetActive(false);
+
+        //then create a temp copy of the texture list using those shuffled indices
+        List<Texture> tempTextureList = new List<Texture>();
+        for (int i = 0; i < roomTextureList.Count; i++)
+        {
+            if (intVals[i] != (focusIndex))
+            {
+                tempTextureList.Add(roomTextureList[intVals[i]]);
+                texturePositionToRoomMapping.Add(intVals[i] + 1, tempTextureList.Count - 1); //intVals starts from 0; we also use tempTextureList.Count as a more reliable way to tell the index
+                Debug.Log("room " + (intVals[i] + 1).ToString() + " --> position " + (tempTextureList.Count - 1).ToString());
+            }
+        }
+
+
+        //then, distribute rest of images as choice images
+        for (int i = 0; i < choiceImageList.Count; i++)
+        {
+            Experiment.Instance.shopLiftLog.LogMultipleChoiceTexture(i, tempTextureList[i].name);
+            choiceImageList[i].texture = tempTextureList[i];
+        }
+
+        choiceImageList[1].texture = roomTextureList[4];
+        choiceImageList[3].texture = roomTextureList[5];
+        //correctChoice = 
+
+        return correctChoice;
+
+    }
+
+    public int SetupMultipleChoice(int focusIndex, bool isLastRoom)
 	{
         gameObject.GetComponent<AnswerSelector>().ResetSelectorPosition();
-
+        Debug.Log("roomMappings KEys Count: " + roomMappings.Keys.Count);
 
         //we will store texture position to the actual rooms contained in those textures in this dictionary
         if (texturePositionToRoomMapping == null)
@@ -181,10 +249,17 @@ public class MultipleChoiceGroup : MonoBehaviour {
 
         //focus index is zero-inclusive (0 is the first index) while roomMapping keys begin with 1
         Debug.Log("focus index is " + focusIndex.ToString());
-        int correctChoice = roomMappings[focusIndex + 1];
+        int correctChoice;
+        if (isLastRoom)
+            correctChoice = roomMappings[roomMappings[focusIndex + 1]];
+        else
+            correctChoice = roomMappings[focusIndex + 1];
 
+        choiceImageList[0].gameObject.SetActive(true);
+        choiceImageList[2].gameObject.SetActive(true);
+        choiceImageList[4].gameObject.SetActive(true);
 
-		//first pick the focus index
+        //first pick the focus index
         focusImage.texture= roomTextureList[focusIndex];
         Debug.Log("FOCUS IMAGE IS " + focusImage.texture.name);
         Experiment.Instance.shopLiftLog.LogMultipleChoiceFocusImage(roomTextureList[focusIndex].name);
@@ -193,7 +268,7 @@ public class MultipleChoiceGroup : MonoBehaviour {
         List<Texture> tempTextureList = new List<Texture>();
         for (int i = 0; i < roomTextureList.Count; i++)
         {
-            if (intVals[i] != focusIndex)
+            if (intVals[i] != (focusIndex))
             {
                 tempTextureList.Add(roomTextureList[intVals[i]]);
                 texturePositionToRoomMapping.Add(intVals[i] + 1, tempTextureList.Count-1); //intVals starts from 0; we also use tempTextureList.Count as a more reliable way to tell the index
