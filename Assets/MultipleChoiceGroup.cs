@@ -9,6 +9,7 @@ public class MultipleChoiceGroup : MonoBehaviour {
 
 	public RawImage focusImage;
 	public List<RawImage> choiceImageList;
+    public int displayOptions;
 
     //feedback canvas groups
     public CanvasGroup positiveFeedbackGroup;
@@ -20,8 +21,18 @@ public class MultipleChoiceGroup : MonoBehaviour {
     private Dictionary<int, int> texturePositionToRoomMapping;
 
     public Text instructionText;
-	// Use this for initialization
-	void Start () {
+    public Text PrefText;
+    public Slider slider;
+    public CanvasGroup canvasLeftFeedColor;
+    public Image canvasLeftFeedImage;
+    public CanvasGroup canvasRightFeedColor;
+    public Image canvasRightFeedImage;
+    public bool canvasPatch_isset;
+
+    // Use this for initialization
+    void Start () {
+        canvasPatch_isset = false;
+        displayOptions = 0;
         if (ExperimentSettings.Instance.controlDevice == ExperimentSettings.ControlDevice.Keyboard)
         {
             if (ExperimentSettings.Instance.currentLanguage == ExperimentSettings.Language.English)
@@ -47,6 +58,43 @@ public class MultipleChoiceGroup : MonoBehaviour {
     // Update is called once per frame
     void Update () {
 	}
+
+    public float sliderValue() {
+        return slider.value;
+    }
+
+    public void setCorrectPatches(int correctAns) {
+        if (correctAns == 0)
+        {
+            canvasLeftFeedImage.color = Color.green;
+            canvasRightFeedImage.color = Color.red;
+        }
+        else {
+            //canvasLeftFeedColo
+            canvasLeftFeedImage.color = Color.red;
+            canvasRightFeedImage.color = Color.green;
+
+        }
+    }
+
+    public void setCanvas(bool is_set)
+    {
+        canvasPatch_isset = is_set;
+        if (is_set)
+        {
+            canvasLeftFeedColor.alpha = 1f;
+            canvasRightFeedColor.alpha = 1f;
+        }
+        else
+        {
+            canvasLeftFeedColor.alpha = 0f;
+            canvasRightFeedColor.alpha = 0f;
+        }
+    }
+
+    public bool IsCanvasPatchSet() {
+        return canvasPatch_isset;
+    }
 
     private void CreateDefaultRoomMappings()
     {
@@ -157,6 +205,46 @@ public class MultipleChoiceGroup : MonoBehaviour {
         }
     }
 
+    public void SetCashQuesOptions(int SetdisplayOptions) {
+        displayOptions = SetdisplayOptions;
+    }
+    public void SetFocusImage(bool focus_status, Vector3 instructTextpos, Vector3 prefTextpos, int questionType)
+    {
+        focusImage.enabled = focus_status;
+        PrefText.transform.localPosition = prefTextpos;
+        instructionText.transform.localPosition = instructTextpos;
+
+        if (questionType == 0)
+        {
+            PrefText.text = " Which room comes after the ABOVE room?";
+        }
+        else if (questionType == 1) {
+            PrefText.text = "Which room will lead you to more cash?";
+            if (displayOptions == 0)
+            {
+                choiceImageList[1].texture = roomTextureList[0];
+                choiceImageList[3].texture = roomTextureList[1];
+                displayOptions = 1;
+            }
+            else {
+                choiceImageList[1].texture = roomTextureList[2];
+                choiceImageList[3].texture = roomTextureList[3];
+                displayOptions = 0;
+            }
+        }
+    }
+
+    public void ChangeToInterm(bool Chg_req) {
+        if (Chg_req) {
+            //choiceImageList[1].texture = roomTextureList[2];
+            //choiceImageList[3].texture = roomTextureList[3];
+            //ocusImage.texture = roomTextureList[focusIndex + 2];
+        }
+    }
+
+    public void ChangeFocusImagetoInterm(int focusIndex) {
+        focusImage.texture = roomTextureList[focusIndex+2];
+    }
     public int SetupMultipleChoice_v2(int focusIndex, bool isLastRoom)
     {
         gameObject.GetComponent<AnswerSelector>().ResetSelectorPosition();

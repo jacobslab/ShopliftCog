@@ -17,12 +17,12 @@ public class AnswerSelector : MonoBehaviour {
     private GameObject correctIndicator;
     public float blankPosition;
 
-
-    public AudioSource selectionSwitchAudio;
+	public Slider slider;
+	public AudioSource selectionSwitchAudio;
 
 
 	int currPositionIndex = 0;
-
+	bool active = false;
 	void Awake(){
         //		positions = new List<float> ();
         correctIndicator = gameObject.GetComponent<MultipleChoiceGroup>().correctIndicator.gameObject;
@@ -31,21 +31,32 @@ public class AnswerSelector : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		ResetSelectorPosition ();
+		//active = false;
 	}
 
 	void OnEnable()
 	{
 		//GetComponent<MultipleChoiceGroup> ().SetupMultipleChoice (Random.Range (0, 4)); // 5th and 6th rooms aren't valid to be the focus image
-		SetShouldCheckForInput (true);
+		//SetShouldCheckForInput (true);
+
+		slider.value = 0.5f;
+		active = true;
 	}
 	void OnDisable()
 	{
-		SetShouldCheckForInput (false);
+		active = false;
+		//SetShouldCheckForInput (false);
 	}
 
 	// Update is called once per frame
 	void Update () {
+		bool canvasPatch = exp.shopLift.multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().IsCanvasPatchSet();
 
+		if (active && !canvasPatch) {
+			Debug.Log("I am active");
+			float move = Input.GetAxis("Horizontal");
+			slider.value += move * 0.05f;
+		}
 	}
 
 	public void SetShouldCheckForInput(bool shouldCheck){

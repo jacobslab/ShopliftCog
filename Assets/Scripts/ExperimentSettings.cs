@@ -7,6 +7,7 @@ using System.Reflection;
 using System;
 public class ExperimentSettings : MonoBehaviour {
 
+    bool isFirst = true;
     public int trialCount = 0;
 	public static bool practice=false;
 
@@ -99,7 +100,9 @@ public class ExperimentSettings : MonoBehaviour {
         SO
     }
 
-    public EnvironmentType currentEnvironmentType; 
+    public EnvironmentType currentEnvironmentType;
+
+    public int ExperimentValue;
 
     public enum Stage
     {
@@ -138,6 +141,9 @@ public class ExperimentSettings : MonoBehaviour {
     public Dropdown controlDeviceDropdown;
     public Dropdown languageDropdown;
     public Dropdown sessionDayDropdown;
+    static public int staticSessionDay;
+    static public int staticCurrentExpType;
+    public Dropdown ExperimentDropdown;
     public Toggle isControlToggle;
 
     public static int envIndex= 0;
@@ -161,7 +167,9 @@ public class ExperimentSettings : MonoBehaviour {
 			return;
 		}
 		_instance = this;
-		checkpointButton.gameObject.SetActive(true);
+
+
+        checkpointButton.gameObject.SetActive(true);
 		resumeFromCheckpointButton.gameObject.SetActive(false);
         //		DoMicTest ();
         //		if(Application.loadedLevel==0)
@@ -177,17 +185,21 @@ public class ExperimentSettings : MonoBehaviour {
         InitMainMenuLabels();
 
         SetConnectionMethod();
+        Debug.Log("Awake!!");
         SetSessionDay();
+        SetExperiment();
+        
         SetControlDevice();
         SetControlToggle();
 
-//		reevalType = ReevalType.Reward;
-//		}
-	}
+        //Experiment.Instance.shopLiftLog.LogMetaData();
+        //		reevalType = ReevalType.Reward;
+        //		}
+    }
 	// Update is called once per frame
 	void Update () {
-		
-	}
+
+    }
 
 	public void UpdateCheckpointStatus()
 	{
@@ -550,14 +562,36 @@ public class ExperimentSettings : MonoBehaviour {
                 currentEnvironmentType = EnvironmentType.WA;
                 break;
         }
+        staticSessionDay = sessionDayDropdown.value;
+        Debug.Log("SetSessionDay: DropDown: " + sessionDayDropdown.value);
         sceneController.UpdateSessionEnvironments(); //directly updates the environments for that particular day
 
         sceneController.UpdateSessionReevalConditions(sessionDayDropdown.value); // Day 1 = RR first, TR second ; Day 2 = TR first, RR second
     }
 
 
-	// Use this for initialization
-	void Start () {
+    public void SetExperiment()
+    {
+        switch (ExperimentDropdown.value)
+        {
+            case 0:
+                ExperimentValue = 0;
+                break;
+            case 1:
+                ExperimentValue = 1;
+                break;
+            default:
+                ExperimentValue = 0;
+                break;
+        }
+        Debug.Log("SetExperiment: DropDown: "+ ExperimentDropdown.value);
+        //sceneController.UpdateSessionEnvironments(); //directly updates the environments for that particular day
+
+        sceneController.UpdateExperimentNumber(ExperimentValue); // Day 1 = RR first, TR second ; Day 2 = TR first, RR second
+    }
+
+    // Use this for initialization
+    void Start () {
 
 	//	StartCoroutine(WordListGenerator.Instance.GenerateWordList());
 		//StartCoroutine("RunExperiment");

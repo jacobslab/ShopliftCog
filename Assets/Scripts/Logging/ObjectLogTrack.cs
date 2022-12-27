@@ -4,6 +4,7 @@ using System.Collections;
 public class ObjectLogTrack : LogTrack {
 	string nameToLog { get { return GetNameToLog (); } }
 
+	static public bool isFirst = true;
 	public bool firstLog = false; //should log spawned on the first log
 
 	//if we want to only log objects when something has changed... should start with keep track of last positions/rotations.
@@ -20,6 +21,16 @@ public class ObjectLogTrack : LogTrack {
 	//log on late update so that everything for that frame gets set first
 	void LateUpdate(){
 		if (ExperimentSettings.isLogging) {
+			if (isFirst == true)
+			{
+				Experiment.Instance.shopLiftLog.LogMetaData();
+				Experiment.Instance.shopLiftLog.LogDay(ExperimentSettings.staticSessionDay + 1);
+				Experiment.Instance.shopLiftLog.LogExpType(ExperimentSettings.staticCurrentExpType);
+				Experiment.Instance.shopLiftLog.LogExpXRanges(-1279, -1130);
+				Experiment.Instance.shopLiftLog.LogExpYRanges(-221, -220);
+				Experiment.Instance.shopLiftLog.LogExpZRanges(-37, 25);
+				isFirst = false;
+			}
 			Log ();
 		}
 	}
@@ -28,8 +39,9 @@ public class ObjectLogTrack : LogTrack {
 	{
 		//the following is set up to log properties only when they change, or on an initial log.
 
-		if(firstLog){
-//			LogSpawned();
+		if (firstLog){
+			//			LogSpawned();
+			
 			LogPosition();
 			LogRotation ();
 			LogScale ();

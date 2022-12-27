@@ -125,23 +125,26 @@ public class SceneController : MonoBehaviour
         }
     }
 
-
+    public void UpdateExperimentNumber(int ExpNo)
+    {
+        shoplifterRef.environmentNumber = ExpNo;
+    }
     public void UpdateSessionReevalConditions(int reevalConditionIndex)
     {
         switch(reevalConditionIndex)
         {
             case 0:
-                //shoplifterRef.reevalConditions[0] = 0;    //0 - RR; 1 - TR
+                //shoplifterRef.reevalConditions[0] = 0;    //0 - RR; 1 - TR //2- RC //3- TC
                 shoplifterRef.reevalConditions[0] = 0;
                 shoplifterRef.reevalConditions[1] = 1;
                 break;
             case 1:
-                shoplifterRef.reevalConditions[0] = 0;
+                shoplifterRef.reevalConditions[0] = 2;
                 //shoplifterRef.reevalConditions[1] = 0;
                 shoplifterRef.reevalConditions[1] = 0;
                 break;
             case 2:
-                shoplifterRef.reevalConditions[0] = 1;
+                shoplifterRef.reevalConditions[0] = 3;
                 //shoplifterRef.reevalConditions[1] = 0;
                 shoplifterRef.reevalConditions[1] = 1;
                 break;
@@ -151,7 +154,9 @@ public class SceneController : MonoBehaviour
                 shoplifterRef.reevalConditions[1] = 1;
                 break;
         }
-    }
+
+        ExperimentSettings.staticCurrentExpType = shoplifterRef.reevalConditions[shoplifterRef.environmentNumber];
+}
 
 
     public void LoadMainMenu(){

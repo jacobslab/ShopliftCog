@@ -185,4 +185,189 @@ public class ShopliftLogTrack : LogTrack {
 	{
 		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount (), "END_SESSION" + separator + ((isActive) ? "ON" : "OFF"));
     }
+
+	public void LogMetaData()
+	{
+		subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "TASK_INFO" + separator + "Version" + separator + "0");
+		subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "TASK_INFO" + separator + "Build_No" + separator + "0");
+		subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "TASK_INFO" + separator + "Language" + separator + "English");
+		subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "TASK_INFO" + separator + "Platform" + separator + "Unity");
+		subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "TASK_INFO" + separator + "OS" + separator + "MAC");
+		subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "VALIDATION_INFO" + separator + "NPhases" + separator + "5");
+		subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "VALIDATION_INFO" + separator + "NTrials" + separator + "21");
+		subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "ALIGNMENT_APPROACH" + separator + "STRATEGY" + separator + "AUDIO_SYNC_PULSES");
+
+	}
+
+	public void LogDay(int day)
+	{
+		subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "EXP_INFO" + separator + "Day" + separator + day.ToString());
+	}
+
+	public void LogExpType(int exp_type)
+	{
+		if (exp_type == 0)
+			subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "EXP_INFO" + separator + "EXP_TYPE" + separator + "REWARD" + separator + "TEST");
+		else if (exp_type == 1)
+			subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "EXP_INFO" + separator + "EXP_TYPE" + separator + "TRANSITION" + separator + "TEST");
+		else if (exp_type == 2)
+			subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "EXP_INFO" + separator + "EXP_TYPE" + separator + "REWARD" + separator + "CONTROL");
+		else if (exp_type == 3)
+			subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "EXP_INFO" + separator + "EXP_TYPE" + separator + "TRANSITION" + separator + "CONTROL");
+
+	}
+
+	public void LogExpXRanges(float min, float max)
+	{
+		subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "EXPERIMENT_DEFINITION" + separator + "X_POSITION_RANGES" + separator + min.ToString() + separator + max.ToString());
+	}
+
+	public void LogExpYRanges(float min, float max)
+	{
+		subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "EXPERIMENT_DEFINITION" + separator + "Y_POSITION_RANGES" + separator + min.ToString() + separator + max.ToString());
+	}
+
+	public void LogExpZRanges(float min, float max)
+	{
+		subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "EXPERIMENT_DEFINITION" + separator + "Z_POSITION_RANGES" + separator + min.ToString() + separator + max.ToString());
+	}
+
+	public void LogExpTrialPhaseStatus(int exp_stage, bool isActive)
+	{
+		if (exp_stage == 0)
+			subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "TRIAL_PHASE" + separator + "INTRODUCTION" + separator + ((isActive) ? "STARTED" : "ENDED"));
+		else if (exp_stage == 1)
+			subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "TRIAL_PHASE" + separator + "PRETRAINING_1_ROOM" + separator + ((isActive) ? "STARTED" : "ENDED"));
+		else if (exp_stage == 2)
+			subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "TRIAL_PHASE" + separator + "PRETRAINING_3_ROOM" + separator + ((isActive) ? "STARTED" : "ENDED"));
+		else if (exp_stage == 3)
+			subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "TRIAL_PHASE" + separator + "LEARNING" + separator + ((isActive) ? "STARTED" : "ENDED"));
+		else if (exp_stage == 4)
+			subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "TRIAL_PHASE" + separator + "RELEARNING" + separator + ((isActive) ? "STARTED" : "ENDED"));
+		else if (exp_stage == 5)
+			subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "TRIAL_PHASE" + separator + "TEST" + separator + ((isActive) ? "STARTED" : "ENDED"));
+
+	}
+
+	public void LogExpTrialInfoStatus(int log_event, int number)
+	{
+		if (log_event == 1)
+			subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "TRIAL_INFO" + separator + "NUMBER" + separator + number.ToString());
+		else if (log_event == 2)
+			subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "TRIAL_INFO" + separator + "ROOM_NUMBER" + separator + number.ToString());
+		else if (log_event == 3)
+			subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "TRIAL_INFO" + separator + "SEQUENCE" + separator + ((number == 0) ? "A" : "B"));
+		else if (log_event == 4)
+			subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "TRIAL_INFO" + separator + "CHEST_REWARD" + separator + number.ToString());
+		else if (log_event == 5)
+			subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "TRIAL_INFO" + separator + "CHEST_OPEN" + separator + ((number == 1) ? "STARTED" : "ENDED"));
+
+	}
+
+	public void LogExpQuesType(int quest_t, int ques_subtype, int AnswerOptions, int RoomDisplayed)
+	{
+		string str = "";
+
+		if (quest_t == 1)
+			str += "CASH";
+		else if (quest_t == 2)
+			str += "STRUCTURE";
+
+		if (ques_subtype == 1)
+			str += separator + "INITIAL";
+		else if (ques_subtype == 2)
+			str += separator + "INTERMEDIATE";
+		else if (ques_subtype == 3)
+			str += separator + "TEST";
+
+		if (AnswerOptions == 1)
+			str += separator + "1/2";
+		else if (AnswerOptions == 2)
+			str += separator + "3/4";
+		else if (AnswerOptions == 3)
+			str += separator + "5/6";
+
+		if (RoomDisplayed == 0)
+			str += separator + "N/A";
+		else
+			str += separator + RoomDisplayed.ToString();
+
+		subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), str);
+	}
+
+	public void LogExpQuesCorrectness(int quest_t, int ques_subtype, int AnswerOptions, int RoomDisplayed, int CorrectAnswer)
+	{
+		string str = "";
+
+		if (quest_t == 1)
+			str += "CASH";
+		else if (quest_t == 2)
+			str += "STRUCTURE";
+
+		if (ques_subtype == 1)
+			str += separator + "INITIAL";
+		else if (ques_subtype == 2)
+			str += separator + "INTERMEDIATE";
+		else if (ques_subtype == 3)
+			str += separator + "TEST";
+
+		if (AnswerOptions == 1)
+			str += separator + "1/2";
+		else if (AnswerOptions == 2)
+			str += separator + "3/4";
+		else if (AnswerOptions == 3)
+			str += separator + "5/6";
+
+		if (RoomDisplayed == 0)
+			str += separator + "N/A";
+		else
+			str += separator + RoomDisplayed.ToString();
+
+
+		str += separator + CorrectAnswer.ToString();
+
+		subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), str);
+	}
+
+	public void LogExpQuesSliderCorrectness(int quest_t, int ques_subtype, int AnswerOptions, int RoomDisplayed, float SliderAmount)
+	{
+		string str = "";
+
+		if (quest_t == 1)
+			str += "CASH";
+		else if (quest_t == 2)
+			str += "STRUCTURE";
+
+		if (ques_subtype == 1)
+			str += separator + "INITIAL";
+		else if (ques_subtype == 2)
+			str += separator + "INTERMEDIATE";
+		else if (ques_subtype == 3)
+			str += separator + "TEST";
+
+		if (AnswerOptions == 1)
+			str += separator + "1/2";
+		else if (AnswerOptions == 2)
+			str += separator + "3/4";
+		else if (AnswerOptions == 3)
+			str += separator + "5/6";
+
+		if (RoomDisplayed == 0)
+			str += separator + "N/A";
+		else
+			str += separator + RoomDisplayed.ToString();
+
+
+		str += separator + SliderAmount.ToString();
+
+		subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), str);
+	}
+
+
+	public void LogPressedKey(KeyCode vCode)
+	{
+		subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "KeyCodePress" + separator + vCode.ToString());
+
+	}
+
 }
