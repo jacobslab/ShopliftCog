@@ -186,8 +186,9 @@ public class ExperimentSettings : MonoBehaviour {
 
         SetConnectionMethod();
         Debug.Log("Awake!!");
-        SetSessionDay();
         SetExperiment();
+        SetSessionDay();
+        
         
         SetControlDevice();
         SetControlToggle();
@@ -547,16 +548,41 @@ public class ExperimentSettings : MonoBehaviour {
 
     public void SetSessionDay()
     {
-        switch(sessionDayDropdown.value)
+        UnityEngine.Debug.Log("Option 0: " + ExperimentDropdown.options[0].text);
+        UnityEngine.Debug.Log("Option 1: " + ExperimentDropdown.options[1].text);
+        Debug.Log("SetExperiment: DropDown SetSessionDay: " + ExperimentDropdown.value);
+        sceneController.UpdateExperimentNumber(ExperimentDropdown.value);
+        switch (sessionDayDropdown.value)
         {
             case 0:
-                currentEnvironmentType = EnvironmentType.WA; 
+                currentEnvironmentType = EnvironmentType.WA;
+                ExperimentDropdown.options[0].text = "Exp 1 (RE)";
+                ExperimentDropdown.options[1].text = "Exp 2 (TE)";
+
+                if (ExperimentDropdown.value == 1)
+                    ExperimentDropdown.captionText.text = "Exp 2 (TE)";
+                else
+                    ExperimentDropdown.captionText.text = "Exp 1 (RE)";
                 break;
             case 1:
                 currentEnvironmentType = EnvironmentType.SO;
+                ExperimentDropdown.options[0].text = "Exp 1 (RE)";
+                ExperimentDropdown.options[1].text = "Exp 2 (RC)";
+
+                if (ExperimentDropdown.value == 1)
+                    ExperimentDropdown.captionText.text = "Exp 2 (RC)";
+                else
+                    ExperimentDropdown.captionText.text = "Exp 1 (RE)";
                 break;
             case 2:
                 currentEnvironmentType = EnvironmentType.SO;
+                ExperimentDropdown.options[0].text = "Exp 1 (TE)";
+                ExperimentDropdown.options[1].text = "Exp 2 (TC)";
+
+                if (ExperimentDropdown.value == 1)
+                    ExperimentDropdown.captionText.text = "Exp 2 (TC)";
+                else
+                    ExperimentDropdown.captionText.text = "Exp 1 (TE)";
                 break;
             default:
                 currentEnvironmentType = EnvironmentType.WA;
@@ -588,6 +614,7 @@ public class ExperimentSettings : MonoBehaviour {
         //sceneController.UpdateSessionEnvironments(); //directly updates the environments for that particular day
 
         sceneController.UpdateExperimentNumber(ExperimentValue); // Day 1 = RR first, TR second ; Day 2 = TR first, RR second
+        sceneController.UpdateSessionReevalConditions(sessionDayDropdown.value);
     }
 
     // Use this for initialization

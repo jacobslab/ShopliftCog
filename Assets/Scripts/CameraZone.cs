@@ -114,7 +114,8 @@ public class CameraZone : MonoBehaviour {
             Debug.Log("isFocus is: " + isFocus.ToString());
             Debug.Log("isPreTraining is: " + isPretraining.ToString());
             Debug.Log("hasSneaked is: " + hasSneaked.ToString());
-            if (Input.GetButtonDown("Action Button") && isFocus && !showingWarning && !hasSneaked && !isPretraining)
+            if (Input.GetButtonDown("Action Button") && isFocus && !showingWarning &&
+                !hasSneaked && !isPretraining && (Experiment.Instance.shopLift.isGamePaused == false))
             {
 
                 ShoplifterScript.haltPlayer = false;

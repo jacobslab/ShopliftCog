@@ -9,6 +9,7 @@ public class Experiment : MonoBehaviour {
     //logging
     private string subjectLogfile; //gets set based on the current subject in Awake()
 	public Logger_Threading subjectLog;
+	public Logger_Threading_New subjectLogNew;
 	private string eegLogfile; //gets set based on the current subject in Awake()
 	public Logger_Threading eegLog;
 	public string sessionDirectory;
@@ -149,7 +150,9 @@ public class Experiment : MonoBehaviour {
 		}
 		
 		subjectLog.fileName = sessionDirectory + ExperimentSettings.currentSubject.name + "Log" + ".txt";
+		subjectLog.fileNameNew = sessionDirectory + ExperimentSettings.currentSubject.name + "LogNew" + ".txt";
 		eegLog.fileName = sessionDirectory + ExperimentSettings.currentSubject.name + "EEGLog" + ".txt";
+		eegLog.fileNameNew = sessionDirectory + ExperimentSettings.currentSubject.name + "EEGLogNew" + ".txt";
 	}
 
 	//In order to increment the session, this file must be present. Otherwise, the session has not actually started.
@@ -256,11 +259,13 @@ public class Experiment : MonoBehaviour {
 	
 	public IEnumerator WaitForActionButton(){
 		bool hasPressedButton = false;
-		while(Input.GetAxis("Action Button") != 0f){
+		while(Input.GetAxis("Action Button") != 0f && Experiment.Instance.shopLift.isGamePaused == false)
+		{
 			yield return 0;
 		}
 		while(!hasPressedButton){
-			if(Input.GetAxis("Action Button") == 1.0f){
+			if(Input.GetAxis("Action Button") == 1.0f && Experiment.Instance.shopLift.isGamePaused == false)
+			{
 				hasPressedButton = true;
 			}
 			yield return 0;
@@ -283,6 +288,7 @@ public class Experiment : MonoBehaviour {
 		if (ExperimentSettings.isLogging) {
 			subjectLog.close ();
 			eegLog.close ();
+			subjectLogNew.close();
 		}
 	}
 
@@ -290,6 +296,7 @@ public class Experiment : MonoBehaviour {
 		if (ExperimentSettings.isLogging) {
 			subjectLog.close ();
 			eegLog.close ();
+			subjectLogNew.close();
 			Application.Quit ();
 		}
 	}
@@ -300,6 +307,7 @@ public class Experiment : MonoBehaviour {
 			File.Copy ("/Users/" + System.Environment.UserName + "/Library/Logs/Unity/Player.log", sessionDirectory+"Player.log");
 #endif
 		subjectLog.close ();
+		subjectLogNew.close();
 		eegLog.close ();
 
 	}

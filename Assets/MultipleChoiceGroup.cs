@@ -208,7 +208,13 @@ public class MultipleChoiceGroup : MonoBehaviour {
     public void SetCashQuesOptions(int SetdisplayOptions) {
         displayOptions = SetdisplayOptions;
     }
-    public void SetFocusImage(bool focus_status, Vector3 instructTextpos, Vector3 prefTextpos, int questionType)
+
+    public int ReturnDisplayOpt()
+    {
+        return displayOptions;
+    }
+
+    public void SetFocusImage(bool focus_status, Vector3 instructTextpos, Vector3 prefTextpos, int questionType, int swap)
     {
         focusImage.enabled = focus_status;
         PrefText.transform.localPosition = prefTextpos;
@@ -222,13 +228,85 @@ public class MultipleChoiceGroup : MonoBehaviour {
             PrefText.text = "Which room will lead you to more cash?";
             if (displayOptions == 0)
             {
-                choiceImageList[1].texture = roomTextureList[0];
-                choiceImageList[3].texture = roomTextureList[1];
+                Experiment.Instance.shopLiftLog.LogExpQuesType(1, 1, 1, 0);
+                if (swap == 0)
+                {
+                    choiceImageList[1].texture = roomTextureList[0];
+                    choiceImageList[3].texture = roomTextureList[1];
+                    if (Experiment.Instance.shopLift._currentReevalCondition != 1)
+                    {
+                        Experiment.Instance.shopLiftLog.LogExpQuesType2(1, 1, 1, 0, 0, false);
+                        Experiment.Instance.shopLiftLog.LogExpQuesType2(1, 1, 1, 1, 1, false);
+                    }
+                    else
+                    {
+                        Experiment.Instance.shopLiftLog.LogExpQuesType2(1, 1, 1, 0, 0, true);
+                        Experiment.Instance.shopLiftLog.LogExpQuesType2(1, 1, 1, 1, 1, true);
+                    }
+                }
+                else
+                {
+                    choiceImageList[1].texture = roomTextureList[1];
+                    choiceImageList[3].texture = roomTextureList[0];
+                    if (Experiment.Instance.shopLift._currentReevalCondition != 1)
+                    {
+                        Experiment.Instance.shopLiftLog.LogExpQuesType2(1, 1, 1, 0, 1, false);
+                        Experiment.Instance.shopLiftLog.LogExpQuesType2(1, 1, 1, 1, 0, false);
+                    }
+                    else
+                    {
+                        Experiment.Instance.shopLiftLog.LogExpQuesType2(1, 1, 1, 0, 1, true);
+                        Experiment.Instance.shopLiftLog.LogExpQuesType2(1, 1, 1, 1, 0, true);
+                    }
+                }
+                
+
+                //Experiment.Instance.shopLiftLog.LogExpQuesTyp2(1, 1, 1, 0);
+                if ((Experiment.Instance.shopLift.expSettings.stage == ExperimentSettings.Stage.Reevaluation) &&
+                    ((Experiment.Instance.shopLift._currentReevalCondition == 1) || (Experiment.Instance.shopLift._currentReevalCondition == 0)))
+                    Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(1, 1, 1, 0, 2);
+                else
+                    Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(1, 1, 1, 0, 1);
                 displayOptions = 1;
             }
             else {
-                choiceImageList[1].texture = roomTextureList[2];
-                choiceImageList[3].texture = roomTextureList[3];
+                Experiment.Instance.shopLiftLog.LogExpQuesType(1, 2, 2, 0);
+                if (swap == 0)
+                {
+                    choiceImageList[1].texture = roomTextureList[2];
+                    choiceImageList[3].texture = roomTextureList[3];
+                    if (Experiment.Instance.shopLift._currentReevalCondition != 1)
+                    {
+                        Experiment.Instance.shopLiftLog.LogExpQuesType2(1, 2, 2, 0, 0, false);
+                        Experiment.Instance.shopLiftLog.LogExpQuesType2(1, 2, 2, 1, 1, false);
+                    }
+                    else
+                    {
+                        Experiment.Instance.shopLiftLog.LogExpQuesType2(1, 2, 2, 0, 0, true);
+                        Experiment.Instance.shopLiftLog.LogExpQuesType2(1, 2, 2, 1, 1, true);
+                    }
+                }
+                else
+                {
+                    choiceImageList[1].texture = roomTextureList[3];
+                    choiceImageList[3].texture = roomTextureList[2];
+                    if (Experiment.Instance.shopLift._currentReevalCondition != 1)
+                    {
+                        Experiment.Instance.shopLiftLog.LogExpQuesType2(1, 2, 2, 0, 1, false);
+                        Experiment.Instance.shopLiftLog.LogExpQuesType2(1, 2, 2, 1, 0, false);
+                    }
+                    else
+                    {
+                        Experiment.Instance.shopLiftLog.LogExpQuesType2(1, 2, 2, 0, 1, true);
+                        Experiment.Instance.shopLiftLog.LogExpQuesType2(1, 2, 2, 1, 0, true);
+                    }
+                }
+                
+                if ((Experiment.Instance.shopLift.expSettings.stage == ExperimentSettings.Stage.Reevaluation) &&
+                    (Experiment.Instance.shopLift._currentReevalCondition == 1))
+                    Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(1, 2, 2, 0, 4);
+                else
+                    Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(1, 2, 2, 0, 3);
                 displayOptions = 0;
             }
         }
@@ -245,7 +323,7 @@ public class MultipleChoiceGroup : MonoBehaviour {
     public void ChangeFocusImagetoInterm(int focusIndex) {
         focusImage.texture = roomTextureList[focusIndex+2];
     }
-    public int SetupMultipleChoice_v2(int focusIndex, bool isLastRoom)
+    public int SetupMultipleChoice_v2(int focusIndex, bool isLastRoom, int swap)
     {
         gameObject.GetComponent<AnswerSelector>().ResetSelectorPosition();
         Debug.Log("roomMappings KEys Count: " + roomMappings.Keys.Count);
@@ -305,8 +383,16 @@ public class MultipleChoiceGroup : MonoBehaviour {
             choiceImageList[i].texture = tempTextureList[i];
         }
 
-        choiceImageList[1].texture = roomTextureList[4];
-        choiceImageList[3].texture = roomTextureList[5];
+        if (swap == 0)
+        {
+            choiceImageList[1].texture = roomTextureList[4];
+            choiceImageList[3].texture = roomTextureList[5];
+        }
+        else
+        {
+            choiceImageList[1].texture = roomTextureList[5];
+            choiceImageList[3].texture = roomTextureList[4];
+        }
         //correctChoice = 
 
         return correctChoice;

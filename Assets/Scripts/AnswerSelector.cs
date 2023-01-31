@@ -52,7 +52,7 @@ public class AnswerSelector : MonoBehaviour {
 	void Update () {
 		bool canvasPatch = exp.shopLift.multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().IsCanvasPatchSet();
 
-		if (active && !canvasPatch) {
+		if (active && !canvasPatch && Experiment.Instance.shopLift.isGamePaused == false) {
 			Debug.Log("I am active");
 			float move = Input.GetAxis("Horizontal");
 			slider.value += move * 0.05f;
@@ -106,33 +106,42 @@ public class AnswerSelector : MonoBehaviour {
 		float currDelayTime = 0.0f;
 
 		while (true) {
-			if (!isInput) {
-				float horizAxisInput = Input.GetAxis ("Horizontal");
-				if (horizAxisInput > 0) {
-					Move (1);
-					isInput = true;
-				} 
-				else if (horizAxisInput < 0) {
-					Move (-1);
-					isInput = true;
-				} 
-				else if (horizAxisInput == 0) {
-					isInput = false;
+			if (Experiment.Instance.shopLift.isGamePaused == false)
+			{
+				if (!isInput)
+				{
+					float horizAxisInput = Input.GetAxis("Horizontal");
+					if (horizAxisInput > 0)
+					{
+						Move(1);
+						isInput = true;
+					}
+					else if (horizAxisInput < 0)
+					{
+						Move(-1);
+						isInput = true;
+					}
+					else if (horizAxisInput == 0)
+					{
+						isInput = false;
+					}
+
 				}
 
+				else
+				{
+					if (currDelayTime < delayTime)
+					{
+						currDelayTime += Time.deltaTime;
+					}
+					else
+					{
+						currDelayTime = 0.0f;
+						isInput = false;
+					}
+
+				}
 			}
-
-			else{
-				if(currDelayTime < delayTime){
-					currDelayTime += Time.deltaTime;
-				}
-				else{
-					currDelayTime = 0.0f;
-					isInput = false;
-				}
-
-			}
-
 			yield return 0;
 		}
 	}

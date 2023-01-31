@@ -109,18 +109,23 @@ public class Logger_Threading : MonoBehaviour{
 	public static string LogTextSeparator = "\t";
 
 	LoggerQueue myLoggerQueue;
+	LoggerQueue myLoggerQueueNew;
 	LoggerWriter myLoggerWriter;
 	public bool isRunning=false;
 	long frameCount;
 	public StreamWriter logfile;
+	public StreamWriter logfileNew;
 
 	public string fileName;
+	public string fileNameNew;
 
 	void Start ()
 	{
 		if (ExperimentSettings.isLogging) {
 			myLoggerQueue = new LoggerQueue ();
+			myLoggerQueueNew = new LoggerQueue();
 			StartCoroutine ("LogWriter");
+			//StartCoroutine("LogWriterNew");
 			//			myLoggerWriter = new LoggerWriter (fileName, myLoggerQueue);
 			//		
 			//			myLoggerWriter.Start ();
@@ -130,6 +135,7 @@ public class Logger_Threading : MonoBehaviour{
 	}
 
 	public Logger_Threading(string file){
+		UnityEngine.Debug.Log("running Constructor: " + file);
 		fileName = file;
 	}
 
@@ -148,9 +154,38 @@ public class Logger_Threading : MonoBehaviour{
 				logfile.WriteLine (msg);
 				yield return 0;
 			}
+
 			yield return 0;
 		}
 		UnityEngine.Debug.Log ("closing this");
+		yield return null;
+	}
+
+	IEnumerator LogWriterNew()
+	{
+		isRunning = true;
+
+		logfileNew = new StreamWriter(fileNameNew, true, Encoding.ASCII, 0x10000);
+		UnityEngine.Debug.Log("running logwriter coroutine writing at New: " + fileNameNew);
+		while (isRunning)
+		{
+			UnityEngine.Debug.Log("running Count New: " + myLoggerQueueNew.logQueue.Count);
+			while (myLoggerQueueNew.logQueue.Count > 0)
+			{
+				string msg = myLoggerQueueNew.GetFromLogQueue();
+
+				UnityEngine.Debug.Log ("writing New: " + msg);
+
+				using (StreamWriter writer = new StreamWriter(fileNameNew, true, Encoding.ASCII))
+				{
+					writer.Write(msg + "\n");
+				}
+				yield return 0;
+			}
+
+			yield return 0;
+		}
+		UnityEngine.Debug.Log("closing this");
 		yield return null;
 	}
 
@@ -173,14 +208,32 @@ public class Logger_Threading : MonoBehaviour{
 	}
 
 	public void Log(long timeLogged,string newLogInfo){
-		if (myLoggerQueue != null) {
-			myLoggerQueue.AddToLogQueue (timeLogged + LogTextSeparator + newLogInfo);
-		}
+		/*if (myLoggerQueueNew != null) {
+			myLoggerQueueNew.AddToLogQueue (timeLogged + LogTextSeparator + newLogInfo);
+		}*/
 	}
 
 	public void Log(long timeLogged, long frame, string newLogInfo){
-		if (myLoggerQueue != null) {
-			myLoggerQueue.AddToLogQueue (timeLogged + LogTextSeparator + frame + LogTextSeparator + newLogInfo);
+		if (fileName == "qwertyyy/session_0/qwertyyyLogNew.txt")
+			Debug.Log("I came hereNew");
+		if (fileName == "qwertyyy/session_0/qwertyyyLog.txt")
+			Debug.Log("I came here");
+
+		/*if (myLoggerQueueNew != null) {
+			myLoggerQueueNew.AddToLogQueue (timeLogged + LogTextSeparator + frame + LogTextSeparator + newLogInfo);
+		}*/
+	}
+
+	public void LogNew(long timeLogged, long frame, string newLogInfo)
+	{
+		if (fileName == "qwertyyy/session_0/qwertyyyLogNew.txt")
+			Debug.Log("I came hereNew");
+		if (fileName == "qwertyyy/session_0/qwertyyyLog.txt")
+			Debug.Log("I came here");
+
+		if (myLoggerQueue != null)
+		{
+			myLoggerQueue.AddToLogQueue(timeLogged + LogTextSeparator + frame + LogTextSeparator + newLogInfo);
 		}
 	}
 
@@ -195,11 +248,21 @@ public class Logger_Threading : MonoBehaviour{
 		//applicationIsRunning = false;
 //		UnityEngine.Debug.Log("is running will be false");
 		logfile.Flush ();
-		logfile.Close ();
-		isRunning=false;
+		logfileNew.Flush();
+		logfile.Close();
+		logfileNew.Close();
+		isRunning =false;
 		//		myLoggerWriter.End ();
 	}
 
+	public void QueueisEmpty() {
+		UnityEngine.Debug.Log("This is the Count: " + myLoggerQueue.logQueue.Count);
+		while (myLoggerQueue.logQueue.Count > 0) {
+			//string msg = 
+			logfile.WriteLine(myLoggerQueue.GetFromLogQueue());
+		}
+		
+	}
 
 
 }

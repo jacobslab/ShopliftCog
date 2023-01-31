@@ -110,7 +110,12 @@ public class PrefGroupSetup : MonoBehaviour {
         break;
 
         }
-		if (Random.value < 0.5f) {
+
+        leftImg.texture = targetGroup[0];
+        rightImg.texture = targetGroup[1];
+        Experiment.Instance.shopLiftLog.LogComparativePrefImage(prefType, leftImg.texture.name, rightImg.texture.name);
+
+        /*if (Random.value < 0.5f) {
 			leftImg.texture = targetGroup [0];
 			rightImg.texture = targetGroup [1];
 			Experiment.Instance.shopLiftLog.LogComparativePrefImage (prefType,leftImg.texture.name,rightImg.texture.name);
@@ -118,9 +123,9 @@ public class PrefGroupSetup : MonoBehaviour {
 			leftImg.texture = targetGroup [1];
 			rightImg.texture = targetGroup [0];
             Experiment.Instance.shopLiftLog.LogComparativePrefImage (prefType,leftImg.texture.name,rightImg.texture.name);
-		}
+		}*/
 
-	}
+    }
 
 	void OnDisable()
 	{

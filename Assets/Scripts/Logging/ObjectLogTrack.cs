@@ -26,9 +26,9 @@ public class ObjectLogTrack : LogTrack {
 				Experiment.Instance.shopLiftLog.LogMetaData();
 				Experiment.Instance.shopLiftLog.LogDay(ExperimentSettings.staticSessionDay + 1);
 				Experiment.Instance.shopLiftLog.LogExpType(ExperimentSettings.staticCurrentExpType);
-				Experiment.Instance.shopLiftLog.LogExpXRanges(-1279, -1130);
-				Experiment.Instance.shopLiftLog.LogExpYRanges(-221, -220);
-				Experiment.Instance.shopLiftLog.LogExpZRanges(-37, 25);
+				Experiment.Instance.shopLiftLog.LogExpXRanges(-885, -735);
+				Experiment.Instance.shopLiftLog.LogExpYRanges(1.3f, 1.7f);
+				Experiment.Instance.shopLiftLog.LogExpZRanges(-38, 26);
 				isFirst = false;
 			}
 			Log ();
@@ -43,6 +43,7 @@ public class ObjectLogTrack : LogTrack {
 			//			LogSpawned();
 			
 			LogPosition();
+			LogPositionNew();
 			LogRotation ();
 			LogScale ();
 			firstLog = false;
@@ -50,6 +51,7 @@ public class ObjectLogTrack : LogTrack {
 
 		if (lastPosition != transform.position) {
 			LogPosition ();
+			LogPositionNew();
 		}
 		if (lastRotation != transform.rotation) {
 			LogRotation ();
@@ -84,7 +86,12 @@ public class ObjectLogTrack : LogTrack {
 		lastPosition = transform.position;
 		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), nameToLog + separator + "POSITION" + separator + transform.position.x + separator + transform.position.y + separator + transform.position.z);
 	}
-	
+
+	void LogPositionNew() {
+		subjectLog.LogNew(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "PLAYER" + separator + "POSITION" + separator + transform.position.x + separator + transform.position.y + separator + transform.position.z);
+	}
+
+
 	void LogRotation(){
 		lastRotation = transform.rotation;
 		subjectLog.Log (GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), nameToLog + separator + "ROTATION" + separator + transform.rotation.eulerAngles.x + separator + transform.rotation.eulerAngles.y + separator + transform.rotation.eulerAngles.z);
