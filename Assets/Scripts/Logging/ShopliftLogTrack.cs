@@ -197,7 +197,7 @@ public class ShopliftLogTrack : LogTrack
 		subjectLog.LogNew(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "TASK_INFO" + separator + "BUILD_PLATFORM" + separator + "Unity");
 		subjectLog.LogNew(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "TASK_INFO" + separator + "RUN_PLATFORM" + separator + "MAC");
 		subjectLog.LogNew(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "VALIDATION_INFO" + separator + "NUMBER_OF_PHASES" + separator + "5");
-		subjectLog.LogNew(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "VALIDATION_INFO" + separator + "NUMBER_OF_TRIALS" + separator + "21");
+		subjectLog.LogNew(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "VALIDATION_INFO" + separator + "NUMBER_OF_TRIALS" + separator + "29");
 		subjectLog.LogNew(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "ALIGNMENT_APPROACH" + separator + "STRATEGY" + separator + "AUDIO_SYNC_PULSES");
 
 	}
@@ -503,9 +503,31 @@ public class ShopliftLogTrack : LogTrack
 		subjectLog.LogNew(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "IMAGE" + separator + "BLACK_SCREEN" + separator + (S_E_pos == true ? "STARTED" : "ENDED"));
 	}
 
-	public void LogExpSpeedChange(float speed)
+	public void LogExpSpeedChange(float speed, int time_bins)
 	{
-		subjectLog.LogNew(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "PLAYER" + separator + "SPEED_CHANGE" + separator + speed.ToString());
+		subjectLog.LogNew(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "PLAYER" + separator + "SPEED_CHANGE" + separator + "Timebins" + separator + time_bins.ToString() + separator + speed.ToString());
+		subjectLog.LogNew(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "PLAYER" + separator + "SPEED_CHANGE" + separator + "ROOM" + separator + speed.ToString());
+	}
+
+
+	public void LogExpSpeedChangeTransition(float speed)
+	{
+		subjectLog.LogNew(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "PLAYER" + separator + "SPEED_CHANGE" + separator + "ROOM_TRANSITION" + separator + speed.ToString());
+	}
+
+	public void LogSecCameraPos(float x, float y, float z)
+	{
+		subjectLog.LogNew(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "CAMERA" + separator + "POSITION" + separator + x.ToString() + separator + y.ToString() + separator + z.ToString());
+	}
+
+	public void LogSecCameraStatus(int status)
+	{
+		if (status == 1)
+			subjectLog.LogNew(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "PLAYER" + separator + "CAMERA" + separator + "BUTTON_PRESS" + separator + "C");
+		else if (status == 2)
+			subjectLog.LogNew(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "PLAYER" + separator + "CAMERA" + separator + "NOT_DETECTED");
+		else if (status == 3)
+			subjectLog.LogNew(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "PLAYER" + separator + "CAMERA" + separator + "DETECTED");
 	}
 
 	public void LogGamePause(bool isstarted)

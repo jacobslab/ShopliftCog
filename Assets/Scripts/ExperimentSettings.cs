@@ -278,7 +278,7 @@ public class ExperimentSettings : MonoBehaviour {
                 Debug.Log("setting stage to " + stage.ToString());
                 break;
             case Stage.Learning:
-                stage = Stage.Reevaluation;
+                stage = Stage.Test;
                 Debug.Log("setting stage to " + stage.ToString());
                 break;
             case Stage.Reevaluation:
@@ -286,7 +286,7 @@ public class ExperimentSettings : MonoBehaviour {
                 Debug.Log("setting stage to " + stage.ToString());
                 break;
             case Stage.Test:
-                stage = Stage.Training;
+                stage = Stage.Reevaluation;
                 Debug.Log("setting stage to " + stage.ToString());
                 break;
             default:

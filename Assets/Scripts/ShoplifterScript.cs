@@ -15,6 +15,11 @@ public class ShoplifterScript : MonoBehaviour
     Experiment exp { get { return Experiment.Instance; } }
     public ExperimentSettings expSettings { get { return ExperimentSettings.Instance; } }
 
+    public bool globalCamSelectDisable;
+    public Material SecurityCamMat_Black;
+    public Material SecurityCamMat_White;
+    public GameObject security_camera;
+    public Camera cam;
     bool isFirst = true;
     bool apartment_set = false;
     public IMG2Sprite img2sprite;
@@ -310,6 +315,10 @@ public class ShoplifterScript : MonoBehaviour
     public string[] training_3_ques = new string[3];
     public string[] learning_ques = new string[10];
     public string[] reeval_ques = new string[10];
+    public int[] questionpattern = new int[10]; 
+    public float speedTimer;
+    public int timebins;
+    public GameObject mountain_gobj;
 
     enum EnvironmentIndex
     {
@@ -362,8 +371,11 @@ public class ShoplifterScript : MonoBehaviour
         }
         _instance = this;
 
+        globalCamSelectDisable = false;
+        timebins = 0;
         reevaluation_stage = -1;
         isGamePaused = false;
+        Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(true);
         blackScreen.alpha = 1f;
         pauseUI.alpha = 0f;
         instructionVideo.SetActive(false);
@@ -374,6 +386,7 @@ public class ShoplifterScript : MonoBehaviour
         globaltimer = 0f;
         count_global = true;
         isFirst = true;
+        speedTimer = 0f;
 
         training_1_seq = new string[6];
         training_3_seq = new string[3];
@@ -448,12 +461,13 @@ public class ShoplifterScript : MonoBehaviour
         rewardScore.enabled = false;
 
         Cursor.visible = false;
-
-
+        currentSpeed = (UnityEngine.Random.Range(minSpeed, maxSpeed)) * 1.2f;
+        timebins = 1;
         InitializeInstructionsByLanguage();
 
         UnityEngine.Debug.Log("SAI_DEBUG: Running Task ");
 
+        //LoadMaterial_mountain();
         StartCoroutine("RunTask");
     }
 
@@ -484,6 +498,18 @@ public class ShoplifterScript : MonoBehaviour
             }
         }
 
+        if (globalCamSelectDisable == true)
+        {
+            if (Input.GetKeyDown(KeyCode.C))
+            {
+                security_camera.gameObject.GetComponent<MeshRenderer>().enabled = false;
+                Experiment.Instance.shopLiftLog.LogSecCameraStatus(1);
+                Experiment.Instance.shopLiftLog.LogSecCameraStatus(3);
+                globalCamSelectDisable = false;
+            }
+        }
+
+
         if (environments[envIndex].name == "Apartment")
         { //office
             envManager.phase2Door_L.transform.GetChild(1).gameObject.transform.localEulerAngles = new Vector3(0, 0, 0);
@@ -505,6 +531,17 @@ public class ShoplifterScript : MonoBehaviour
                 Experiment.Instance.shopLiftLog.LogPressedKey(vKey);
 
             }
+        }
+
+        speedTimer += Time.deltaTime;
+
+        if (speedTimer >= 1.5f)
+        {
+            timebins += 1;
+            speedTimer = 0f;
+            currentSpeed = (UnityEngine.Random.Range(minSpeed, maxSpeed)) * 1.2f;
+            UnityEngine.Debug.Log("Unity Speed: " + currentSpeed);
+            Experiment.Instance.shopLiftLog.LogExpSpeedChange(currentSpeed, timebins);
         }
 
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -961,6 +998,8 @@ public class ShoplifterScript : MonoBehaviour
             //instructionVideo.gameObject.GetComponent<AudioSource>().Play();
             yield return new WaitForSeconds(0.3f);
             Debug.Log("enabled player cam");
+            if (blackScreen.alpha == 1f)
+                Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
             blackScreen.alpha = 0f;
             EnablePlayerCam(true);
             while (!Input.GetButtonDown("Skip Button") && timer < maxTimer)
@@ -977,6 +1016,8 @@ public class ShoplifterScript : MonoBehaviour
         }
         else
         {
+            if (blackScreen.alpha == 1f)
+                Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
             blackScreen.alpha = 0f;
         }
 
@@ -1030,10 +1071,10 @@ public class ShoplifterScript : MonoBehaviour
             RandomizeTrainingRewards();
             bool isLeft = true;
 
-            yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, true, true));
+            yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, true, true, 0));
             //now run the other corridor
             isLeft = !isLeft;
-            yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, true, true));
+            yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, true, true, 0));
             yield return StartCoroutine(AskPreference(2, false, false, true, 0, 0f));
         }
 
@@ -1042,10 +1083,10 @@ public class ShoplifterScript : MonoBehaviour
         {
             RandomizeTrainingRewards();
             bool isLeft = true;
-            yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, true, true));
+            yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, true, true, 0));
             //now run the other corridor
             isLeft = !isLeft;
-            yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, true, true));
+            yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, true, true, 0));
             //we will randomly pick on whether to query the left or right room
             yield return StartCoroutine(AskSoloPreference((UnityEngine.Random.value > 0.5f) ? 2 : 3, true)); // we have assigned Room 5 (left) and Room 6 (right) as 2 and 3 index in the solo img groups
         }
@@ -1068,8 +1109,8 @@ public class ShoplifterScript : MonoBehaviour
         bool isLeft = true;
         for (int i = 0; i < 2; i++)
         {
-            yield return StartCoroutine(RunPhaseTwo((isLeft) ? 0 : 1, true, false));
-            yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, false, false));
+            yield return StartCoroutine(RunPhaseTwo((isLeft) ? 0 : 1, true, false, 0));
+            yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, false, false, 0));
             yield return StartCoroutine(AskMultipleChoice(2 + i, true));
             isLeft = !isLeft;
 
@@ -1080,6 +1121,8 @@ public class ShoplifterScript : MonoBehaviour
 
     IEnumerator ShowIntroInstructions()
     {
+        if (blackScreen.alpha == 1f)
+            Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
         blackScreen.alpha = 0f;
         Experiment.Instance.shopLiftLog.LogTextInstructions(1, true);
         TCPServer.Instance.SetState(TCP_Config.DefineStates.INSTRUCTIONS, true);
@@ -1094,6 +1137,8 @@ public class ShoplifterScript : MonoBehaviour
         introInstructionGroup.alpha = 0f;
 
         Experiment.Instance.shopLiftLog.LogTextInstructions(1, false);
+        if (blackScreen.alpha == 0f)
+            Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(true);
         blackScreen.alpha = 1f;
         yield return null;
     }
@@ -1134,6 +1179,7 @@ public class ShoplifterScript : MonoBehaviour
         }
 
 
+        
         cameraZoneManager.ResetAllCamZones();
         //cameraZoneManager.ToggleAllCamZones(true); //temporarily turn on all cameras
         RandomizeSpeedChangeZones();
@@ -1194,18 +1240,98 @@ public class ShoplifterScript : MonoBehaviour
             Experiment.Instance.shopLiftLog.LogExpTrialInfoStatusStartEnd(3, ((isLeft == true) ? 0 : 1), 1);
             counter_Val.alpha = 1f;
             Debug.Log("about to run phase 1");
-            
 
-            yield return StartCoroutine(RunPhaseOne((isLeft) ? 0 : 1, false));
+            List<int> l = new List<int>() { 1, 2, 3 };
+            System.Random rnd = new System.Random();
+            int index = rnd.Next(l.Count);
+            int selected = l[index];
+
+            List<int> xl = new List<int>() { -1, 1 };
+            int indexx = rnd.Next(xl.Count);
+            int selectedx = xl[indexx];
+
+            float value_fixed = 0.9f;
+
+
+            security_camera.gameObject.GetComponent<MeshRenderer>().enabled = true;
+            if (selected == 3)
+            {
+                value_fixed = 0.99f;
+                security_camera.gameObject.GetComponent<MeshRenderer>().material = SecurityCamMat_Black;
+            }
+            else if (selected == 2)
+            {
+                security_camera.gameObject.GetComponent<MeshRenderer>().material = SecurityCamMat_Black;
+            }
+            else if (selected == 1)
+            {
+                if (ExperimentSettings.env == ExperimentSettings.Environment.SpaceStation)
+                    security_camera.gameObject.GetComponent<MeshRenderer>().material = SecurityCamMat_White;
+                else
+                    security_camera.gameObject.GetComponent<MeshRenderer>().material = SecurityCamMat_Black;
+            }
+
+            if (ExperimentSettings.env == ExperimentSettings.Environment.SpaceStation)
+            {
+                security_camera.gameObject.transform.localScale = new Vector3(20f, 20f, 20f);
+                if (isLeft)
+                {
+                    if (selected == 1)
+                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_L.transform.position + value_fixed * phase1End_L.transform.position)) + (selectedx * new Vector3(5f, selectedx * 5f, 0));
+                    else if (selected == 2)
+                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(5f, selectedx * 5f, 0));
+                    else if (selected == 3)
+                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(5f, selectedx * 5f, 0));
+
+                }
+                else
+                {
+                    if (selected == 1)
+                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(5f, selectedx * 5f, 0));
+                    else if (selected == 2)
+                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(5f, selectedx * 5f, 0));
+                    else if (selected == 3)
+                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_R.transform.position + value_fixed * phase3End_R.transform.position)) + (selectedx * new Vector3(5f, selectedx * 5f, 0));
+                }
+            }
+            else if (ExperimentSettings.env == ExperimentSettings.Environment.Apartment)
+            {
+                security_camera.gameObject.transform.localScale = new Vector3(8f, 8f, 8f);
+                if (isLeft)
+                {
+                    if (selected == 1)
+                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_L.transform.position + value_fixed * phase1End_L.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                    else if (selected == 2)
+                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                    else if (selected == 3)
+                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+
+                }
+                else
+                {
+                    if (selected == 1)
+                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                    else if (selected == 2)
+                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                    else if (selected == 3)
+                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_R.transform.position + value_fixed * phase3End_R.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                }
+            }
+
+            security_camera.gameObject.transform.localEulerAngles = new Vector3(0, -selectedx * 45, 0);
+
+
+
+            yield return StartCoroutine(RunPhaseOne((isLeft) ? 0 : 1, false, selected));
             Experiment.Instance.shopLiftLog.LogDoorPosition(((isLeft) ? phase1Door_L : phase1Door_R).transform.position.x, ((isLeft) ? phase1Door_L : phase1Door_R).transform.position.y, ((isLeft) ? phase1Door_L : phase1Door_R).transform.position.z);
 
             Debug.Log("about to run phase 2");
-            yield return StartCoroutine(RunPhaseTwo((isLeft) ? 0 : 1, false, false));
+            yield return StartCoroutine(RunPhaseTwo((isLeft) ? 0 : 1, false, false, selected));
             Experiment.Instance.shopLiftLog.LogDoorPosition(((isLeft) ? phase2Door_L : phase2Door_R).transform.position.x, ((isLeft) ? phase2Door_L : phase2Door_R).transform.position.y, ((isLeft) ? phase2Door_L : phase2Door_R).transform.position.z);
 
             //			TurnOffRooms ();
             Debug.Log("about to run phase 3");
-            yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, true, true));
+            yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, true, true, selected));
             Experiment.Instance.shopLiftLog.LogChestPosition(((isLeft) ? register_L : register_R).transform.position.x, ((isLeft) ? register_L : register_R).transform.position.y, ((isLeft) ? register_L : register_R).transform.position.z);
 
 
@@ -1231,7 +1357,7 @@ public class ShoplifterScript : MonoBehaviour
                     Experiment.Instance.shopLiftLog.LogExpQuesType(2, 1, 3, 1);
                     
                     
-                    /*v2 is for Ques with Focus Image*/
+                    //v2 is for Ques with Focus Image
                     if (training_3_ques[0] == "A")
                     {
                         Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 1, 3, 0, 0, false);
@@ -1258,11 +1384,11 @@ public class ShoplifterScript : MonoBehaviour
             {
                 UnityEngine.Debug.Log("Case 2 training: AskMultipleChoice_v3");
                 Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
-                /*v2 is for Ques without Focus Image*/
+                //v2 is for Ques without Focus Image
                 if (training_3_ques[numTraining / 2] == "A")
-                    yield return StartCoroutine(AskMultipleChoice_v3((numTraining) % 2, 0));
+                    yield return StartCoroutine(AskMultipleChoice_v3((numTraining) % 2, 0, 0));
                 else
-                    yield return StartCoroutine(AskMultipleChoice_v3((numTraining) % 2, 1));
+                    yield return StartCoroutine(AskMultipleChoice_v3((numTraining) % 2, 1, 0));
                 Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
             }
 
@@ -1356,7 +1482,7 @@ public class ShoplifterScript : MonoBehaviour
     }
 
 
-    IEnumerator RunPhaseOne(int pathIndex, bool terminateWithChoice)
+    IEnumerator RunPhaseOne(int pathIndex, bool terminateWithChoice, int selected)
     {
         Experiment.Instance.shopLiftLog.LogExpTrialInfoStatusStartEnd(2, (pathIndex % 2) + 1, 1);
         Experiment.Instance.shopLiftLog.LogPathIndex(pathIndex);
@@ -1395,7 +1521,22 @@ public class ShoplifterScript : MonoBehaviour
         camVehicle.SetActive(true);
         Experiment.Instance.shopLiftLog.LogMoveEvent(1, true);
         Debug.Log("Hello There!! I am here ");
+        if (selected == 1)
+        {
+            Experiment.Instance.shopLiftLog.LogSecCameraPos(security_camera.transform.position.x,
+                                                            security_camera.transform.position.y,
+                                                            security_camera.transform.position.z);
+            globalCamSelectDisable = true;
+        }
         yield return StartCoroutine(VelocityPlayerTo(startPos, endPos, phase1Factor));
+        if (selected == 1)
+        {
+            if (globalCamSelectDisable == true)
+            {
+                Experiment.Instance.shopLiftLog.LogSecCameraStatus(2);
+            }
+            globalCamSelectDisable = false;
+        }
         Debug.Log("Hello There!! I am here 2222222");
 
         Experiment.Instance.shopLiftLog.LogMoveEvent(1, false);
@@ -1436,13 +1577,14 @@ public class ShoplifterScript : MonoBehaviour
                 if (!terminateWithChoice)
                 {
                     Debug.Log("phase 1 door L: " + phase1Door_L.transform.GetChild(0).gameObject.name);
-                    yield return StartCoroutine(MovePlayerTo(camVehicle.transform.position, phase1Door_L.transform.GetChild(0).position, 0.5f));
+                    //yield return StartCoroutine(MovePlayerTo(camVehicle.transform.position, phase1Door_L.transform.GetChild(0).position, 0.5f));
                     /*baseAudio.Stop ();
 					delayTwo = UnityEngine.Random.Range (0f, currentAudio.clip.length);
 					currentAudio.time = delayTwo;
 					currentAudio.Play ();
                     */
-                    yield return StartCoroutine(MovePlayerTo(phase1Door_L.transform.GetChild(0).position, phase2Start_L.transform.position, 0.5f));
+                    //yield return StartCoroutine(MovePlayerTo(phase1Door_L.transform.GetChild(0).position, phase2Start_L.transform.position, 0.5f));
+                    yield return StartCoroutine(MovePlayerTo(camVehicle.transform.position, phase2Start_L.transform.position, 0.5f));
                 }
 
             }
@@ -1459,14 +1601,15 @@ public class ShoplifterScript : MonoBehaviour
                 if (!terminateWithChoice)
                 {
                     Debug.Log("phase 1 door R: " + phase1Door_R.transform.GetChild(0).gameObject.name);
-                    yield return StartCoroutine(MovePlayerTo(camVehicle.transform.position, phase1Door_R.transform.GetChild(0).position, 0.5f));
+                    //yield return StartCoroutine(MovePlayerTo(camVehicle.transform.position, phase1Door_R.transform.GetChild(0).position, 0.5f));
 
                     /*baseAudio.Stop ();
 					delayTwo = UnityEngine.Random.Range (0f, currentAudio.clip.length);
 					currentAudio.time = delayTwo;
 					currentAudio.Play ();
                     */
-                    yield return StartCoroutine(MovePlayerTo(phase1Door_R.transform.GetChild(0).position, phase2Start_R.transform.position, 0.5f));
+                    //yield return StartCoroutine(MovePlayerTo(phase1Door_R.transform.GetChild(0).position, phase2Start_R.transform.position, 0.5f));
+                    yield return StartCoroutine(MovePlayerTo(camVehicle.transform.position, phase2Start_R.transform.position, 0.5f));
                 }
             }
             //Doors.canOpen = false;
@@ -1480,7 +1623,7 @@ public class ShoplifterScript : MonoBehaviour
         yield return null;
     }
 
-    IEnumerator RunPhaseTwo(int pathIndex, bool isDirect, bool hasRewards)
+    IEnumerator RunPhaseTwo(int pathIndex, bool isDirect, bool hasRewards, int selected)
     {
         if (expSettings.stage == ExperimentSettings.Stage.Reevaluation && (_currentReevalCondition == 1))
             Experiment.Instance.shopLiftLog.LogExpTrialInfoStatusStartEnd(2, ((pathIndex + 1) % 2) + 3, 1);
@@ -1509,9 +1652,61 @@ public class ShoplifterScript : MonoBehaviour
         Experiment.Instance.shopLiftLog.LogMoveEvent(2, true);
         clearCameraZoneFlags = false;
         Debug.Log("running phase two");
-        camVehicle.transform.position = startPos;
-        Debug.Log("velo player in phase 2");
-        yield return StartCoroutine(VelocityPlayerTo(startPos, endPos, phase1Factor));
+        Debug.Log("Error: CamVehicle Transform1: " + camVehicle.transform.position);
+        Debug.Log("Error: CamVehicle Transform2: " + startPos);
+
+        /*if (expSettings.stage == ExperimentSettings.Stage.Training)
+        {
+            yield return StartCoroutine(MovePlayerTo(camVehicle.transform.position, startPos, phase1Factor));
+        }
+        else*/   //if ()
+
+        //if (ExperimentSettings.env == ExperimentSettings.Environment.SpaceStation && camVehicle.transform.position.z > startPos.z)
+        if (ExperimentSettings.env == ExperimentSettings.Environment.SpaceStation)
+        {
+            //camVehicle.transform.position = new Vector3(startPos.x, startPos.y, camVehicle.transform.position.z);
+            Debug.Log("velo player in phase 2");
+
+            if (selected == 2)
+            {
+                Experiment.Instance.shopLiftLog.LogSecCameraPos(security_camera.transform.position.x,
+                                                security_camera.transform.position.y,
+                                                security_camera.transform.position.z);
+                globalCamSelectDisable = true;
+            }
+            yield return StartCoroutine(VelocityPlayerTo(camVehicle.transform.position, endPos, phase1Factor));
+            if (selected == 2)
+            {
+                if (globalCamSelectDisable == true)
+                {
+                    Experiment.Instance.shopLiftLog.LogSecCameraStatus(2);
+                }
+                globalCamSelectDisable = false;
+            }
+        }
+        else
+        {
+            camVehicle.transform.position = startPos;
+            Debug.Log("velo player in phase 2");
+
+            if (selected == 2)
+            {
+                Experiment.Instance.shopLiftLog.LogSecCameraPos(security_camera.transform.position.x,
+                                                security_camera.transform.position.y,
+                                                security_camera.transform.position.z);
+                globalCamSelectDisable = true;
+            }
+            yield return StartCoroutine(VelocityPlayerTo(startPos, endPos, phase1Factor));
+            if (selected == 2)
+            {
+                if (globalCamSelectDisable == true)
+                {
+                    Experiment.Instance.shopLiftLog.LogSecCameraStatus(2);
+                }
+                globalCamSelectDisable = false;
+            }
+        }
+
         Experiment.Instance.shopLiftLog.LogMoveEvent(2, false);
 
         clearCameraZoneFlags = true;
@@ -1540,7 +1735,7 @@ public class ShoplifterScript : MonoBehaviour
         if (pathIndex == 0)
         {
             Debug.Log("[RunPhase2 LS1] in phase 2 End");
-            yield return StartCoroutine(MovePlayerTo(camVehicle.transform.position, phase2Door_L.transform.GetChild(0).position, 0.5f));
+            //yield return StartCoroutine(MovePlayerTo(camVehicle.transform.position, phase2Door_L.transform.GetChild(0).position, 0.5f));
             Debug.Log("[RunPhase2 LS2] in phase 2 End");
             /*
 			currentAudio.Stop ();
@@ -1549,7 +1744,8 @@ public class ShoplifterScript : MonoBehaviour
 			currentAudio.time = delayThree;
 			currentAudio.Play ();
             */
-            yield return StartCoroutine(MovePlayerTo(phase2Door_L.transform.GetChild(0).position, phase3Start_L.transform.position, 0.5f));
+            //yield return StartCoroutine(MovePlayerTo(phase2Door_L.transform.GetChild(0).position, phase3Start_L.transform.position, 0.5f));
+            yield return StartCoroutine(MovePlayerTo(camVehicle.transform.position, phase3Start_L.transform.position, 0.5f));
             Debug.Log("[RunPhase2 LS3] in phase 2 End");
 
         }
@@ -1563,9 +1759,10 @@ public class ShoplifterScript : MonoBehaviour
 			currentAudio.time = delayThree;
 			currentAudio.Play();
             */
-            yield return StartCoroutine(MovePlayerTo(camVehicle.transform.position, phase2Door_R.transform.GetChild(0).position, 0.5f));
+            //yield return StartCoroutine(MovePlayerTo(camVehicle.transform.position, phase2Door_R.transform.GetChild(0).position, 0.5f));
             Debug.Log("[RunPhase2 LS5] in phase 2 End");
-            yield return StartCoroutine(MovePlayerTo(phase2Door_R.transform.GetChild(0).position, phase3Start_R.transform.position, 0.5f));
+            //yield return StartCoroutine(MovePlayerTo(phase2Door_R.transform.GetChild(0).position, phase3Start_R.transform.position, 0.5f));
+            yield return StartCoroutine(MovePlayerTo(camVehicle.transform.position, phase3Start_R.transform.position, 0.5f));
             Debug.Log("[RunPhase2 LS6] in phase 2 End");
         }
 
@@ -1735,11 +1932,13 @@ public class ShoplifterScript : MonoBehaviour
         Experiment.Instance.shopLiftLog.LogExpTrialInfoStatusStartEnd(2, ConvertToInteger(training_1_seq[0]), 0);
         Experiment.Instance.shopLiftLog.LogExpTrialInfoStatusStartEnd(1, 1, 0);
 
-        Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(true);
+        if (blackScreen.alpha == 0f)
+            Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(true);
         blackScreen.alpha = 1f;
         yield return new WaitForSeconds(1f);
+        if (blackScreen.alpha == 1f)
+            Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
         blackScreen.alpha = 0f;
-        Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
 
         yield return StartCoroutine(ExecuteDirectoryD6());
 
@@ -1762,11 +1961,13 @@ public class ShoplifterScript : MonoBehaviour
         Experiment.Instance.shopLiftLog.LogExpTrialInfoStatusStartEnd(2, ConvertToInteger(training_1_seq[1]), 0);
         Experiment.Instance.shopLiftLog.LogExpTrialInfoStatusStartEnd(1, 2, 0);
 
-        Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(true);
+        if (blackScreen.alpha == 0f)
+            Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(true);
         blackScreen.alpha = 1f;
         yield return new WaitForSeconds(1f);
+        if (blackScreen.alpha == 1f)
+            Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
         blackScreen.alpha = 0f;
-        Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
 
 
         yield return StartCoroutine(ExecuteDirectoryD6());
@@ -1790,11 +1991,14 @@ public class ShoplifterScript : MonoBehaviour
         Experiment.Instance.shopLiftLog.LogExpTrialInfoStatusStartEnd(2, ConvertToInteger(training_1_seq[2]), 0);
         Experiment.Instance.shopLiftLog.LogExpTrialInfoStatusStartEnd(1, 3, 0);
 
-        Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(true);
+        if (blackScreen.alpha == 0f)
+            Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(true);
         blackScreen.alpha = 1f;
         yield return new WaitForSeconds(1f);
+
+        if (blackScreen.alpha == 1f)
+            Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
         blackScreen.alpha = 0f;
-        Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
 
 
         yield return StartCoroutine(ExecuteDirectoryD6());
@@ -1818,11 +2022,14 @@ public class ShoplifterScript : MonoBehaviour
         Experiment.Instance.shopLiftLog.LogExpTrialInfoStatusStartEnd(2, ConvertToInteger(training_1_seq[3]), 0);
         Experiment.Instance.shopLiftLog.LogExpTrialInfoStatusStartEnd(1, 4, 0);
 
-        Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(true);
+        if (blackScreen.alpha == 0f)
+            Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(true);
         blackScreen.alpha = 1f;
         yield return new WaitForSeconds(1f);
+
+        if (blackScreen.alpha == 1f)
+            Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
         blackScreen.alpha = 0f;
-        Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
 
 
         yield return StartCoroutine(ExecuteDirectoryD6());
@@ -1846,11 +2053,14 @@ public class ShoplifterScript : MonoBehaviour
         Experiment.Instance.shopLiftLog.LogExpTrialInfoStatusStartEnd(2, ConvertToInteger(training_1_seq[4]), 0);
         Experiment.Instance.shopLiftLog.LogExpTrialInfoStatusStartEnd(1, 5, 0);
 
-        Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(true);
+        if (blackScreen.alpha == 0f)
+            Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(true);
         blackScreen.alpha = 1f;
         yield return new WaitForSeconds(1f);
+
+        if (blackScreen.alpha == 1f)
+            Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
         blackScreen.alpha = 0f;
-        Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
 
         yield return StartCoroutine(ExecuteDirectoryD6());
 
@@ -1873,11 +2083,14 @@ public class ShoplifterScript : MonoBehaviour
         Experiment.Instance.shopLiftLog.LogExpTrialInfoStatusStartEnd(2, ConvertToInteger(training_1_seq[5]), 0);
         Experiment.Instance.shopLiftLog.LogExpTrialInfoStatusStartEnd(1, 6, 0);
 
-        Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(true);
+        if (blackScreen.alpha == 0f)
+            Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(true);
         blackScreen.alpha = 1f;
         yield return new WaitForSeconds(1f);
+
+        if (blackScreen.alpha == 1f)
+            Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
         blackScreen.alpha = 0f;
-        Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
 
         counter_Val.alpha = 0f;
         clearCameraZoneFlags = true;
@@ -1886,7 +2099,7 @@ public class ShoplifterScript : MonoBehaviour
     }
 
 
-    IEnumerator RunPhaseThree(int pathIndex, bool isDirect, bool hasRewards)
+    IEnumerator RunPhaseThree(int pathIndex, bool isDirect, bool hasRewards, int selected)
     {
         Experiment.Instance.shopLiftLog.LogExpTrialInfoStatusStartEnd(2, (pathIndex % 2) + 5, 1);
         if (isDirect)
@@ -1921,13 +2134,60 @@ public class ShoplifterScript : MonoBehaviour
         camVehicle.transform.position = startPos;
         Debug.Log("velo player in phase 3");
         Experiment.Instance.shopLiftLog.LogMoveEvent(3, true);
-        yield return StartCoroutine(VelocityPlayerTo(startPos, endPos, phase1Factor));
+
+        //if (ExperimentSettings.env == ExperimentSettings.Environment.SpaceStation && camVehicle.transform.position.z > startPos.z)
+        if (ExperimentSettings.env == ExperimentSettings.Environment.SpaceStation)
+        {
+            //camVehicle.transform.position = new Vector3(startPos.x, startPos.y, camVehicle.transform.position.z);
+            Debug.Log("velo player in phase 3");
+
+            if (selected == 3)
+            {
+                Experiment.Instance.shopLiftLog.LogSecCameraPos(security_camera.transform.position.x,
+                                                security_camera.transform.position.y,
+                                                security_camera.transform.position.z);
+                globalCamSelectDisable = true;
+            }
+            yield return StartCoroutine(VelocityPlayerTo(camVehicle.transform.position, endPos, phase1Factor));
+            if (selected == 3)
+            {
+                if (globalCamSelectDisable == true)
+                {
+                    Experiment.Instance.shopLiftLog.LogSecCameraStatus(2);
+                }
+                globalCamSelectDisable = false;
+            }
+        }
+        else
+        {
+            camVehicle.transform.position = startPos;
+            Debug.Log("velo player in phase 3");
+
+            if (selected == 3)
+            {
+                Experiment.Instance.shopLiftLog.LogSecCameraPos(security_camera.transform.position.x,
+                                                security_camera.transform.position.y,
+                                                security_camera.transform.position.z);
+                globalCamSelectDisable = true;
+            }
+            yield return StartCoroutine(VelocityPlayerTo(startPos, endPos, phase1Factor));
+            if (selected == 3)
+            {
+                if (globalCamSelectDisable == true)
+                {
+                    Experiment.Instance.shopLiftLog.LogSecCameraStatus(2);
+                }
+                globalCamSelectDisable = false;
+            }
+        }
+
+        //yield return StartCoroutine(VelocityPlayerTo(startPos, endPos, phase1Factor));
         Experiment.Instance.shopLiftLog.LogMoveEvent(3, false);
         clearCameraZoneFlags = true;
         if (hasRewards)
         {
-            if (!(ExperimentSettings.env == ExperimentSettings.Environment.Apartment &&
-                expSettings.stage == ExperimentSettings.Stage.Reevaluation))
+            if (!((ExperimentSettings.env == ExperimentSettings.Environment.Apartment &&
+                expSettings.stage == ExperimentSettings.Stage.Reevaluation) || (ExperimentSettings.env == ExperimentSettings.Environment.SpaceStation)))
             {
 
                 if (pathIndex == 0)
@@ -1970,7 +2230,7 @@ public class ShoplifterScript : MonoBehaviour
         if (ExperimentSettings.env == ExperimentSettings.Environment.SpaceStation)
         {
             Debug.Log("NOT WESTERN TOWN");
-            suitcaseObj.transform.eulerAngles = (System.Math.Abs(directionEnv - 1f) < double.Epsilon) ? new Vector3(-90f, 0f, 0f) : new Vector3(-90f, 0f, 180f);
+            suitcaseObj.transform.eulerAngles = (System.Math.Abs(directionEnv - 1f) < double.Epsilon) ? new Vector3(180f, 0f, 0f) : new Vector3(180f, 0f, 180f);
             //				suitcaseObj = suitcaseObj.transform.GetChild (0).gameObject;
         }
         else if (ExperimentSettings.env == ExperimentSettings.Environment.Office)
@@ -2134,19 +2394,95 @@ public class ShoplifterScript : MonoBehaviour
             Experiment.Instance.shopLiftLog.LogExpTrialInfoStatusStartEnd(3, ((isLeft == true) ? 0 : 1), 1);
             counter_Val.alpha = 1f;
             learningPeriodGroup.alpha = 1f;
-            yield return StartCoroutine(RunPhaseOne((isLeft) ? 0 : 1, false));
+
+            List<int> l = new List<int>() { 1, 2, 3 };
+            System.Random rnd = new System.Random();
+            int index = rnd.Next(l.Count);
+            int selected = l[index];
+
+            List<int> xl = new List<int>() { -1, 1 };
+            int indexx = rnd.Next(xl.Count);
+            int selectedx = xl[indexx];
+
+            float value_fixed = 0.9f;
+
+            security_camera.gameObject.GetComponent<MeshRenderer>().enabled = true;
+            if (selected == 3)
+            {
+                value_fixed = 0.99f;
+                security_camera.gameObject.GetComponent<MeshRenderer>().material = SecurityCamMat_Black;
+            }
+            else if (selected == 2)
+            {
+                security_camera.gameObject.GetComponent<MeshRenderer>().material = SecurityCamMat_Black;
+            }
+            else if (selected == 1)
+            {
+                security_camera.gameObject.GetComponent<MeshRenderer>().material = SecurityCamMat_White;
+            }
+
+            if (ExperimentSettings.env == ExperimentSettings.Environment.SpaceStation)
+            {
+                security_camera.gameObject.transform.localScale = new Vector3(20f, 20f, 20f);
+                if (isLeft)
+                {
+                    if (selected == 1)
+                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_L.transform.position + value_fixed * phase1End_L.transform.position)) + (selectedx * new Vector3(5f, selectedx * 5f, 0));
+                    else if (selected == 2)
+                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(5f, selectedx * 5f, 0));
+                    else if (selected == 3)
+                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(5f, selectedx * 5f, 0));
+
+                }
+                else
+                {
+                    if (selected == 1)
+                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(5f, selectedx * 5f, 0));
+                    else if (selected == 2)
+                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(5f, selectedx * 5f, 0));
+                    else if (selected == 3)
+                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_R.transform.position + value_fixed * phase3End_R.transform.position)) + (selectedx * new Vector3(5f, selectedx * 5f, 0));
+                }
+            }
+            else if (ExperimentSettings.env == ExperimentSettings.Environment.Apartment)
+            {
+                security_camera.gameObject.transform.localScale = new Vector3(8f, 8f, 8f);
+                if (isLeft)
+                {
+                    if (selected == 1)
+                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_L.transform.position + value_fixed * phase1End_L.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                    else if (selected == 2)
+                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                    else if (selected == 3)
+                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+
+                }
+                else
+                {
+                    if (selected == 1)
+                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                    else if (selected == 2)
+                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                    else if (selected == 3)
+                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_R.transform.position + value_fixed * phase3End_R.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                }
+            }
+
+            security_camera.gameObject.transform.localEulerAngles = new Vector3(0, -selectedx * 45, 0);
+
+            yield return StartCoroutine(RunPhaseOne((isLeft) ? 0 : 1, false, selected));
             Experiment.Instance.shopLiftLog.LogDoorPosition(((isLeft) ? phase1Door_L : phase1Door_R).transform.position.x, ((isLeft) ? phase1Door_L : phase1Door_R).transform.position.y, ((isLeft) ? phase1Door_L : phase1Door_R).transform.position.z);
 
             Debug.Log("about to run phase 2");
 
-            yield return StartCoroutine(RunPhaseTwo((isLeft) ? 0 : 1, false, true));
+            yield return StartCoroutine(RunPhaseTwo((isLeft) ? 0 : 1, false, true, selected));
             Experiment.Instance.shopLiftLog.LogDoorPosition(((isLeft) ? phase2Door_L : phase2Door_R).transform.position.x, ((isLeft) ? phase2Door_L : phase2Door_R).transform.position.y, ((isLeft) ? phase2Door_L : phase2Door_R).transform.position.z);
 
             Debug.Log("about to run phase 3");
             if (!isPostTest)
-                yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, false, true));
+                yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, false, true, selected));
             else
-                yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, false, false));
+                yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, false, false, selected));
             Experiment.Instance.shopLiftLog.LogChestPosition(((isLeft) ? register_L : register_R).transform.position.x, ((isLeft) ? register_L : register_R).transform.position.y, ((isLeft) ? register_L : register_R).transform.position.z);
 
             //			TurnOffRooms ();
@@ -2154,15 +2490,166 @@ public class ShoplifterScript : MonoBehaviour
             learningPeriodGroup.alpha = 0f;
             counter_Val.alpha = 0f;
 
+            //blackScreen.alpha = 0f;
 
             Experiment.Instance.shopLiftLog.LogExpTrialInfoStatusStartEnd(3, ((isLeft == true) ? 0 : 1), 0);
             if (numTrials_Learning % 2 == 1)
                 Experiment.Instance.shopLiftLog.LogExpTrialInfoStatusStartEnd(1, count + 9, 0);
 
-            if (Real_trail < 15)
+            /* Enable below for the dynamic sequence of questions. For nowm this is enabled.
+             * Instead of Static
+             * Q0, Q1, Q2 - Cash
+             * Q3, Q4, Q5, Q6 - Structure
+             * (Taken from the Resources_IGNORE/question_sequence.txt)
+             */
+
+            if ((numTrials_Learning) % 2 == 1)
+            {
+                switch (questionpattern[numTrials_Learning / 2])
+                {
+                    case 0:
+                        //Q0
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
+                        multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().SetCashQuesOptions(0);
+                        if (learning_ques[(numTrials_Learning) / 2] == "A")
+                            yield return StartCoroutine(AskMultipleChoice_v3(1, 0, 0));
+                        else
+                            yield return StartCoroutine(AskMultipleChoice_v3(1, 1, 0));
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
+                        break;
+                    case 1:
+                        //Q1
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
+                        multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().SetCashQuesOptions(1);
+                        if (learning_ques[(numTrials_Learning) / 2] == "A")
+                            yield return StartCoroutine(AskMultipleChoice_v3(1, 0, 0));
+                        else
+                            yield return StartCoroutine(AskMultipleChoice_v3(1, 1, 0));
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
+                        break;
+                    case 2:
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
+                        multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().SetCashQuesOptions(0);
+                        if (learning_ques[(numTrials_Learning) / 2] == "A")
+                            yield return StartCoroutine(AskMultipleChoice_v3(1, 0, 1));
+                        else
+                            yield return StartCoroutine(AskMultipleChoice_v3(1, 1, 1));
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
+                        break;
+                    case 3:
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
+                        //(Real_trail / 2) % 2 == 0 : Q3
+                        //(Real_trail / 2) % 2 == 1 : Q4
+                        Experiment.Instance.shopLiftLog.LogExpQuesType(2, 1, 3, 1);
+                        if (learning_ques[(numTrials_Learning) / 2] == "A")
+                        {
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 1, 3, 0, 0, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 1, 3, 1, 1, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 1, 3, 1, 5);
+                            yield return StartCoroutine(AskMultipleChoice_v2(0, 0, 0));
+                            Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(2, 1, 3, 1, 5.0f + MultipleChoiceslider.value);
+                        }
+                        else
+                        {
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 1, 3, 0, 1, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 1, 3, 1, 0, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 1, 3, 1, 5);
+                            yield return StartCoroutine(AskMultipleChoice_v2(0, 0, 1));
+                            Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(2, 1, 3, 1, 6.0f - MultipleChoiceslider.value);
+                        }
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
+
+                        break;
+                    case 4:
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
+                        //(Real_trail / 2) % 2 == 0 : Q3
+                        //(Real_trail / 2) % 2 == 1 : Q4
+                        Experiment.Instance.shopLiftLog.LogExpQuesType(2, 1, 3, 1 + 1);
+
+                        if (learning_ques[(numTrials_Learning) / 2] == "A")
+                        {
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 1, 3, 0, 0, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 1, 3, 1, 1, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 1, 3, 1 + 1, 6);
+                            yield return StartCoroutine(AskMultipleChoice_v2(1, 0, 0));
+                            Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(2, 1, 3, 1 + 1, 5.0f + MultipleChoiceslider.value);
+                        }
+                        else
+                        {
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 1, 3, 0, 1, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 1, 3, 1, 0, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 1, 3, 1 + 1, 6);
+                            yield return StartCoroutine(AskMultipleChoice_v2(1, 0, 1));
+                            Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(2, 1, 3, 1 + 1, 6.0f - MultipleChoiceslider.value);
+                        }
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
+                        break;
+                    case 5:
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
+                        //(Real_trail / 2) % 2 == 0 : Q5
+                        //(Real_trail / 2) % 2 == 1 : Q6
+
+                        Experiment.Instance.shopLiftLog.LogExpQuesType(2, 2, 3, 3);
+
+                        if (learning_ques[(numTrials_Learning) / 2] == "A")
+                        {
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 2, 3, 0, 0, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 2, 3, 1, 1, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 2, 3, 3, 5);
+                            yield return StartCoroutine(AskMultipleChoice_v2(0, 1, 0));
+                            Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(2, 2, 3, 3, 5.0f + MultipleChoiceslider.value);
+                        }
+                        else
+                        {
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 2, 3, 0, 1, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 2, 3, 1, 0, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 2, 3, 3, 5);
+                            yield return StartCoroutine(AskMultipleChoice_v2(0, 1, 1));
+                            Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(2, 2, 3, 3, 6.0f - MultipleChoiceslider.value);
+                        }
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
+                        break;
+                    case 6:
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
+                        //(Real_trail / 2) % 2 == 0 : Q5
+                        //(Real_trail / 2) % 2 == 1 : Q6
+
+                        Experiment.Instance.shopLiftLog.LogExpQuesType(2, 2, 3, 1 + 3);
+
+                        if (learning_ques[(numTrials_Learning) / 2] == "A")
+                        {
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 2, 3, 0, 0, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 2, 3, 1, 1, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 2, 3, 1 + 3, 6);
+                            yield return StartCoroutine(AskMultipleChoice_v2(1, 1, 0));
+                            Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(2, 2, 3, 1 + 3, 5.0f + MultipleChoiceslider.value);
+                        }
+                        else
+                        {
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 2, 3, 0, 1, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 2, 3, 1, 0, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 2, 3, 1 + 3, 6);
+                            yield return StartCoroutine(AskMultipleChoice_v2(1, 1, 1));
+                            Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(2, 2, 3, 1 + 3, 6.0f - MultipleChoiceslider.value);
+                        }
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
+                        break;
+
+                }
+            }
+
+            /*Enable the below code to trigger the static question sequence pattern 
+             * Q0, Q1, Q2 - Cash
+             * Q3, Q4, Q5, Q6 - Structure
+             * Sequence: Q0, Q1, Q3, Q4, Q0, Q1, Q5, Q6, Q0, Q3
+             */
+
+            /*if (Real_trail < 15)
             {
                 if (((((Real_trail + 1) % 16 == 1) || (Real_trail + 1) % 16 == 9)) && ((numTrials_Learning) % 2 == 1))
                 {
+
+                    //Q0
                     Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
                     multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().SetCashQuesOptions(0);
                     if (learning_ques[(numTrials_Learning) / 2] == "A")
@@ -2173,6 +2660,8 @@ public class ShoplifterScript : MonoBehaviour
                 }
                 else if (((((Real_trail + 1) % 16 == 3) || (Real_trail + 1) % 16 == 11)) && ((numTrials_Learning) % 2 == 1))
                 {
+
+                    //Q1
                     Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
                     multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().SetCashQuesOptions(1);
                     if (learning_ques[(numTrials_Learning) / 2] == "A")
@@ -2184,6 +2673,8 @@ public class ShoplifterScript : MonoBehaviour
                 else if (((((Real_trail + 1) % 16 == 5) || (Real_trail + 1) % 16 == 7)) && ((numTrials_Learning) % 2 == 1))
                 {
                     Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
+                    //(Real_trail / 2) % 2 == 0 : Q3
+                    //(Real_trail / 2) % 2 == 1 : Q4
                     Experiment.Instance.shopLiftLog.LogExpQuesType(2, 1, 3, (((Real_trail / 2)) % 2) + 1);
 
                     if (learning_ques[(numTrials_Learning) / 2] == "A")
@@ -2213,6 +2704,9 @@ public class ShoplifterScript : MonoBehaviour
                 else if (((((Real_trail + 1) % 16 == 13) || (Real_trail + 1) % 16 == 15)) && ((numTrials_Learning) % 2 == 1))
                 {
                     Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
+                    //(Real_trail / 2) % 2 == 0 : Q5
+                    //(Real_trail / 2) % 2 == 1 : Q6
+
                     Experiment.Instance.shopLiftLog.LogExpQuesType(2, 2, 3, (((Real_trail / 2)) % 2) + 3);
 
                     if (learning_ques[(numTrials_Learning) / 2] == "A")
@@ -2267,7 +2761,7 @@ public class ShoplifterScript : MonoBehaviour
                                 Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 1, 3, (((Real_trail / 2) + 1) % 2) + 1, 5);
                             else
                                 Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 1, 3, (((Real_trail / 2) + 1) % 2) + 1, 6);
-                            yield return StartCoroutine(AskMultipleChoice_v2(((Real_trail / 2) + 1) % 2, 0, 0));   /*0*/
+                            yield return StartCoroutine(AskMultipleChoice_v2(((Real_trail / 2) + 1) % 2, 0, 0));   //0
                             Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(2, 1, 3, (((Real_trail / 2) + 1) % 2) + 1, 5.0f + MultipleChoiceslider.value);
                         }
                         else
@@ -2278,7 +2772,7 @@ public class ShoplifterScript : MonoBehaviour
                                 Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 1, 3, (((Real_trail / 2) + 1) % 2) + 1, 5);
                             else
                                 Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 1, 3, (((Real_trail / 2) + 1) % 2) + 1, 6);
-                            yield return StartCoroutine(AskMultipleChoice_v2(((Real_trail / 2) + 1) % 2, 0, 1));   /*0*/
+                            yield return StartCoroutine(AskMultipleChoice_v2(((Real_trail / 2) + 1) % 2, 0, 1));   //0*
                             Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(2, 1, 3, (((Real_trail / 2) + 1) % 2) + 1, 6.0f - MultipleChoiceslider.value);
                         }
                         Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
@@ -2309,7 +2803,7 @@ public class ShoplifterScript : MonoBehaviour
                                 Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 1, 3, (((Real_trail / 2)) % 2) + 1, 5);
                             else
                                 Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 1, 3, (((Real_trail / 2)) % 2) + 1, 6);
-                            yield return StartCoroutine(AskMultipleChoice_v2(((Real_trail / 2)) % 2, 0, 0));   /*1*/
+                            yield return StartCoroutine(AskMultipleChoice_v2(((Real_trail / 2)) % 2, 0, 0));   //1
                             Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(2, 1, 3, (((Real_trail / 2)) % 2) + 1, 5.0f + MultipleChoiceslider.value);
                         }
                         else
@@ -2320,14 +2814,17 @@ public class ShoplifterScript : MonoBehaviour
                                 Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 1, 3, (((Real_trail / 2)) % 2) + 1, 5);
                             else
                                 Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 1, 3, (((Real_trail / 2)) % 2) + 1, 6);
-                            yield return StartCoroutine(AskMultipleChoice_v2(((Real_trail / 2)) % 2, 0, 1));   /*1*/
+                            yield return StartCoroutine(AskMultipleChoice_v2(((Real_trail / 2)) % 2, 0, 1));   //1
                             Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(2, 1, 3, (((Real_trail / 2)) % 2) + 1, 6.0f - MultipleChoiceslider.value);
                         }
                         Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
                     }
                 }
 
-            }
+            }*/
+
+
+            //blackScreen.alpha = 0f;
 
             /*if ((numTrials_Learning+1)%4==0 && numTrials_Learning >0)
             {
@@ -2357,12 +2854,16 @@ public class ShoplifterScript : MonoBehaviour
                 showOnce = false;
             }
 
+
             if (numTrials_Learning < maxTrials - 1 || (!hasLearned && numAdditionalTrials < maxAdditionalTrials - 1))
                 yield return StartCoroutine(ShowEndTrialScreen(false, ShouldShowTips()));
             else if (!isPostTest)
                 yield return StartCoroutine(ShowNextStageScreen());
             numTrials_Learning++;
 
+            if (blackScreen.alpha == 1f)
+                Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
+            blackScreen.alpha = 0f;
             //this indicates that we are in additional_learning phase until the subject has learned the structure
             if (numTrials_Learning >= maxTrials)
             {
@@ -2488,19 +2989,95 @@ public class ShoplifterScript : MonoBehaviour
                 reevaluation_stage = (temp_Real_trail + 1) % 2;
                 counter_Val.alpha = 1f;
 
+                List<int> l = new List<int>() { 1, 2, 3 };
+                System.Random rnd = new System.Random();
+                int index = rnd.Next(l.Count);
+                int selected = l[index];
+
+                List<int> xl = new List<int>() { -1, 1 };
+                int indexx = rnd.Next(xl.Count);
+                int selectedx = xl[indexx];
+
+                float value_fixed = 0.9f;
+
+
+                security_camera.gameObject.GetComponent<MeshRenderer>().enabled = true;
+                if (selected == 3)
+                {
+                    value_fixed = 0.99f;
+                    security_camera.gameObject.GetComponent<MeshRenderer>().material = SecurityCamMat_Black;
+                }
+                else if (selected == 2)
+                {
+                    security_camera.gameObject.GetComponent<MeshRenderer>().material = SecurityCamMat_Black;
+                }
+                else if (selected == 1)
+                {
+                    security_camera.gameObject.GetComponent<MeshRenderer>().material = SecurityCamMat_White;
+                }
+
+                if (ExperimentSettings.env == ExperimentSettings.Environment.SpaceStation)
+                {
+                    security_camera.gameObject.transform.localScale = new Vector3(20f, 20f, 20f);
+                    if (leftChoice)
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_L.transform.position + value_fixed * phase1End_L.transform.position)) + (selectedx * new Vector3(5f, selectedx * 5f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(5f, selectedx * 5f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(5f, selectedx * 5f, 0));
+
+                    }
+                    else
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(5f, selectedx * 5f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(5f, selectedx * 5f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_R.transform.position + value_fixed * phase3End_R.transform.position)) + (selectedx * new Vector3(5f, selectedx * 5f, 0));
+                    }
+                }
+                else if (ExperimentSettings.env == ExperimentSettings.Environment.Apartment)
+                {
+                    security_camera.gameObject.transform.localScale = new Vector3(8f, 8f, 8f);
+                    if (leftChoice)
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_L.transform.position + value_fixed * phase1End_L.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+
+                    }
+                    else
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_R.transform.position + value_fixed * phase3End_R.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                    }
+                }
+
+                security_camera.gameObject.transform.localEulerAngles = new Vector3(0, -selectedx * 45, 0);
+
                 Debug.Log("about to run phase 1");
-                yield return StartCoroutine(RunPhaseOne((leftChoice) ? 0 : 1, false));
+                yield return StartCoroutine(RunPhaseOne((leftChoice) ? 0 : 1, false, selected));
                 Experiment.Instance.shopLiftLog.LogDoorPosition(((leftChoice) ? phase1Door_L : phase1Door_R).transform.position.x, ((leftChoice) ? phase1Door_L : phase1Door_R).transform.position.y, ((leftChoice) ? phase1Door_L : phase1Door_R).transform.position.z);
 
                 Debug.Log("about to run phase 2");
-                yield return StartCoroutine(RunPhaseTwo((leftChoice) ? 0 : 1, true, true));
+                yield return StartCoroutine(RunPhaseTwo((leftChoice) ? 0 : 1, true, true, selected));
                 Experiment.Instance.shopLiftLog.LogDoorPosition(((leftChoice) ? phase2Door_L : phase2Door_R).transform.position.x, ((leftChoice) ? phase2Door_L : phase2Door_R).transform.position.y, ((leftChoice) ? phase2Door_L : phase2Door_R).transform.position.z);
 
                 Debug.Log("about to run phase 3");
-                yield return StartCoroutine(RunPhaseThree((leftChoice) ? 0 : 1, false, true));
+                yield return StartCoroutine(RunPhaseThree((leftChoice) ? 0 : 1, false, true, selected));
                 Experiment.Instance.shopLiftLog.LogChestPosition(((leftChoice) ? register_L : register_R).transform.position.x, ((leftChoice) ? register_L : register_R).transform.position.y, ((leftChoice) ? register_L : register_R).transform.position.z);
 
-
+                
                 counter_Val.alpha = 0f;
 
 
@@ -2514,37 +3091,328 @@ public class ShoplifterScript : MonoBehaviour
                 numTrials_Reeval++;
 
                 reevaluationPeriodGroup.alpha = 0f;
+
+                if (numTrials_Reeval < maxTrials_Reeval)
+                {
+                    if (blackScreen.alpha == 1f)
+                        Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
+                    blackScreen.alpha = 0f;
+                }
                 yield return 0;
             }
 
+            /* Enable below for the dynamic sequence of questions. For nowm this is enabled.
+             * Instead of Static
+             * Q0, Q1, Q2 - Cash
+             * Q3, Q4, Q5, Q6 - Structure
+             * (Taken from the Resources_IGNORE/question_sequence.txt)
+             */
+
+            if (reevalConditionIndex != 1)
+            {
+                switch (questionpattern[Real_trail])
+                {
+                    case 0:
+                        //Q0
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
+                        multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().SetCashQuesOptions(0);
+                        if (reeval_ques[numBlocks_Reeval] == "A")
+                            yield return StartCoroutine(AskMultipleChoice_v3(1, 0, 0));
+                        else
+                            yield return StartCoroutine(AskMultipleChoice_v3(1, 1, 0));
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
+                        break;
+                    case 1:
+                        //Q1
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
+                        multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().SetCashQuesOptions(1);
+                        if (reeval_ques[numBlocks_Reeval] == "A")
+                            yield return StartCoroutine(AskMultipleChoice_v3(0, 0, 0));
+                        else
+                            yield return StartCoroutine(AskMultipleChoice_v3(0, 1, 0));
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
+                        break;
+                    case 2:
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
+                        multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().SetCashQuesOptions(0);
+                        if (reeval_ques[numBlocks_Reeval] == "A")
+                            yield return StartCoroutine(AskMultipleChoice_v3(1, 0, 1));
+                        else
+                            yield return StartCoroutine(AskMultipleChoice_v3(1, 1, 1));
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
+                        break;
+                    case 3:
+                        //(Real_trail + 1) % 8 == 3   - Q3
+                        //(Real_trail + 1) % 8 == 4   - Q4
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
+                        Experiment.Instance.shopLiftLog.LogExpQuesType(2, 1, 3, 1);
+
+                        if (reeval_ques[numBlocks_Reeval] == "A")
+                        {
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 1, 3, 0, 0, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 1, 3, 1, 1, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 1, 3, 1, 5);
+                            yield return StartCoroutine(AskMultipleChoice_v2(0, 0, 0));
+                            Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(2, 1, 3, 1, 5.0f + MultipleChoiceslider.value);
+                        }
+                        else
+                        {
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 1, 3, 0, 1, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 1, 3, 1, 0, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 1, 3, 1, 5);
+                            yield return StartCoroutine(AskMultipleChoice_v2(0, 0, 1));
+                            Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(2, 1, 3, 1, 6.0f - MultipleChoiceslider.value);
+                        }
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
+
+                        break;
+                    case 4:
+                        //(Real_trail + 1) % 8 == 3   - Q3
+                        //(Real_trail + 1) % 8 == 4   - Q4
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
+                        Experiment.Instance.shopLiftLog.LogExpQuesType(2, 1, 3, 1 + 1);
+
+                        if (reeval_ques[numBlocks_Reeval] == "A")
+                        {
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 1, 3, 0, 0, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 1, 3, 1, 1, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 1, 3, 1 + 1, 6);
+                            yield return StartCoroutine(AskMultipleChoice_v2(1, 0, 0));
+                            Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(2, 1, 3, 1 + 1, 5.0f + MultipleChoiceslider.value);
+                        }
+                        else
+                        {
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 1, 3, 0, 1, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 1, 3, 1, 0, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 1, 3, 1 + 1, 6);
+                            yield return StartCoroutine(AskMultipleChoice_v2(1, 0, 1));
+                            Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(2, 1, 3, 1 + 1, 6.0f - MultipleChoiceslider.value);
+                        }
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
+                        break;
+                    case 5:
+                        //(Real_trail + 1) % 8 == 7     - Q5
+                        //(Real_trail + 1) % 8 == 8/0   - Q6
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
+                        Experiment.Instance.shopLiftLog.LogExpQuesType(2, 2, 3, 3);
+
+                        if (reeval_ques[numBlocks_Reeval] == "A")
+                        {
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 2, 3, 0, 0, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 2, 3, 1, 1, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 2, 3, 3, 5);
+                            yield return StartCoroutine(AskMultipleChoice_v2(0, 1, 0));
+                            Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(2, 2, 3, 3, 5.0f + MultipleChoiceslider.value);
+                        }
+                        else
+                        {
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 2, 3, 0, 1, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 2, 3, 1, 0, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 2, 3, 3, 5);
+                            yield return StartCoroutine(AskMultipleChoice_v2(0, 1, 1));
+                            Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(2, 2, 3, 3, 6.0f - MultipleChoiceslider.value);
+                        }
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
+                        break;
+                    case 6:
+                        //(Real_trail + 1) % 8 == 7     - Q5
+                        //(Real_trail + 1) % 8 == 8/0   - Q6
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
+                        Experiment.Instance.shopLiftLog.LogExpQuesType(2, 2, 3, 1 + 3);
+
+                        if (reeval_ques[numBlocks_Reeval] == "A")
+                        {
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 2, 3, 0, 0, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 2, 3, 1, 1, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 2, 3, 1 + 3, 6);
+                            yield return StartCoroutine(AskMultipleChoice_v2((Real_trail) % 2, 1, 0));
+                            Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(2, 2, 3, 1 + 3, 5.0f + MultipleChoiceslider.value);
+                        }
+                        else
+                        {
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 2, 3, 0, 1, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 2, 3, 1, 0, false);
+                            Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 2, 3, 1 + 3, 6);
+                            yield return StartCoroutine(AskMultipleChoice_v2(1, 1, 1));
+                            Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(2, 2, 3, 1 + 3, 6.0f - MultipleChoiceslider.value);
+                        }
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
+                        break;
+
+                }
+            }
+            else
+            {
+                switch (questionpattern[Real_trail])
+                {
+                    case 0:
+                        //Q0
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
+                        multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().SetCashQuesOptions(0);
+                        if (reeval_ques[numBlocks_Reeval] == "A")
+                            yield return StartCoroutine(AskMultipleChoice_v3(1, 0, 0));
+                        else
+                            yield return StartCoroutine(AskMultipleChoice_v3(1, 1, 0));
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
+                        break;
+                    case 1:
+                        //Q1
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
+                        multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().SetCashQuesOptions(1);
+                        if (reeval_ques[numBlocks_Reeval] == "A")
+                            yield return StartCoroutine(AskMultipleChoice_v3(0, 0, 0));
+                        else
+                            yield return StartCoroutine(AskMultipleChoice_v3(0, 1, 0));
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
+                        break;
+                    case 2:
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
+                        multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().SetCashQuesOptions(0);
+                        if (reeval_ques[numBlocks_Reeval] == "A")
+                            yield return StartCoroutine(AskMultipleChoice_v3(1, 0, 1));
+                        else
+                            yield return StartCoroutine(AskMultipleChoice_v3(1, 1, 1));
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
+                        break;
+                    case 3:
+                        //(Real_trail + 1) % 8 == 3   - Q3
+                        //(Real_trail + 1) % 8 == 4   - Q4
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
+                        Experiment.Instance.shopLiftLog.LogExpQuesType(2, 1, 3, 1);
+
+                        if (reeval_ques[numBlocks_Reeval] == "B")
+                        {
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 1, 3, 0, 1, true);
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 1, 3, 1, 0, true);
+                            Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 1, 3, 1, 6);
+                            yield return StartCoroutine(AskMultipleChoice_v2(0, 0, 0));
+                            Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(2, 1, 3, 1, 5.0f + MultipleChoiceslider.value);
+                        }
+                        else
+                        {
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 1, 3, 0, 0, true);
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 1, 3, 1, 1, true);
+                            Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 1, 3, 1, 6);
+                            yield return StartCoroutine(AskMultipleChoice_v2(0, 0, 1));
+                            Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(2, 1, 3, 1, 6.0f - MultipleChoiceslider.value);
+                        }
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
+
+                        break;
+                    case 4:
+                        //(Real_trail + 1) % 8 == 3   - Q3
+                        //(Real_trail + 1) % 8 == 4   - Q4
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
+                        Experiment.Instance.shopLiftLog.LogExpQuesType(2, 1, 3, 1 + 1);
+
+                        if (reeval_ques[numBlocks_Reeval] == "B")
+                        {
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 1, 3, 0, 1, true);
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 1, 3, 1, 0, true);
+                            Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 1, 3, 1 + 1, 5);
+                            yield return StartCoroutine(AskMultipleChoice_v2(1, 0, 0));
+                            Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(2, 1, 3, 1 + 1, 5.0f + MultipleChoiceslider.value);
+                        }
+                        else
+                        {
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 1, 3, 0, 0, true);
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 1, 3, 1, 1, true);
+                            Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 1, 3, 1 + 1, 5);
+                            yield return StartCoroutine(AskMultipleChoice_v2(1, 0, 1));
+                            Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(2, 1, 3, 1 + 1, 6.0f - MultipleChoiceslider.value);
+                        }
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
+                        break;
+                    case 5:
+                        //(Real_trail + 1) % 8 == 7     - Q5
+                        //(Real_trail + 1) % 8 == 8/0   - Q6
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
+                        Experiment.Instance.shopLiftLog.LogExpQuesType(2, 2, 3, 3);
+
+                        if (reeval_ques[numBlocks_Reeval] == "B")
+                        {
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 2, 3, 0, 1, true);
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 2, 3, 1, 0, true);
+                            Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 2, 3, 3, 6);
+                            yield return StartCoroutine(AskMultipleChoice_v2(0, 1, 0));
+                            Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(2, 2, 3, 3, 5.0f + MultipleChoiceslider.value);
+                        }
+                        else
+                        {
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 2, 3, 0, 0, true);
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 2, 3, 1, 1, true);
+                            Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 2, 3, 3, 6);
+                            yield return StartCoroutine(AskMultipleChoice_v2(0, 1, 1));
+                            Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(2, 2, 3, 3, 6.0f - MultipleChoiceslider.value);
+                        }
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
+                        break;
+                    case 6:
+                        //(Real_trail + 1) % 8 == 7     - Q5
+                        //(Real_trail + 1) % 8 == 8/0   - Q6
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
+                        Experiment.Instance.shopLiftLog.LogExpQuesType(2, 2, 3, 1 + 3);
+
+                        if (reeval_ques[numBlocks_Reeval] == "B")
+                        {
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 2, 3, 0, 1, true);
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 2, 3, 1, 0, true);
+                            Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 2, 3, 1 + 3, 5);
+                            yield return StartCoroutine(AskMultipleChoice_v2(1, 1, 0));
+                            Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(2, 2, 3, 1 + 3, 5.0f + MultipleChoiceslider.value);
+                        }
+                        else
+                        {
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 2, 3, 0, 0, true);
+                            Experiment.Instance.shopLiftLog.LogExpQuesType2(2, 2, 3, 1, 1, true);
+                            Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(2, 2, 3, 1 + 3, 5);
+                            yield return StartCoroutine(AskMultipleChoice_v2(1, 1, 1));
+                            Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(2, 2, 3, 1 + 3, 6.0f - MultipleChoiceslider.value);
+                        }
+                        Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
+                        break;
+
+                }
+            }
+
+            /*Enable the below code to trigger the static question sequence pattern 
+             * Q0, Q1, Q2 - Cash
+             * Q3, Q4, Q5, Q6 - Structure
+             * Sequence: Q0, Q1, Q3, Q4, Q0, Q1, Q5, Q6, Q0, Q3
+             */
+
             //yield return StartCoroutine (AskPreference (1,false,false,false,0,0f));
             //			yield return StartCoroutine (RunRestPeriod());
-            if (reevalConditionIndex != 1)
+            /*if (reevalConditionIndex != 1)
             {
                 if (Real_trail <= 7)
                 {
                     if (((Real_trail + 1) % 8 == 1) || ((Real_trail + 1) % 8 == 5))
                     {
+                        //Q0
                         Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
                         multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().SetCashQuesOptions(0);
                         if (reeval_ques[numBlocks_Reeval] == "A")
-                            yield return StartCoroutine(AskMultipleChoice_v3((Real_trail + 1) % 2, 0));
+                            yield return StartCoroutine(AskMultipleChoice_v3((Real_trail + 1) % 2, 0, 0));
                         else
-                            yield return StartCoroutine(AskMultipleChoice_v3((Real_trail + 1) % 2, 1));
+                            yield return StartCoroutine(AskMultipleChoice_v3((Real_trail + 1) % 2, 1, 0));
                         Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
                     }
                     else if (((Real_trail + 1) % 8 == 2) || ((Real_trail + 1) % 8 == 6))
                     {
+                        //Q1
                         Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
                         multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().SetCashQuesOptions(1);
                         if (reeval_ques[numBlocks_Reeval] == "A")
-                            yield return StartCoroutine(AskMultipleChoice_v3((Real_trail + 1) % 2, 0));
+                            yield return StartCoroutine(AskMultipleChoice_v3((Real_trail + 1) % 2, 0, 0));
                         else
-                            yield return StartCoroutine(AskMultipleChoice_v3((Real_trail + 1) % 2, 1));
+                            yield return StartCoroutine(AskMultipleChoice_v3((Real_trail + 1) % 2, 1, 0));
                         Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
                     }
                     else if (((((Real_trail + 1) % 8 == 3) || (Real_trail + 1) % 8 == 4)))
                     {
+                        //(Real_trail + 1) % 8 == 3   - Q3
+                        //(Real_trail + 1) % 8 == 4   - Q4
                         Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
                         Experiment.Instance.shopLiftLog.LogExpQuesType(2, 1, 3, ((Real_trail) % 2) + 1);
 
@@ -2574,6 +3442,8 @@ public class ShoplifterScript : MonoBehaviour
                     }
                     else if (((((Real_trail + 1) % 8 == 7) || (Real_trail + 1) % 8 == 0)))
                     {
+                        //(Real_trail + 1) % 8 == 7     - Q5
+                        //(Real_trail + 1) % 8 == 8/0   - Q6
                         Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
                         Experiment.Instance.shopLiftLog.LogExpQuesType(2, 2, 3, ((Real_trail) % 2) + 3);
 
@@ -2606,16 +3476,18 @@ public class ShoplifterScript : MonoBehaviour
                 {
                     if ((Real_trail + 1) % 4 == 1)
                     {
+                        //Q0
                         Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
                         multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().SetCashQuesOptions(0);
                         if (reeval_ques[numBlocks_Reeval] == "A")
-                            yield return StartCoroutine(AskMultipleChoice_v3((Real_trail + 1) % 2, 0));
+                            yield return StartCoroutine(AskMultipleChoice_v3((Real_trail + 1) % 2, 0, 0));
                         else
-                            yield return StartCoroutine(AskMultipleChoice_v3((Real_trail + 1) % 2, 1));
+                            yield return StartCoroutine(AskMultipleChoice_v3((Real_trail + 1) % 2, 1, 0));
                         Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
                     }
                     else if ((Real_trail + 1) % 4 == 2)
                     {
+                        //Q3
                         Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
                         Experiment.Instance.shopLiftLog.LogExpQuesType(2, 2, 3, ((Real_trail + 1) % 2) + 3);
 
@@ -2655,9 +3527,9 @@ public class ShoplifterScript : MonoBehaviour
                         Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
                         multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().SetCashQuesOptions(0);
                         if (reeval_ques[numBlocks_Reeval] == "A")
-                            yield return StartCoroutine(AskMultipleChoice_v3((Real_trail + 1) % 2, 0));
+                            yield return StartCoroutine(AskMultipleChoice_v3((Real_trail + 1) % 2, 0, 0));
                         else
-                            yield return StartCoroutine(AskMultipleChoice_v3((Real_trail + 1) % 2, 1));
+                            yield return StartCoroutine(AskMultipleChoice_v3((Real_trail + 1) % 2, 1, 0));
                         Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
                     }
                     else if (((Real_trail + 1) % 8 == 2) || ((Real_trail + 1) % 8 == 6))
@@ -2665,9 +3537,9 @@ public class ShoplifterScript : MonoBehaviour
                         Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
                         multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().SetCashQuesOptions(1);
                         if (reeval_ques[numBlocks_Reeval] == "A")
-                            yield return StartCoroutine(AskMultipleChoice_v3((Real_trail + 1) % 2, 0));
+                            yield return StartCoroutine(AskMultipleChoice_v3((Real_trail + 1) % 2, 0, 0));
                         else
-                            yield return StartCoroutine(AskMultipleChoice_v3((Real_trail + 1) % 2, 1));
+                            yield return StartCoroutine(AskMultipleChoice_v3((Real_trail + 1) % 2, 1, 0));
                         Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
                     }
                     else if (((((Real_trail + 1) % 8 == 3) || (Real_trail + 1) % 8 == 4)))
@@ -2736,9 +3608,9 @@ public class ShoplifterScript : MonoBehaviour
                         Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
                         multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().SetCashQuesOptions(0);
                         if (reeval_ques[numBlocks_Reeval] == "A")
-                            yield return StartCoroutine(AskMultipleChoice_v3((Real_trail + 1) % 2, 0));
+                            yield return StartCoroutine(AskMultipleChoice_v3((Real_trail + 1) % 2, 0, 0));
                         else
-                            yield return StartCoroutine(AskMultipleChoice_v3((Real_trail + 1) % 2, 1));
+                            yield return StartCoroutine(AskMultipleChoice_v3((Real_trail + 1) % 2, 1, 0));
                         Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
                     }
                     else if ((Real_trail + 1) % 4 == 2)
@@ -2771,7 +3643,11 @@ public class ShoplifterScript : MonoBehaviour
                         Experiment.Instance.shopLiftLog.LogQuestionExtremes(false);
                     }
                 }
-            }
+            }*/
+
+            if (blackScreen.alpha == 1f)
+                Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
+            blackScreen.alpha = 0f;
             /*if (reevalConditionIndex != 1)
             {
                 Experiment.Instance.shopLiftLog.LogQuestionExtremes(true);
@@ -2842,13 +3718,13 @@ public class ShoplifterScript : MonoBehaviour
             {
                 Debug.Log("about to run phase 1");
                 isLeft = !isLeft; //flip the left right
-                yield return StartCoroutine(RunPhaseOne((isLeft) ? 0 : 1, false));
+                yield return StartCoroutine(RunPhaseOne((isLeft) ? 0 : 1, false, 0));
 
                 Debug.Log("about to run phase 2");
-                yield return StartCoroutine(RunPhaseTwo((isLeft) ? 0 : 1, false, false));
+                yield return StartCoroutine(RunPhaseTwo((isLeft) ? 0 : 1, false, false, 0));
                 //          TurnOffRooms ();
                 Debug.Log("about to run phase 3");
-                yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, false, false));
+                yield return StartCoroutine(RunPhaseThree((isLeft) ? 0 : 1, false, false, 0));
             }
         }
 
@@ -3234,6 +4110,7 @@ public class ShoplifterScript : MonoBehaviour
         yield return null;
     }
 
+    //Used for Structure question
     IEnumerator AskMultipleChoice_v2(int prefIndex, int Start_or_Inter, int swap)
     {
         int correctChoice;
@@ -3244,6 +4121,10 @@ public class ShoplifterScript : MonoBehaviour
         Debug.Log("PREF INDEX IS " + prefIndex.ToString());
         EnablePlayerCam(false);
         multipleChoiceGroup.gameObject.SetActive(true);
+
+        if (blackScreen.alpha == 1f)
+            Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
+        blackScreen.alpha = 0f;
         multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().SetFocusImage(true, new Vector3(0, 23, 0), new Vector3(0, 43, 0), 0, 0);
         correctChoice = multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().SetupMultipleChoice_v2(prefIndex, true, swap);
         correctChoice = prefIndex;
@@ -3284,9 +4165,9 @@ public class ShoplifterScript : MonoBehaviour
         float val = multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().sliderValue();
         if (!pressed || (val == 0.5f))
         {
-            while (val == 0.5f)
+            while (!pressed)
             {
-                yield return StartCoroutine(WaitForButtonPress(10f, didPress =>
+                yield return StartCoroutine(WaitForButtonPress(10000f, didPress =>
                 {
                     pressed = didPress;
                 }));
@@ -3320,7 +4201,8 @@ public class ShoplifterScript : MonoBehaviour
         yield return null;
     }
 
-    IEnumerator AskMultipleChoice_v3(int prefIndex, int swap)
+    //Used for Cash Question
+    IEnumerator AskMultipleChoice_v3(int prefIndex, int swap, int is_test)
     {
         int correctChoice;
         bool pressed = false;
@@ -3330,8 +4212,16 @@ public class ShoplifterScript : MonoBehaviour
         Debug.Log("PREF INDEX IS " + prefIndex.ToString());
         EnablePlayerCam(false);
         multipleChoiceGroup.gameObject.SetActive(true);
+
+        if (blackScreen.alpha == 1f)
+            Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
+        blackScreen.alpha = 0f;
         correctChoice = multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().SetupMultipleChoice_v2(prefIndex, true, 0);
-        multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().SetFocusImage(false, new Vector3(0, 100, 0), new Vector3(0, 125, 0), 1, swap);
+
+        if (is_test == 0)
+            multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().SetFocusImage(false, new Vector3(0, 100, 0), new Vector3(0, 125, 0), 1, swap);
+        else
+            multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().SetFocusImageCashTest(false, new Vector3(0, 100, 0), new Vector3(0, 125, 0), 1, swap, is_test);
 
 
         correctChoice = prefIndex;
@@ -3365,9 +4255,9 @@ public class ShoplifterScript : MonoBehaviour
         float val = multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().sliderValue();
         if (!pressed || (val == 0.5f))
         {
-            while (val == 0.5f)
+            while (!pressed)
             {
-                yield return StartCoroutine(WaitForButtonPress(10f, didPress =>
+                yield return StartCoroutine(WaitForButtonPress(10000f, didPress =>
                 {
                     pressed = didPress;
                 }));
@@ -3377,22 +4267,34 @@ public class ShoplifterScript : MonoBehaviour
         infoText.text = "";
         infoGroup.alpha = 0f;
 
-        int dOpt = multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().ReturnDisplayOpt();
-        val = multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().sliderValue();
-
-        if (dOpt == 1)
+        if (is_test == 0)
         {
-            if (swap == 0)
-                Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(1, 1, 1, 0, 1.0f + val);
+            int dOpt = multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().ReturnDisplayOpt();
+            val = multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().sliderValue();
+
+            if (dOpt == 1)
+            {
+                if (swap == 0)
+                    Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(1, 1, 1, 0, 1.0f + val);
+                else
+                    Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(1, 1, 1, 0, 2.0f - val);
+            }
             else
-                Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(1, 1, 1, 0, 2.0f - val);
+            {
+                if (swap == 0)
+                    Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(1, 2, 2, 0, 3.0f + val);
+                else
+                    Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(1, 2, 2, 0, 4.0f - val);
+            }
         }
         else
         {
+            val = multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().sliderValue();
             if (swap == 0)
-                Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(1, 2, 2, 0, 3.0f + val);
+                Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(1, 1, 1, 0, 5.0f + val);
             else
-                Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(1, 2, 2, 0, 4.0f - val);
+                Experiment.Instance.shopLiftLog.LogExpQuesSliderCorrectness(1, 1, 1, 0, 6.0f - val);
+
         }
 
         if (is_Training)
@@ -3457,7 +4359,7 @@ public class ShoplifterScript : MonoBehaviour
         float val = multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().sliderValue();
         if (!pressed || (val == 0.5f))
         {
-            while (val == 0.5f)
+            while (!pressed)
             {
                 yield return StartCoroutine(WaitForButtonPress(100000f, didPress =>
                 {
@@ -3591,7 +4493,7 @@ public class ShoplifterScript : MonoBehaviour
             }
             if (!pressed)
             {
-                yield return StartCoroutine(WaitForButtonPress(15f, didPress =>
+                yield return StartCoroutine(WaitForButtonPress(10000f, didPress =>
                 {
                     pressed = didPress;
                 }));
@@ -3904,6 +4806,7 @@ public class ShoplifterScript : MonoBehaviour
         // #TODO: Make sure environment checks are not reliant on string checks 
         if (environments[envIndex].name == "SpaceStation")
         {
+            //cam.clearFlags = CameraClearFlags.SolidColor;
             Debug.Log("chosen space station");
             ExperimentSettings.env = ExperimentSettings.Environment.SpaceStation; //space station, for now - envInce: 3
             camVehicle.transform.localEulerAngles = new Vector3(0f, 180f, 0f);
@@ -3913,6 +4816,7 @@ public class ShoplifterScript : MonoBehaviour
         }
         else if (environments[envIndex].name == "WesternTown")
         { //western town, for now - envInce: 0
+            //cam.clearFlags = CameraClearFlags.Skybox;
             Debug.Log("chosen western town");
             ExperimentSettings.env = ExperimentSettings.Environment.WesternTown;
             camVehicle.transform.localEulerAngles = new Vector3(0f, 0f, 0f);
@@ -3923,6 +4827,7 @@ public class ShoplifterScript : MonoBehaviour
         }
         else if (environments[envIndex].name == "VikingVillage") //office - envInce: 2
         { //viking village, for now
+            //cam.clearFlags = CameraClearFlags.Skybox;
             Debug.Log("chosen viking village");
             ExperimentSettings.env = ExperimentSettings.Environment.VikingVillage;
             camVehicle.transform.localEulerAngles = new Vector3(0f, 0f, 0f);
@@ -3932,6 +4837,7 @@ public class ShoplifterScript : MonoBehaviour
         }
         else if (environments[envIndex].name == "Office")
         { //office - envInce: 1
+            //cam.clearFlags = CameraClearFlags.Skybox;
             Debug.Log("chosen office");
             ExperimentSettings.env = ExperimentSettings.Environment.Office;
             camVehicle.transform.localEulerAngles = new Vector3(0f, 180f, 0f);
@@ -3942,6 +4848,7 @@ public class ShoplifterScript : MonoBehaviour
         }
         else if (environments[envIndex].name == "Apartment")
         { //office
+            //cam.clearFlags = CameraClearFlags.Skybox;
             Debug.Log("chosen office");
             ExperimentSettings.env = ExperimentSettings.Environment.Apartment;
             camVehicle.transform.localEulerAngles = new Vector3(0f, 180f, 0f);
@@ -4125,6 +5032,9 @@ public class ShoplifterScript : MonoBehaviour
             _startingIndex = Experiment.Instance.checkpointedEnvIndex;
             registerVals = new List<int>();
             Debug.Log("TURNED OFF blackscreen");
+
+            if (blackScreen.alpha == 1f)
+                Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
             blackScreen.alpha = 0f;
             registerVals.Add(Experiment.Instance.leftReward);
             registerVals.Add(Experiment.Instance.rightReward);
@@ -4148,6 +5058,9 @@ public class ShoplifterScript : MonoBehaviour
         currentPhaseName = "PRE-TRAINING";
         CheckpointSession(0, true);
         yield return StartCoroutine(ShowIntroInstructions());
+
+        if (blackScreen.alpha == 1f)
+            Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
         blackScreen.alpha = 0f;
 
 
@@ -4156,10 +5069,16 @@ public class ShoplifterScript : MonoBehaviour
         if (expSettings.stage == ExperimentSettings.Stage.Pretraining)
         {
             CameraZone.enableCamZones = false;
+
+            if (blackScreen.alpha == 0f)
+                Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(true);
             blackScreen.alpha = 1f;
             yield return StartCoroutine(PickEnvironment(0, true)); //training env
             RandomizeSuitcases();
             yield return StartCoroutine(PlayInstructionVideo(true));
+
+            if (blackScreen.alpha == 1f)
+                Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
             blackScreen.alpha = 0f;
             //disable any kind of camera zone interaction
 
@@ -4198,6 +5117,9 @@ public class ShoplifterScript : MonoBehaviour
 
         if (expSettings.stage == ExperimentSettings.Stage.Training)
         {
+
+            if (blackScreen.alpha == 1f)
+                Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
             blackScreen.alpha = 0f;
             //enable camera zone interaction before camera training
             Debug.Log("running cam training");
@@ -4358,6 +5280,7 @@ public class ShoplifterScript : MonoBehaviour
 
         yield return StartCoroutine(ParseSequence());
         yield return StartCoroutine(ParseQuestion());
+        yield return StartCoroutine(ParseQuestionPattern());
         yield return StartCoroutine(RunPretraining());
 
 
@@ -4394,6 +5317,11 @@ public class ShoplifterScript : MonoBehaviour
         yield return StartCoroutine(RunLearning(i));
         Experiment.Instance.shopLiftLog.LogExpTrialPhaseStatus(3, false);
 
+        UnityEngine.Debug.Log("SAI_DEBUG: Running Testing ");
+        yield return StartCoroutine(ExecuteDirectoryD11());
+        Experiment.Instance.shopLiftLog.LogExpTrialPhaseStatus(5, true);
+        yield return StartCoroutine(RunTesting(i));
+        Experiment.Instance.shopLiftLog.LogExpTrialPhaseStatus(5, false);
 
         UnityEngine.Debug.Log("SAI_DEBUG: Running Reevaluation ");
         yield return StartCoroutine(ExecuteDirectoryD4());
@@ -4403,7 +5331,7 @@ public class ShoplifterScript : MonoBehaviour
 
         //testing phase
 
-        UnityEngine.Debug.Log("SAI_DEBUG: Running Teting ");
+        UnityEngine.Debug.Log("SAI_DEBUG: Running Testing ");
         yield return StartCoroutine(ExecuteDirectoryD5());
         Experiment.Instance.shopLiftLog.LogExpTrialPhaseStatus(5, true);
         yield return StartCoroutine(RunTesting(i));
@@ -4428,7 +5356,10 @@ public class ShoplifterScript : MonoBehaviour
         Experiment.Instance.subjectLog.QueueisEmpty();
         //yield return new WaitForSeconds(10f);
         yield return StartCoroutine(ExecuteDirectoryD10());
-        Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(true);
+        //Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(true);
+
+        if (blackScreen.alpha == 0f)
+            Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(true);
         blackScreen.alpha = 1f;
 
 
@@ -4652,13 +5583,19 @@ public class ShoplifterScript : MonoBehaviour
         if (reward > 60)
         {
             yield return StartCoroutine(ExecuteDirectoryD8());
-            Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(true);
+            //Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(true);
+
+            if (blackScreen.alpha == 0f)
+                Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(true);
             blackScreen.alpha = 1f;
         }
         else
         {
             yield return StartCoroutine(ExecuteDirectoryD9());
-            Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(true);
+            //Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(true);
+
+            if (blackScreen.alpha == 0f)
+                Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(true);
             blackScreen.alpha = 1f;
 
         }
@@ -4868,7 +5805,7 @@ public class ShoplifterScript : MonoBehaviour
         {
             timer += Time.deltaTime;
             camVehicle.transform.position = Vector3.Lerp(startPos, endPos, timer / factor);
-            Experiment.Instance.shopLiftLog.LogExpSpeedChange(timer / factor);
+            Experiment.Instance.shopLiftLog.LogExpSpeedChangeTransition((endPos - startPos).sqrMagnitude / factor);
             yield return 0;
         }
         //		camVehicle.GetComponent<RigidbodyFirstPersonController> ().enabled = true;
@@ -4893,7 +5830,7 @@ public class ShoplifterScript : MonoBehaviour
         Debug.Log("[VelocityPlayerTo] in phase 2");
         int sign = (int)((endPos.z - startPos.z) / Mathf.Abs(endPos.z - startPos.z));
         Vector3 moveDir = new Vector3(0f, 0f, sign * 1f);
-        currentSpeed = (UnityEngine.Random.Range(minSpeed, maxSpeed)) * 1.2f;
+        //currentSpeed = (UnityEngine.Random.Range(minSpeed, maxSpeed)) * 1.2f;
         float distanceLeft = Vector3.Distance(camVehicle.transform.position, endPos);
 
         camVehicle.GetComponent<RigidbodyFirstPersonController>().enabled = false;
@@ -4913,6 +5850,7 @@ public class ShoplifterScript : MonoBehaviour
 
     public IEnumerator ExecuteDirectoryD1()
     {
+        
         string[] Images = Directory.GetFiles(Application.dataPath + "/Resources_IGNORE/D1", "0*.png", SearchOption.AllDirectories);
 
         Experiment.Instance.shopLiftLog.LogInstructionExtremes(true);
@@ -4923,7 +5861,11 @@ public class ShoplifterScript : MonoBehaviour
             instructionRendererImage.sprite = image_new;
             instructionRenderer.alpha = 1f;
 
-            yield return StartCoroutine(WaitForButtonPress(20f, didPress =>
+            if (blackScreen.alpha == 1f)
+                Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
+            blackScreen.alpha = 0f;
+
+            yield return StartCoroutine(WaitForButtonPress(10000f, didPress =>
             {
                 Debug.Log("did press: " + didPress);
             }
@@ -4939,6 +5881,7 @@ public class ShoplifterScript : MonoBehaviour
 
     public IEnumerator ExecuteDirectoryD2()
     {
+        
         string[] Images = Directory.GetFiles(Application.dataPath + "/Resources_IGNORE/D2", "0*.png", SearchOption.AllDirectories);
 
         Experiment.Instance.shopLiftLog.LogInstructionExtremes(true);
@@ -4949,7 +5892,11 @@ public class ShoplifterScript : MonoBehaviour
             instructionRendererImage.sprite = image_new;
             instructionRenderer.alpha = 1f;
 
-            yield return StartCoroutine(WaitForButtonPress(20f, didPress =>
+            if (blackScreen.alpha == 1f)
+                Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
+            blackScreen.alpha = 0f;
+
+            yield return StartCoroutine(WaitForButtonPress(10000f, didPress =>
             {
                 Debug.Log("did press: " + didPress);
             }
@@ -4965,6 +5912,7 @@ public class ShoplifterScript : MonoBehaviour
 
     public IEnumerator ExecuteDirectoryD3()
     {
+        
         string[] Images = Directory.GetFiles(Application.dataPath + "/Resources_IGNORE/D3", "0*.png", SearchOption.AllDirectories);
 
         Experiment.Instance.shopLiftLog.LogInstructionExtremes(true);
@@ -4975,7 +5923,11 @@ public class ShoplifterScript : MonoBehaviour
             instructionRendererImage.sprite = image_new;
             instructionRenderer.alpha = 1f;
 
-            yield return StartCoroutine(WaitForButtonPress(20f, didPress =>
+            if (blackScreen.alpha == 1f)
+                Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
+            blackScreen.alpha = 0f;
+
+            yield return StartCoroutine(WaitForButtonPress(10000f, didPress =>
             {
                 Debug.Log("did press: " + didPress);
             }
@@ -4990,6 +5942,7 @@ public class ShoplifterScript : MonoBehaviour
 
     public IEnumerator ExecuteDirectoryD4()
     {
+        
         string[] Images = Directory.GetFiles(Application.dataPath + "/Resources_IGNORE/D4", "0*.png", SearchOption.AllDirectories);
 
         Experiment.Instance.shopLiftLog.LogInstructionExtremes(true);
@@ -5000,7 +5953,11 @@ public class ShoplifterScript : MonoBehaviour
             instructionRendererImage.sprite = image_new;
             instructionRenderer.alpha = 1f;
 
-            yield return StartCoroutine(WaitForButtonPress(20f, didPress =>
+            if (blackScreen.alpha == 1f)
+                Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
+            blackScreen.alpha = 0f;
+
+            yield return StartCoroutine(WaitForButtonPress(10000f, didPress =>
             {
                 Debug.Log("did press: " + didPress);
             }
@@ -5015,6 +5972,7 @@ public class ShoplifterScript : MonoBehaviour
 
     public IEnumerator ExecuteDirectoryD5()
     {
+        
         string[] Images = Directory.GetFiles(Application.dataPath + "/Resources_IGNORE/D5", "0*.png", SearchOption.AllDirectories);
 
         Experiment.Instance.shopLiftLog.LogInstructionExtremes(true);
@@ -5025,7 +5983,11 @@ public class ShoplifterScript : MonoBehaviour
             instructionRendererImage.sprite = image_new;
             instructionRenderer.alpha = 1f;
 
-            yield return StartCoroutine(WaitForButtonPress(20f, didPress =>
+            if (blackScreen.alpha == 1f)
+                Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
+            blackScreen.alpha = 0f;
+
+            yield return StartCoroutine(WaitForButtonPress(10000f, didPress =>
             {
                 Debug.Log("did press: " + didPress);
             }
@@ -5040,6 +6002,7 @@ public class ShoplifterScript : MonoBehaviour
 
     public IEnumerator ExecuteDirectoryD6()
     {
+        
         string[] Images = Directory.GetFiles(Application.dataPath + "/Resources_IGNORE/D6", "0*.png", SearchOption.AllDirectories);
 
         Experiment.Instance.shopLiftLog.LogInstructionExtremes(true);
@@ -5050,7 +6013,11 @@ public class ShoplifterScript : MonoBehaviour
             instructionRendererImage.sprite = image_new;
             instructionRenderer.alpha = 1f;
 
-            yield return StartCoroutine(WaitForButtonPress(20f, didPress =>
+            if (blackScreen.alpha == 1f)
+                Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
+            blackScreen.alpha = 0f;
+
+            yield return StartCoroutine(WaitForButtonPress(10000f, didPress =>
             {
                 Debug.Log("did press: " + didPress);
             }
@@ -5065,6 +6032,7 @@ public class ShoplifterScript : MonoBehaviour
 
     public IEnumerator ExecuteDirectoryD7()
     {
+        
         string[] Images = Directory.GetFiles(Application.dataPath + "/Resources_IGNORE/D7", "0*.png", SearchOption.AllDirectories);
 
         Experiment.Instance.shopLiftLog.LogInstructionExtremes(true);
@@ -5075,7 +6043,11 @@ public class ShoplifterScript : MonoBehaviour
             instructionRendererImage.sprite = image_new;
             instructionRenderer.alpha = 1f;
 
-            yield return StartCoroutine(WaitForButtonPress(20f, didPress =>
+            if (blackScreen.alpha == 1f)
+                Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
+            blackScreen.alpha = 0f;
+
+            yield return StartCoroutine(WaitForButtonPress(10000f, didPress =>
             {
                 Debug.Log("did press: " + didPress);
             }
@@ -5090,6 +6062,7 @@ public class ShoplifterScript : MonoBehaviour
 
     public IEnumerator ExecuteDirectoryD8()
     {
+        
         string[] Images = Directory.GetFiles(Application.dataPath + "/Resources_IGNORE/D8", "0*.png", SearchOption.AllDirectories);
 
         Experiment.Instance.shopLiftLog.LogInstructionExtremes(true);
@@ -5100,7 +6073,11 @@ public class ShoplifterScript : MonoBehaviour
             instructionRendererImage.sprite = image_new;
             instructionRenderer.alpha = 1f;
 
-            yield return StartCoroutine(WaitForButtonPress(20f, didPress =>
+            if (blackScreen.alpha == 1f)
+                Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
+            blackScreen.alpha = 0f;
+
+            yield return StartCoroutine(WaitForButtonPress(10000f, didPress =>
             {
                 Debug.Log("did press: " + didPress);
             }
@@ -5115,6 +6092,7 @@ public class ShoplifterScript : MonoBehaviour
 
     public IEnumerator ExecuteDirectoryD9()
     {
+        
         string[] Images = Directory.GetFiles(Application.dataPath + "/Resources_IGNORE/D9", "0*.png", SearchOption.AllDirectories);
 
         Experiment.Instance.shopLiftLog.LogInstructionExtremes(true);
@@ -5125,7 +6103,45 @@ public class ShoplifterScript : MonoBehaviour
             instructionRendererImage.sprite = image_new;
             instructionRenderer.alpha = 1f;
 
-            yield return StartCoroutine(WaitForButtonPress(20f, didPress =>
+            if (blackScreen.alpha == 1f)
+                Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
+            blackScreen.alpha = 0f;
+
+            yield return StartCoroutine(WaitForButtonPress(10000f, didPress =>
+            {
+                Debug.Log("did press: " + didPress);
+            }
+            ));
+
+
+            if (blackScreen.alpha == 0f)
+                Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(true);
+            blackScreen.alpha = 1f;
+            instructionRenderer.alpha = 0f;
+        }
+        Experiment.Instance.shopLiftLog.LogInstructionExtremes(false);
+
+        yield return null;
+    }
+
+    public IEnumerator ExecuteDirectoryD10()
+    {
+        
+        string[] Images = Directory.GetFiles(Application.dataPath + "/Resources_IGNORE/D10", "0*.png", SearchOption.AllDirectories);
+
+        Experiment.Instance.shopLiftLog.LogInstructionExtremes(true);
+        foreach (string path_n in Images)
+        {
+            Debug.Log("InstManager: Path_n: " + path_n);
+            Sprite image_new = img2sprite.LoadNewSprite(path_n);
+            instructionRendererImage.sprite = image_new;
+            instructionRenderer.alpha = 1f;
+
+            if (blackScreen.alpha == 1f)
+                Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
+            blackScreen.alpha = 0f;
+
+            yield return StartCoroutine(WaitForButtonPress(10000f, didPress =>
             {
                 Debug.Log("did press: " + didPress);
             }
@@ -5138,9 +6154,10 @@ public class ShoplifterScript : MonoBehaviour
         yield return null;
     }
 
-    public IEnumerator ExecuteDirectoryD10()
+    public IEnumerator ExecuteDirectoryD11()
     {
-        string[] Images = Directory.GetFiles(Application.dataPath + "/Resources_IGNORE/D10", "0*.png", SearchOption.AllDirectories);
+
+        string[] Images = Directory.GetFiles(Application.dataPath + "/Resources_IGNORE/D11", "0*.png", SearchOption.AllDirectories);
 
         Experiment.Instance.shopLiftLog.LogInstructionExtremes(true);
         foreach (string path_n in Images)
@@ -5150,7 +6167,11 @@ public class ShoplifterScript : MonoBehaviour
             instructionRendererImage.sprite = image_new;
             instructionRenderer.alpha = 1f;
 
-            yield return StartCoroutine(WaitForButtonPress(20f, didPress =>
+            if (blackScreen.alpha == 1f)
+                Experiment.Instance.shopLiftLog.LogBlackScreenExtremes(false);
+            blackScreen.alpha = 0f;
+
+            yield return StartCoroutine(WaitForButtonPress(10000f, didPress =>
             {
                 Debug.Log("did press: " + didPress);
             }
@@ -5261,5 +6282,39 @@ public class ShoplifterScript : MonoBehaviour
         }
 
     }
+
+    public IEnumerator ParseQuestionPattern()
+    {
+        string filePath = Application.dataPath + "/Resources_IGNORE" + "/" + "question_sequence.txt";
+
+        using (StreamReader reader = new StreamReader(filePath))
+        {
+            string line;
+            int line_no = 0;
+            while ((line = reader.ReadLine()) != null)
+            {
+                line_no++;
+                string[] values = line.Split('\t');
+
+                for (int i = 0; i < 10; i++) {
+                    questionpattern[i] = Int32.Parse(values[i]);
+                }
+
+            }
+        }
+
+        yield return null;
+    }
+
+
+        void LoadMaterial_mountain()
+    {
+        string material = Application.dataPath + "/Resources" + "/Materials/" + "Terrain.mat";
+
+        //Material m = Resources.Load("Material/Terrain.mat", typeof(Material)) as Material;
+        Material m = Resources.Load<Material>("Materials/Terrain.mat") as Material;
+        mountain_gobj.gameObject.GetComponent<MeshRenderer>().material = m;
+
+     }
 
 }

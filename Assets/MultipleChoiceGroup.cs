@@ -222,7 +222,8 @@ public class MultipleChoiceGroup : MonoBehaviour {
 
         if (questionType == 0)
         {
-            PrefText.text = " Which room comes after the ABOVE room?";
+            PrefText.text = " Which room from the BOTTOM is in the same path with the ABOVE room?";
+                //" Which room comes after the ABOVE room?";
         }
         else if (questionType == 1) {
             PrefText.text = "Which room will lead you to more cash?";
@@ -310,6 +311,56 @@ public class MultipleChoiceGroup : MonoBehaviour {
                 displayOptions = 0;
             }
         }
+    }
+
+    public void SetFocusImageCashTest(bool focus_status, Vector3 instructTextpos, Vector3 prefTextpos, int questionType, int swap, int is_test)
+    {
+        focusImage.enabled = focus_status;
+        PrefText.transform.localPosition = prefTextpos;
+        instructionText.transform.localPosition = instructTextpos;
+
+        PrefText.text = "Which room will lead you to more cash?";
+
+        Experiment.Instance.shopLiftLog.LogExpQuesType(1, 3, 3, 0);
+        if (swap == 0)
+        {
+            choiceImageList[1].texture = roomTextureList[4];
+            choiceImageList[3].texture = roomTextureList[5];
+            if (Experiment.Instance.shopLift._currentReevalCondition != 1)
+            {
+                Experiment.Instance.shopLiftLog.LogExpQuesType2(1, 3, 3, 0, 0, false);
+                Experiment.Instance.shopLiftLog.LogExpQuesType2(1, 3, 3, 1, 1, false);
+            }
+            else
+            {
+                Experiment.Instance.shopLiftLog.LogExpQuesType2(1, 3, 3, 0, 0, true);
+                Experiment.Instance.shopLiftLog.LogExpQuesType2(1, 3, 3, 1, 1, true);
+            }
+        }
+        else
+        {
+            choiceImageList[1].texture = roomTextureList[5];
+            choiceImageList[3].texture = roomTextureList[4];
+            if (Experiment.Instance.shopLift._currentReevalCondition != 1)
+            {
+                Experiment.Instance.shopLiftLog.LogExpQuesType2(1, 3, 3, 0, 1, false);
+                Experiment.Instance.shopLiftLog.LogExpQuesType2(1, 3, 3, 1, 0, false);
+            }
+            else
+            {
+                Experiment.Instance.shopLiftLog.LogExpQuesType2(1, 3, 3, 0, 1, true);
+                Experiment.Instance.shopLiftLog.LogExpQuesType2(1, 3, 3, 1, 0, true);
+            }
+        }
+
+
+        //Experiment.Instance.shopLiftLog.LogExpQuesTyp2(1, 1, 1, 0);
+        if ((Experiment.Instance.shopLift.expSettings.stage == ExperimentSettings.Stage.Reevaluation) &&
+            ((Experiment.Instance.shopLift._currentReevalCondition == 1) || (Experiment.Instance.shopLift._currentReevalCondition == 0)))
+            Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(1, 1, 1, 0, 6);
+        else
+            Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(1, 1, 1, 0, 5);
+
     }
 
     public void ChangeToInterm(bool Chg_req) {
