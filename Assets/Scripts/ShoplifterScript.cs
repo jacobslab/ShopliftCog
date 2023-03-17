@@ -223,6 +223,7 @@ public class ShoplifterScript : MonoBehaviour
     public CanvasGroup correctGiantText;
     public CanvasGroup incorrectGiantText;
     public CanvasGroup PauseGroup;
+    public CanvasGroup sensorImage;
     public bool isGamePaused;
 
 
@@ -1266,7 +1267,7 @@ public class ShoplifterScript : MonoBehaviour
             else if (selected == 1)
             {
                 if (ExperimentSettings.env == ExperimentSettings.Environment.SpaceStation)
-                    security_camera.gameObject.GetComponent<MeshRenderer>().material = SecurityCamMat_White;
+                    security_camera.gameObject.GetComponent<MeshRenderer>().material = SecurityCamMat_Black;
                 else
                     security_camera.gameObject.GetComponent<MeshRenderer>().material = SecurityCamMat_Black;
             }
@@ -1287,7 +1288,7 @@ public class ShoplifterScript : MonoBehaviour
                 else
                 {
                     if (selected == 1)
-                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(5f, selectedx * 5f, 0));
+                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(0f, selectedx * 5f, 0));
                     else if (selected == 2)
                         security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(5f, selectedx * 5f, 0));
                     else if (selected == 3)
@@ -2418,7 +2419,7 @@ public class ShoplifterScript : MonoBehaviour
             }
             else if (selected == 1)
             {
-                security_camera.gameObject.GetComponent<MeshRenderer>().material = SecurityCamMat_White;
+                security_camera.gameObject.GetComponent<MeshRenderer>().material = SecurityCamMat_Black;
             }
 
             if (ExperimentSettings.env == ExperimentSettings.Environment.SpaceStation)
@@ -2437,7 +2438,7 @@ public class ShoplifterScript : MonoBehaviour
                 else
                 {
                     if (selected == 1)
-                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(5f, selectedx * 5f, 0));
+                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(0f, selectedx * 5f, 0));
                     else if (selected == 2)
                         security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(5f, selectedx * 5f, 0));
                     else if (selected == 3)
@@ -3013,7 +3014,7 @@ public class ShoplifterScript : MonoBehaviour
                 }
                 else if (selected == 1)
                 {
-                    security_camera.gameObject.GetComponent<MeshRenderer>().material = SecurityCamMat_White;
+                    security_camera.gameObject.GetComponent<MeshRenderer>().material = SecurityCamMat_Black;
                 }
 
                 if (ExperimentSettings.env == ExperimentSettings.Environment.SpaceStation)
@@ -3032,7 +3033,7 @@ public class ShoplifterScript : MonoBehaviour
                     else
                     {
                         if (selected == 1)
-                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(5f, selectedx * 5f, 0));
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(0f, selectedx * 5f, 0));
                         else if (selected == 2)
                             security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(5f, selectedx * 5f, 0));
                         else if (selected == 3)
@@ -4116,7 +4117,8 @@ public class ShoplifterScript : MonoBehaviour
         int correctChoice;
         bool pressed = false;
         float tElapsed = 0f;
-        float minSelectTime = 2f;
+        //float minSelectTime = 2f;
+        float minSelectTime = 0f;
 
         Debug.Log("PREF INDEX IS " + prefIndex.ToString());
         EnablePlayerCam(false);
@@ -4178,18 +4180,18 @@ public class ShoplifterScript : MonoBehaviour
 
         infoText.text = "";
         infoGroup.alpha = 0f;
-        if (is_Training)
+        /*if (is_Training)
         {
             multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().setCorrectPatches(0);
             multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().setCanvas(true);
 
-            /*yield return StartCoroutine(WaitForButtonPress(100000f, didPress =>
-            {
-                pressed = didPress;
-            }));*/
-            yield return StartCoroutine(WaitForJitter(3f));
+            //yield return StartCoroutine(WaitForButtonPress(100000f, didPress =>
+            //{
+            //    pressed = didPress;
+            //}));
+            //yield return StartCoroutine(WaitForJitter(3f));
             multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().setCanvas(false);
-        }
+        }*/
 
         Experiment.Instance.shopLiftLog.LogMultipleChoiceResponse(multipleChoiceGroup.GetComponent<AnswerSelector>().ReturnSelectorPosition(), correctChoice, pressed);
         multipleChoiceGroup.gameObject.SetActive(false);
@@ -4207,7 +4209,8 @@ public class ShoplifterScript : MonoBehaviour
         int correctChoice;
         bool pressed = false;
         float tElapsed = 0f;
-        float minSelectTime = 2f;
+        //float minSelectTime = 2f;
+        float minSelectTime = 0f;
 
         Debug.Log("PREF INDEX IS " + prefIndex.ToString());
         EnablePlayerCam(false);
@@ -4297,18 +4300,18 @@ public class ShoplifterScript : MonoBehaviour
 
         }
 
-        if (is_Training)
+        /*if (is_Training)
         {
             multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().setCorrectPatches(0);
             multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().setCanvas(true);
 
-            /*yield return StartCoroutine(WaitForButtonPress(100000f, didPress =>
-            {
-                pressed = didPress;
-            }));*/
-            yield return StartCoroutine(WaitForJitter(3f));
+            //yield return StartCoroutine(WaitForButtonPress(100000f, didPress =>
+            //{
+            //    pressed = didPress;
+            //}));
+            //yield return StartCoroutine(WaitForJitter(3f));
             multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().setCanvas(false);
-        }
+        }*/
 
 
         Experiment.Instance.shopLiftLog.LogMultipleChoiceResponse(multipleChoiceGroup.GetComponent<AnswerSelector>().ReturnSelectorPosition(), correctChoice, pressed);
@@ -4444,7 +4447,8 @@ public class ShoplifterScript : MonoBehaviour
         else
         {
             float tElapsed = 0f;
-            float minSelectTime = 1.5f;
+            //float minSelectTime = 1.5f;
+            float minSelectTime = 0f;
 
             while (tElapsed < minSelectTime)
             {

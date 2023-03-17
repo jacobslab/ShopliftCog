@@ -8,17 +8,17 @@ using System.IO;
 public class SyncboxControl : MonoBehaviour {
     Experiment exp { get { return Experiment.Instance; } }
 
-	[DllImport ("ASimplePlugin")]
+	[DllImport ("ASimplePlugin.dll")]
 	private static extern int OpenUSB();
-	[DllImport ("ASimplePlugin")]
+	[DllImport ("ASimplePlugin.dll")]
 	private static extern int CloseUSB();
-	[DllImport ("ASimplePlugin")]
+	[DllImport ("ASimplePlugin.dll")]
 	private static extern IntPtr TurnLEDOn();
-	[DllImport ("ASimplePlugin")]
+	[DllImport ("ASimplePlugin.dll")]
 	private static extern IntPtr TurnLEDOff();
-	[DllImport ("ASimplePlugin")]
+	[DllImport ("ASimplePlugin.dll")]
 	private static extern int CheckUSB ();
-    [DllImport("ASimplePlugin")]
+    [DllImport("ASimplePlugin.dll")]
     private static extern int AddTwoIntegers(int a, int b);
     public bool ShouldSyncPulse = true;
 	public float PulseOnSeconds;
@@ -62,11 +62,13 @@ public class SyncboxControl : MonoBehaviour {
 		string connectionError = "";
 		while(!isUSBOpen){
 			UnityEngine.Debug.Log ("attempting to connect");
+			LogZero(GameClock.SystemTime_Milliseconds);
 			int usbOpenFeedback = OpenUSB();
             
-			//UnityEngine.Debug.Log("USB Open response: " + usbOpenFeedback.ToString());
+			UnityEngine.Debug.Log("USB Open response: " + usbOpenFeedback.ToString());
 			if(usbOpenFeedback != 0){
-               // LogSyncInfo("USB Connected");
+				// LogSyncInfo("USB Connected");
+				LogOne(GameClock.SystemTime_Milliseconds);
 				isUSBOpen = true;
 			}
 
@@ -176,12 +178,14 @@ public class SyncboxControl : MonoBehaviour {
 
 	//WE'RE USING THIS FUNCTION
 	IEnumerator RunSyncPulseManual(){
+		UnityEngine.Debug.Log("SyncboxControl: RunsyncPulseManual: ");
 		float jitterMin = 0.1f;
 		float jitterMax = syncPulseInterval - syncPulseDuration;
 
 		Stopwatch executionStopwatch = new Stopwatch ();
-
+		LogTwo(GameClock.SystemTime_Milliseconds);
 		while (ShouldSyncPulse) {
+			LogThree(GameClock.SystemTime_Milliseconds);
 			executionStopwatch.Reset();
 		//	UnityEngine.Debug.Log ("pulse running");
 
@@ -205,13 +209,13 @@ public class SyncboxControl : MonoBehaviour {
 
 	//return microseconds it took to turn on LED
 	void ToggleLEDOn(){
-
+		UnityEngine.Debug.Log("SyncboxControl: RunsyncPulseManual: ToggleLEDOn");
 		TurnLEDOn ();
 		LogSYNCOn (GameClock.SystemTime_Milliseconds);
 	}
 
 	void ToggleLEDOff(){
-
+		UnityEngine.Debug.Log("SyncboxControl: RunsyncPulseManual: ToggleLEDOff");
 		TurnLEDOff();
 		LogSYNCOff (GameClock.SystemTime_Milliseconds);
 
@@ -233,25 +237,59 @@ public class SyncboxControl : MonoBehaviour {
 
 	void LogSYNCOn(long time){
         if (ExperimentSettings.isLogging) {
-			exp.eegLog.Log (time, exp.eegLog.GetFrameCount(), "ON"); //NOTE: NOT USING FRAME IN THE FRAME SLOT
+			exp.eegLog.LogNew (time, exp.eegLog.GetFrameCount(), "ON"); //NOTE: NOT USING FRAME IN THE FRAME SLOT
 		}
 	}
 
 	void LogSYNCOff(long time){
         if (ExperimentSettings.isLogging) {
-			exp.eegLog.Log (time, exp.eegLog.GetFrameCount(), "OFF"); //NOTE: NOT USING FRAME IN THE FRAME SLOT
+			exp.eegLog.LogNew (time, exp.eegLog.GetFrameCount(), "OFF"); //NOTE: NOT USING FRAME IN THE FRAME SLOT
 		}
 	}
 
+	void LogZero(long time)
+	{
+		if (ExperimentSettings.isLogging)
+		{
+			exp.eegLog.LogNew(time, exp.eegLog.GetFrameCount(), "Zero"); //NOTE: NOT USING FRAME IN THE FRAME SLOT
+		}
+	}
+
+	void LogOne(long time)
+	{
+		if (ExperimentSettings.isLogging)
+		{
+			exp.eegLog.LogNew(time, exp.eegLog.GetFrameCount(), "One"); //NOTE: NOT USING FRAME IN THE FRAME SLOT
+		}
+	}
+
+	void LogTwo(long time)
+	{
+		if (ExperimentSettings.isLogging)
+		{
+			exp.eegLog.LogNew(time, exp.eegLog.GetFrameCount(), "Two"); //NOTE: NOT USING FRAME IN THE FRAME SLOT
+		}
+	}
+
+	void LogThree(long time)
+	{
+		if (ExperimentSettings.isLogging)
+		{
+			exp.eegLog.LogNew(time, exp.eegLog.GetFrameCount(), "Three"); //NOTE: NOT USING FRAME IN THE FRAME SLOT
+		}
+	}
+
+
+
 	void LogSYNCStarted(long time, float duration){
         if (ExperimentSettings.isLogging) {
-			exp.eegLog.Log (time, exp.eegLog.GetFrameCount (), "SYNC PULSE STARTED" + Logger_Threading.LogTextSeparator + duration);
+			exp.eegLog.LogNew (time, exp.eegLog.GetFrameCount (), "SYNC PULSE STARTED" + Logger_Threading.LogTextSeparator + duration);
 		}
 	}
 
 	void LogSYNCPulseInfo(long time, float timeBeforePulseSeconds){
         if (ExperimentSettings.isLogging) {
-			exp.eegLog.Log (time, exp.eegLog.GetFrameCount (), "SYNC PULSE INFO" + Logger_Threading.LogTextSeparator + timeBeforePulseSeconds*1000); //log milliseconds
+			exp.eegLog.LogNew (time, exp.eegLog.GetFrameCount (), "SYNC PULSE INFO" + Logger_Threading.LogTextSeparator + timeBeforePulseSeconds*1000); //log milliseconds
 		}
 	}
 

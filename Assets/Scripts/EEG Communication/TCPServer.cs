@@ -110,7 +110,7 @@ public class TCPServer : MonoBehaviour {
 	}
 
 	public void Log(long time, TCP_Config.EventType eventType){
-		exp.eegLog.Log(time, exp.eegLog.GetFrameCount(), eventType.ToString());
+		exp.eegLog.LogNew(time, exp.eegLog.GetFrameCount(), eventType.ToString());
 	}
 
 	public void SetState(TCP_Config.DefineStates state, bool isEnabled){

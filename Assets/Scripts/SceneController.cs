@@ -70,6 +70,7 @@ public class SceneController : MonoBehaviour
         {
             syncPulser.SetActive(true);
             syncPulsingImage.SetActive(true);
+            shoplifterRef.sensorImage.alpha = 1f;
             syncPulser.GetComponent<SyncPulser>().enabled = true;
         }
         else
@@ -85,6 +86,7 @@ public class SceneController : MonoBehaviour
                 syncPulser.GetComponent<SyncboxControl>().enabled = true;
             }
             syncPulsingImage.SetActive(false);
+            shoplifterRef.sensorImage.alpha = 0f;
         }
 
         if (expSettings.controlDevice == ExperimentSettings.ControlDevice.Keyboard)

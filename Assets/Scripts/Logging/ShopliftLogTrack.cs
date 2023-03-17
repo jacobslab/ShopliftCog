@@ -33,12 +33,12 @@ public class ShopliftLogTrack : LogTrack
 
 	public void LogLEDOn()
 	{
-		subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "PHOTODIODE_SQUARE" + separator + "ON");
+		subjectLog.LogNew(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "PHOTODIODE_SQUARE" + separator + "ON");
 	}
 
 	public void LogLEDOff()
 	{
-		subjectLog.Log(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "PHOTODIODE_SQUARE" + separator + "OFF");
+		subjectLog.LogNew(GameClock.SystemTime_Milliseconds, subjectLog.GetFrameCount(), "PHOTODIODE_SQUARE" + separator + "OFF");
 	}
 
 	public void LogTimeout(float maxTime)

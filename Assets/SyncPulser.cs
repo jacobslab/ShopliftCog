@@ -7,6 +7,7 @@ using System.Diagnostics;
 public class SyncPulser : MonoBehaviour {
 
 	public RawImage pulseImage;
+	public Image sensorImageSync;
 	float syncPulseInterval = 10f;
 	float syncPulseDuration=0.05f;
 
@@ -15,6 +16,7 @@ public class SyncPulser : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		pulseImage.color = Color.black;
+		sensorImageSync.color = Color.black;
 		StartCoroutine ("RunSyncPulseManual");
 	}
 	
@@ -29,6 +31,7 @@ public class SyncPulser : MonoBehaviour {
 	}
 
 	IEnumerator RunSyncPulseManual(){
+		UnityEngine.Debug.Log("SyncPulser: RunsyncPulseManual: SyncBox");
 		float jitterMin =2f;
 		float jitterMax = 4f;
 
@@ -59,14 +62,17 @@ public class SyncPulser : MonoBehaviour {
 
 	void ToggleLEDOn()
 	{
-		pulseImage.color = Color.white;
+		UnityEngine.Debug.Log("SyncPulser: RunsyncPulseManual: ToggleLEDOn");
+		//pulseImage.color = Color.white;
+		sensorImageSync.color = Color.white;
 		Experiment.Instance.shopLiftLog.LogLEDOn ();
 	}
 
 	void ToggleLEDOff()
 	{
-
+		UnityEngine.Debug.Log("SyncPulser: RunsyncPulseManual: ToggleLEDOff");
 		pulseImage.color = Color.black;
+		sensorImageSync.color = Color.black;
 		Experiment.Instance.shopLiftLog.LogLEDOff ();
 	}
 
