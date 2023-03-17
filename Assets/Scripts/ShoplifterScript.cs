@@ -4167,7 +4167,7 @@ public class ShoplifterScript : MonoBehaviour
         float val = multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().sliderValue();
         if (!pressed || (val == 0.5f))
         {
-            while (!pressed)
+            while ((!pressed) || (val == 0.5f))
             {
                 yield return StartCoroutine(WaitForButtonPress(10000f, didPress =>
                 {
@@ -4258,7 +4258,7 @@ public class ShoplifterScript : MonoBehaviour
         float val = multipleChoiceGroup.GetComponent<MultipleChoiceGroup>().sliderValue();
         if (!pressed || (val == 0.5f))
         {
-            while (!pressed)
+            while ((!pressed) || (val == 0.5f))
             {
                 yield return StartCoroutine(WaitForButtonPress(10000f, didPress =>
                 {

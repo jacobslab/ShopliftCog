@@ -16,6 +16,7 @@ public class SyncPulser : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		pulseImage.color = Color.black;
+		pulseImage.enabled = false;
 		sensorImageSync.color = Color.black;
 		StartCoroutine ("RunSyncPulseManual");
 	}
