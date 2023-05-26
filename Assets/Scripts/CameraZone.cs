@@ -70,6 +70,14 @@ public class CameraZone : MonoBehaviour {
                 activeCamObj = securityCam;
                 securityCam.transform.localEulerAngles = new Vector3(securityCam.transform.localEulerAngles.x, securityCam.transform.localEulerAngles.y + 180f, securityCam.transform.localEulerAngles.z);
             }
+            else if (ExperimentSettings.env == ExperimentSettings.Environment.MedievalDungeon)
+            {
+                activeCamObj = securityCam;
+            }
+            else if (ExperimentSettings.env == ExperimentSettings.Environment.LibraryDungeon)
+            {
+                activeCamObj = securityCam;
+            }
         }
     }
 

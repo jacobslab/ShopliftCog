@@ -29,6 +29,28 @@ public class ObjectLogTrack : LogTrack {
 				Experiment.Instance.shopLiftLog.LogExpXRanges(-885, -735);
 				Experiment.Instance.shopLiftLog.LogExpYRanges(1.3f, 1.7f);
 				Experiment.Instance.shopLiftLog.LogExpZRanges(-38, 26);
+				switch (((ExperimentSettings.staticSessionDay*2)+1) + ExperimentSettings.Instance.ExperimentValue)
+				{
+					case 1:
+						Experiment.Instance.shopLiftLog.LogExpRoomDefinition(1);
+						break;
+					case 2:
+						Experiment.Instance.shopLiftLog.LogExpRoomDefinition(2);
+						break;
+					case 3:
+						Experiment.Instance.shopLiftLog.LogExpRoomDefinition(3);
+						break;
+					case 4:
+						Experiment.Instance.shopLiftLog.LogExpRoomDefinition(4);
+						break;
+					case 5:
+						Experiment.Instance.shopLiftLog.LogExpRoomDefinition(5);
+						break;
+					case 6:
+						Experiment.Instance.shopLiftLog.LogExpRoomDefinition(6);
+						break;
+				}
+				
 				isFirst = false;
 			}
 			Log ();

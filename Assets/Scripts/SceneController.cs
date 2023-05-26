@@ -14,6 +14,7 @@ public class SceneController : MonoBehaviour
     public GameObject syncPulser;
     public GameObject syncPulsingImage;
 
+    public List<GameObject> environmentList_D3;
     public List<GameObject> environmentList_SO;
     public List<GameObject> environmentList_WA;
 
@@ -120,8 +121,8 @@ public class SceneController : MonoBehaviour
         }
         else
         {
-            shoplifterRef.environments[0] = environmentList_WA[0];
-            shoplifterRef.environments[1] = environmentList_WA[1];
+            shoplifterRef.environments[0] = environmentList_D3[0];
+            shoplifterRef.environments[1] = environmentList_D3[1];
 
 
         }

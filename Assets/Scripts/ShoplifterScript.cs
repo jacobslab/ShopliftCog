@@ -316,7 +316,8 @@ public class ShoplifterScript : MonoBehaviour
     public string[] training_3_ques = new string[3];
     public string[] learning_ques = new string[10];
     public string[] reeval_ques = new string[10];
-    public int[] questionpattern = new int[10]; 
+    public int[] questionpattern = new int[10];
+    public int[] questionpattern_reeval = new int[10];
     public float speedTimer;
     public int timebins;
     public GameObject mountain_gobj;
@@ -840,9 +841,17 @@ public class ShoplifterScript : MonoBehaviour
 
 
 
-
-        leftRoom.transform.localPosition = envManager.leftRoomTransform.localPosition;
-        rightRoom.transform.localPosition = envManager.rightRoomTransform.localPosition;
+        if ((ExperimentSettings.env == ExperimentSettings.Environment.MedievalDungeon) &&
+            (Experiment.Instance.shopLift.expSettings.stage == ExperimentSettings.Stage.Reevaluation))
+        {
+            leftRoom.transform.localPosition = envManager.leftRoomTransform.localPosition; //+ new Vector3(28.03094f, -0.04f, 0.2f);
+            rightRoom.transform.localPosition = envManager.rightRoomTransform.localPosition;
+        }
+        else
+        {
+            leftRoom.transform.localPosition = envManager.leftRoomTransform.localPosition;
+            rightRoom.transform.localPosition = envManager.rightRoomTransform.localPosition;
+        }
         Debug.Log("set " + leftRoom.gameObject.name + " as left and " + rightRoom.gameObject.name + " as right");
 
     }
@@ -953,8 +962,29 @@ public class ShoplifterScript : MonoBehaviour
         tempSuitcase = leftSuitcase;
         leftSuitcase = rightSuitcase;
         rightSuitcase = tempSuitcase;
-        leftRoom.transform.position = envManager.leftRoomTransform.position;
-        rightRoom.transform.position = envManager.rightRoomTransform.position;
+        if (ExperimentSettings.env == ExperimentSettings.Environment.MedievalDungeon)
+        {
+            UnityEngine.Debug.Log("Debug MD - I am here");
+            UnityEngine.Debug.Log("Debug MD - Static leftRoom: " + envManager.leftRoomTransform.position.x + " " + envManager.leftRoomTransform.position.y + " " + envManager.leftRoomTransform.position.z);
+            leftRoom.transform.position = new Vector3(0f, 0f, 0f);
+            Vector3 scale_temp = leftRoom.transform.localScale;
+            leftRoom.transform.localScale = new Vector3(1f, 1f, 1f);
+            leftRoom.transform.position = envManager.leftRoomTransform.position + new Vector3(-40.38001f, -1.44f, -0.8f); //-1.48
+            leftRoom.transform.localScale = scale_temp;
+            UnityEngine.Debug.Log("Debug MD - Static names Left Room: " + leftRoom.name + ", Right Room: " + rightRoom.name);
+
+            rightRoom.transform.position = new Vector3(0f, 0f, 0f);
+            scale_temp = rightRoom.transform.localScale;
+            rightRoom.transform.localScale = new Vector3(1f, 1f, 1f);
+            rightRoom.transform.position = envManager.rightRoomTransform.position + new Vector3((37f + 3.31f), 1.5f, 0.8f); //-1.48
+            rightRoom.transform.localScale = scale_temp;
+            //rightRoom.transform.position = envManager.rightRoomTransform.position;
+        }
+        else
+        {
+            leftRoom.transform.position = envManager.leftRoomTransform.position;
+            rightRoom.transform.position = envManager.rightRoomTransform.position;
+        }
     }
 
     public List<int> ShuffleList(List<int> vals)
@@ -1300,22 +1330,262 @@ public class ShoplifterScript : MonoBehaviour
                 security_camera.gameObject.transform.localScale = new Vector3(8f, 8f, 8f);
                 if (isLeft)
                 {
-                    if (selected == 1)
-                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_L.transform.position + value_fixed * phase1End_L.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
-                    else if (selected == 2)
-                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
-                    else if (selected == 3)
-                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                    if (selectedx == -1)
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_L.transform.position + value_fixed * phase1End_L.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
 
+                    }
+                    else
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_L.transform.position + value_fixed * phase1End_L.transform.position)) + (selectedx * new Vector3(0.9f, selectedx * 1.9f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(0.9f, selectedx * 1.9f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(0.9f, selectedx * 1.9f, 0));
+                    }
                 }
                 else
                 {
-                    if (selected == 1)
-                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
-                    else if (selected == 2)
-                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
-                    else if (selected == 3)
-                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_R.transform.position + value_fixed * phase3End_R.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                    if (selectedx == -1)
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_R.transform.position + value_fixed * phase3End_R.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                    }
+                    else
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(0.9f, selectedx * 1.9f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(0.9f, selectedx * 1.9f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_R.transform.position + value_fixed * phase3End_R.transform.position)) + (selectedx * new Vector3(0.9f, selectedx * 1.9f, 0));
+                    }
+                }
+            }
+            else if (ExperimentSettings.env == ExperimentSettings.Environment.Cyberpunk)
+            {
+                security_camera.gameObject.transform.localScale = new Vector3(16f, 16f, 16f);
+                if (isLeft)
+                {
+                    if (selectedx == -1)
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_L.transform.position + value_fixed * phase1End_L.transform.position)) + (selectedx * new Vector3(4f, selectedx * 4f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(4f, selectedx * 4f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(2f, selectedx * 4f, 0));
+
+                    }
+                    else
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_L.transform.position + value_fixed * phase1End_L.transform.position)) + (selectedx * new Vector3(4f, selectedx * 4f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(4f, selectedx * 4f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(2f, selectedx * 4f, 0));
+                    }
+                }
+                else
+                {
+                    if (selectedx == -1)
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(4f, selectedx * 4f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 4f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_R.transform.position + value_fixed * phase3End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 4f, 0));
+                    }
+                    else
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(4f, selectedx * 4f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 4f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_R.transform.position + value_fixed * phase3End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 4f, 0));
+                    }
+                }
+            }
+            else if (ExperimentSettings.env == ExperimentSettings.Environment.Office)
+            {
+                security_camera.gameObject.transform.localScale = new Vector3(8f, 8f, 8f);
+                if (isLeft)
+                {
+                    if (selectedx == -1)
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_L.transform.position + value_fixed * phase1End_L.transform.position)) + (selectedx * new Vector3(0.5f, selectedx * 2.1f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 2.1f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 2.1f, 0));
+
+                    }
+                    else
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_L.transform.position + value_fixed * phase1End_L.transform.position)) + (selectedx * new Vector3(0.5f, selectedx * 2.1f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 2.1f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 2.1f, 0));
+                    }
+                }
+                else
+                {
+                    if (selectedx == -1)
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 1.9f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 2.1f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_R.transform.position + value_fixed * phase3End_R.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 1.9f, 0));
+                    }
+                    else
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 1.9f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 2.1f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_R.transform.position + value_fixed * phase3End_R.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 1.9f, 0));
+                    }
+                }
+            }
+            else if (ExperimentSettings.env == ExperimentSettings.Environment.MedievalDungeon)
+            {
+                security_camera.gameObject.transform.position = new Vector3(0f, 0f, 0f);
+                security_camera.gameObject.transform.localScale = new Vector3(16f, 16f, 16f);
+                if (isLeft)
+                {
+                    if (selectedx == -1)
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1.0f - 0.8f) * phase1Start_L.transform.position + 0.8f * phase1End_L.transform.position)) + (selectedx * new Vector3(2.5f, selectedx * 4.5f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1.0f - 0.8f) * phase2Start_L.transform.position + 0.8f * phase2End_L.transform.position)) + (selectedx * new Vector3(2.5f, selectedx * 3.5f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(2.5f, selectedx * 5f, 0));
+
+                    }
+                    else
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1.0f - 0.8f) * phase1Start_L.transform.position + 0.8f * phase1End_L.transform.position)) + (selectedx * new Vector3(2.5f, selectedx * 4.5f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1.0f - 0.8f) * phase2Start_L.transform.position + 0.8f * phase2End_L.transform.position)) + (selectedx * new Vector3(2.5f, selectedx * 3.5f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(2.5f, selectedx * 5f, 0));
+                    }
+                }
+                else
+                {
+                    if (selectedx == -1)
+                    {
+                        if (selected == 1)
+                        {
+                            security_camera.gameObject.transform.localScale = new Vector3(8f, 8f, 8f);
+                            security_camera.gameObject.transform.position = (((1.0f - 0.6f) * phase1Start_R.transform.position + 0.6f * phase1End_R.transform.position)) + (selectedx * new Vector3(2.5f, selectedx * 1.2f, 0f));
+                            UnityEngine.Debug.Log("[Debug L] phase1StartR-z: " + phase1Start_R.transform.position.z);
+                            UnityEngine.Debug.Log("[Debug L] phase1End_R-z: " + phase1End_R.transform.position.z);
+                            UnityEngine.Debug.Log("[Debug L] security_camera-z: " + security_camera.gameObject.transform.position.z);
+                        }
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(0.5f, selectedx * 6.5f, 0));
+                        else if (selected == 3)
+                        {
+                            security_camera.gameObject.transform.localScale = new Vector3(12f, 12f, 12f);
+                            security_camera.gameObject.transform.position = (((1.0f - 0.8f) * phase3Start_R.transform.position + 0.8f * phase3End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 2.9f, 0));
+                        }
+                    }
+                    else
+                    {
+                        if (selected == 1)
+                        {
+                            security_camera.gameObject.transform.localScale = new Vector3(8f, 8f, 8f);
+                            security_camera.gameObject.transform.position = (((1.0f - 0.6f) * phase1Start_R.transform.position + 0.6f * phase1End_R.transform.position)) + (selectedx * new Vector3(2.5f, selectedx * 1.2f, 0f));
+                            UnityEngine.Debug.Log("[Debug L] phase1StartR-z: " + phase1Start_R.transform.position.z);
+                            UnityEngine.Debug.Log("[Debug L] phase1End_R-z: " + phase1End_R.transform.position.z);
+                            UnityEngine.Debug.Log("[Debug L] security_camera-z: " + security_camera.gameObject.transform.position.z);
+                        }
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(0.5f, selectedx * 6.5f, 0));
+                        else if (selected == 3)
+                        {
+                            security_camera.gameObject.transform.localScale = new Vector3(12f, 12f, 12f);
+                            security_camera.gameObject.transform.position = (((1.0f - 0.8f) * phase3Start_R.transform.position + 0.8f * phase3End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 3.1f, 0));
+                        }
+                    }
+                }
+            }
+            else if (ExperimentSettings.env == ExperimentSettings.Environment.LibraryDungeon)
+            {
+                security_camera.gameObject.transform.position = new Vector3(0f, 0f, 0f);
+                security_camera.gameObject.transform.localScale = new Vector3(16f, 16f, 16f);
+                if (isLeft)
+                {
+                    if (selectedx == -1)
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1.0f - 0.7f) * phase1Start_L.transform.position + 0.7f * phase1End_L.transform.position)) + (selectedx * new Vector3(0.5f, selectedx * 6.5f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0));
+
+                    }
+                    else
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1.0f - 0.7f) * phase1Start_L.transform.position + 0.7f * phase1End_L.transform.position)) + (selectedx * new Vector3(0.5f, selectedx * 6.5f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0));
+                    }
+                }
+                else
+                {
+                    if (selectedx == -1)
+                    {
+                        if (selected == 1)
+                        {
+                            security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0f));
+                        }
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0));
+                        else if (selected == 3)
+                        {
+                            security_camera.gameObject.transform.position = (((1.0f - 0.7f) * phase3Start_R.transform.position + 0.7f * phase3End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0));
+                        }
+                    }
+                    else
+                    {
+                        if (selected == 1)
+                        {
+                            security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0f));
+                        }
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0));
+                        else if (selected == 3)
+                        {
+                            security_camera.gameObject.transform.position = (((1.0f - 0.7f) * phase3Start_R.transform.position + 0.7f * phase3End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0));
+                        }
+                    }
                 }
             }
 
@@ -1675,7 +1945,9 @@ public class ShoplifterScript : MonoBehaviour
                                                 security_camera.transform.position.z);
                 globalCamSelectDisable = true;
             }
-            yield return StartCoroutine(VelocityPlayerTo(camVehicle.transform.position, endPos, phase1Factor));
+            //yield return StartCoroutine(VelocityPlayerTo(camVehicle.transform.position, endPos, phase1Factor));
+            camVehicle.transform.position = startPos;
+            yield return StartCoroutine(VelocityPlayerTo(startPos, endPos, phase1Factor));
             if (selected == 2)
             {
                 if (globalCamSelectDisable == true)
@@ -2236,7 +2508,14 @@ public class ShoplifterScript : MonoBehaviour
         }
         else if (ExperimentSettings.env == ExperimentSettings.Environment.Office)
         {
-            suitcaseObj.transform.eulerAngles = new Vector3(0f, 90f, 0f);
+            suitcaseObj.transform.eulerAngles = new Vector3(0f, 180f, 0f);
+
+
+
+        }
+        else if (ExperimentSettings.env == ExperimentSettings.Environment.Cyberpunk)
+        {
+            suitcaseObj.transform.eulerAngles = new Vector3(0f, 180f, 0f);
 
 
 
@@ -2275,10 +2554,15 @@ public class ShoplifterScript : MonoBehaviour
             }
 
         }
-
         else if (ExperimentSettings.env == ExperimentSettings.Environment.VikingVillage)
         {
             suitcaseObj.transform.position = suitcaseObj.transform.position + new Vector3(0f, -1f, 4f);
+        }
+        else if ((ExperimentSettings.env == ExperimentSettings.Environment.MedievalDungeon) ||
+                (ExperimentSettings.env == ExperimentSettings.Environment.LibraryDungeon))
+        {
+            suitcaseObj.transform.eulerAngles = new Vector3(0f, 180f, 0f);
+            //Need to do something
         }
     }
 
@@ -2450,22 +2734,262 @@ public class ShoplifterScript : MonoBehaviour
                 security_camera.gameObject.transform.localScale = new Vector3(8f, 8f, 8f);
                 if (isLeft)
                 {
-                    if (selected == 1)
-                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_L.transform.position + value_fixed * phase1End_L.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
-                    else if (selected == 2)
-                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
-                    else if (selected == 3)
-                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                    if (selectedx == -1)
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_L.transform.position + value_fixed * phase1End_L.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                    }
+                    else
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_L.transform.position + value_fixed * phase1End_L.transform.position)) + (selectedx * new Vector3(0.9f, selectedx * 1.9f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(0.9f, selectedx * 1.9f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(0.9f, selectedx * 1.9f, 0));
 
+                    }
                 }
                 else
                 {
-                    if (selected == 1)
-                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
-                    else if (selected == 2)
-                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
-                    else if (selected == 3)
-                        security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_R.transform.position + value_fixed * phase3End_R.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                    if (selectedx == -1)
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_R.transform.position + value_fixed * phase3End_R.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                    }
+                    else
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(0.9f, selectedx * 1.9f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(0.9f, selectedx * 1.9f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_R.transform.position + value_fixed * phase3End_R.transform.position)) + (selectedx * new Vector3(0.9f, selectedx * 1.9f, 0));
+                    }
+                }
+            }
+            else if (ExperimentSettings.env == ExperimentSettings.Environment.Cyberpunk)
+            {
+                security_camera.gameObject.transform.localScale = new Vector3(16f, 16f, 16f);
+                if (isLeft)
+                {
+                    if (selectedx == -1)
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_L.transform.position + value_fixed * phase1End_L.transform.position)) + (selectedx * new Vector3(4f, selectedx * 4f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(4f, selectedx * 4f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(2f, selectedx * 4f, 0));
+
+                    }
+                    else
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_L.transform.position + value_fixed * phase1End_L.transform.position)) + (selectedx * new Vector3(4f, selectedx * 4f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(4f, selectedx * 4f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(2f, selectedx * 4f, 0));
+                    }
+                }
+                else
+                {
+                    if (selectedx == -1)
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(4f, selectedx * 4f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 4f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_R.transform.position + value_fixed * phase3End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 4f, 0));
+                    }
+                    else
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(4f, selectedx * 4f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 4f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_R.transform.position + value_fixed * phase3End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 4f, 0));
+                    }
+                }
+            }
+            else if (ExperimentSettings.env == ExperimentSettings.Environment.Office)
+            {
+                security_camera.gameObject.transform.localScale = new Vector3(8f, 8f, 8f);
+                if (isLeft)
+                {
+                    if (selectedx == -1)
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_L.transform.position + value_fixed * phase1End_L.transform.position)) + (selectedx * new Vector3(0.5f, selectedx * 2.1f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 2.1f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 2.1f, 0));
+
+                    }
+                    else
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_L.transform.position + value_fixed * phase1End_L.transform.position)) + (selectedx * new Vector3(0.5f, selectedx * 2.1f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 2.1f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 2.1f, 0));
+                    }
+                }
+                else
+                {
+                    if (selectedx == -1)
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 1.9f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 2.1f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_R.transform.position + value_fixed * phase3End_R.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 1.9f, 0));
+                    }
+                    else
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 1.9f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 2.1f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_R.transform.position + value_fixed * phase3End_R.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 1.9f, 0));
+                    }
+                }
+            }
+            else if (ExperimentSettings.env == ExperimentSettings.Environment.MedievalDungeon)
+            {
+                security_camera.gameObject.transform.position = new Vector3(0f, 0f, 0f);
+                security_camera.gameObject.transform.localScale = new Vector3(16f, 16f, 16f);
+                if (isLeft)
+                {
+                    if (selectedx == -1)
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1.0f - 0.8f) * phase1Start_L.transform.position + 0.8f * phase1End_L.transform.position)) + (selectedx * new Vector3(2.5f, selectedx * 4.5f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1.0f - 0.8f) * phase2Start_L.transform.position + 0.8f * phase2End_L.transform.position)) + (selectedx * new Vector3(2.5f, selectedx * 3.5f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(2.5f, selectedx * 5f, 0));
+
+                    }
+                    else
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1.0f - 0.8f) * phase1Start_L.transform.position + 0.8f * phase1End_L.transform.position)) + (selectedx * new Vector3(2.5f, selectedx * 4.5f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1.0f - 0.8f) * phase2Start_L.transform.position + 0.8f * phase2End_L.transform.position)) + (selectedx * new Vector3(2.5f, selectedx * 3.5f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(2.5f, selectedx * 5f, 0));
+                    }
+                }
+                else
+                {
+                    if (selectedx == -1)
+                    {
+                        if (selected == 1)
+                        {
+                            security_camera.gameObject.transform.localScale = new Vector3(8f, 8f, 8f);
+                            security_camera.gameObject.transform.position = (((1.0f - 0.6f) * phase1Start_R.transform.position + 0.6f * phase1End_R.transform.position)) + (selectedx * new Vector3(2.5f, selectedx * 1.2f, 0f));
+                            UnityEngine.Debug.Log("[Debug L] phase1StartR-z: " + phase1Start_R.transform.position.z);
+                            UnityEngine.Debug.Log("[Debug L] phase1End_R-z: " + phase1End_R.transform.position.z);
+                            UnityEngine.Debug.Log("[Debug L] security_camera-z: " + security_camera.gameObject.transform.position.z);
+                        }
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(0.5f, selectedx * 6.5f, 0));
+                        else if (selected == 3)
+                        {
+                            security_camera.gameObject.transform.localScale = new Vector3(12f, 12f, 12f);
+                            security_camera.gameObject.transform.position = (((1.0f - 0.8f) * phase3Start_R.transform.position + 0.8f * phase3End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 2.9f, 0));
+                        }
+                    }
+                    else
+                    {
+                        if (selected == 1)
+                        {
+                            security_camera.gameObject.transform.localScale = new Vector3(8f, 8f, 8f);
+                            security_camera.gameObject.transform.position = (((1.0f - 0.6f) * phase1Start_R.transform.position + 0.6f * phase1End_R.transform.position)) + (selectedx * new Vector3(2.5f, selectedx * 1.2f, 0f));
+                            UnityEngine.Debug.Log("[Debug L] phase1StartR-z: " + phase1Start_R.transform.position.z);
+                            UnityEngine.Debug.Log("[Debug L] phase1End_R-z: " + phase1End_R.transform.position.z);
+                            UnityEngine.Debug.Log("[Debug L] security_camera-z: " + security_camera.gameObject.transform.position.z);
+                        }
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(0.5f, selectedx * 6.5f, 0));
+                        else if (selected == 3)
+                        {
+                            security_camera.gameObject.transform.localScale = new Vector3(12f, 12f, 12f);
+                            security_camera.gameObject.transform.position = (((1.0f - 0.8f) * phase3Start_R.transform.position + 0.8f * phase3End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 3.1f, 0));
+                        }
+                    }
+                }
+            }
+            else if (ExperimentSettings.env == ExperimentSettings.Environment.LibraryDungeon)
+            {
+                security_camera.gameObject.transform.position = new Vector3(0f, 0f, 0f);
+                security_camera.gameObject.transform.localScale = new Vector3(16f, 16f, 16f);
+                if (isLeft)
+                {
+                    if (selectedx == -1)
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1.0f - 0.7f) * phase1Start_L.transform.position + 0.7f * phase1End_L.transform.position)) + (selectedx * new Vector3(0.5f, selectedx * 6.5f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0));
+
+                    }
+                    else
+                    {
+                        if (selected == 1)
+                            security_camera.gameObject.transform.position = (((1.0f - 0.7f) * phase1Start_L.transform.position + 0.7f * phase1End_L.transform.position)) + (selectedx * new Vector3(0.5f, selectedx * 6.5f, 0));
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0));
+                        else if (selected == 3)
+                            security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0));
+                    }
+                }
+                else
+                {
+                    if (selectedx == -1)
+                    {
+                        if (selected == 1)
+                        {
+                            security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0f));
+                        }
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0));
+                        else if (selected == 3)
+                        {
+                            security_camera.gameObject.transform.position = (((1.0f - 0.7f) * phase3Start_R.transform.position + 0.7f * phase3End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0));
+                        }
+                    }
+                    else
+                    {
+                        if (selected == 1)
+                        {
+                            security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0f));
+                        }
+                        else if (selected == 2)
+                            security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0));
+                        else if (selected == 3)
+                        {
+                            security_camera.gameObject.transform.position = (((1.0f - 0.7f) * phase3Start_R.transform.position + 0.7f * phase3End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0));
+                        }
+                    }
                 }
             }
 
@@ -2990,7 +3514,7 @@ public class ShoplifterScript : MonoBehaviour
                 reevaluation_stage = (temp_Real_trail + 1) % 2;
                 counter_Val.alpha = 1f;
 
-                List<int> l = new List<int>() { 1, 2, 3 };
+                List<int> l = new List<int>() { 2, 3 };
                 System.Random rnd = new System.Random();
                 int index = rnd.Next(l.Count);
                 int selected = l[index];
@@ -3045,30 +3569,271 @@ public class ShoplifterScript : MonoBehaviour
                     security_camera.gameObject.transform.localScale = new Vector3(8f, 8f, 8f);
                     if (leftChoice)
                     {
-                        if (selected == 1)
-                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_L.transform.position + value_fixed * phase1End_L.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
-                        else if (selected == 2)
-                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
-                        else if (selected == 3)
-                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                        if (selectedx == -1)
+                        {
+                            if (selected == 1)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_L.transform.position + value_fixed * phase1End_L.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                            else if (selected == 2)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                            else if (selected == 3)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                        }
+                        else
+                        {
+                            if (selected == 1)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_L.transform.position + value_fixed * phase1End_L.transform.position)) + (selectedx * new Vector3(0.9f, selectedx * 1.9f, 0));
+                            else if (selected == 2)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(0.9f, selectedx * 1.9f, 0));
+                            else if (selected == 3)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(0.9f, selectedx * 1.9f, 0));
 
+                        }
                     }
                     else
                     {
-                        if (selected == 1)
-                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
-                        else if (selected == 2)
-                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
-                        else if (selected == 3)
-                            security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_R.transform.position + value_fixed * phase3End_R.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                        if (selectedx == -1)
+                        {
+                            if (selected == 1)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                            else if (selected == 2)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                            else if (selected == 3)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_R.transform.position + value_fixed * phase3End_R.transform.position)) + (selectedx * new Vector3(1.2f, selectedx * 1.9f, 0));
+                        }
+                        else
+                        {
+                            if (selected == 1)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(0.9f, selectedx * 1.9f, 0));
+                            else if (selected == 2)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(0.9f, selectedx * 1.9f, 0));
+                            else if (selected == 3)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_R.transform.position + value_fixed * phase3End_R.transform.position)) + (selectedx * new Vector3(0.9f, selectedx * 1.9f, 0));
+
+                        }
+                    }
+                }
+                else if (ExperimentSettings.env == ExperimentSettings.Environment.Cyberpunk)
+                {
+                    security_camera.gameObject.transform.localScale = new Vector3(16f, 16f, 16f);
+                    if (leftChoice)
+                    {
+                        if (selectedx == -1)
+                        {
+                            if (selected == 1)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_L.transform.position + value_fixed * phase1End_L.transform.position)) + (selectedx * new Vector3(4f, selectedx * 4f, 0));
+                            else if (selected == 2)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(4f, selectedx * 4f, 0));
+                            else if (selected == 3)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(2f, selectedx * 4f, 0));
+
+                        }
+                        else
+                        {
+                            if (selected == 1)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_L.transform.position + value_fixed * phase1End_L.transform.position)) + (selectedx * new Vector3(4f, selectedx * 4f, 0));
+                            else if (selected == 2)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(4f, selectedx * 4f, 0));
+                            else if (selected == 3)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(2f, selectedx * 4f, 0));
+                        }
+                    }
+                    else
+                    {
+                        if (selectedx == -1)
+                        {
+                            if (selected == 1)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(4f, selectedx * 4f, 0));
+                            else if (selected == 2)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 4f, 0));
+                            else if (selected == 3)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_R.transform.position + value_fixed * phase3End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 4f, 0));
+                        }
+                        else
+                        {
+                            if (selected == 1)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(4f, selectedx * 4f, 0));
+                            else if (selected == 2)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 4f, 0));
+                            else if (selected == 3)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_R.transform.position + value_fixed * phase3End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 4f, 0));
+                        }
+                    }
+                }
+                else if (ExperimentSettings.env == ExperimentSettings.Environment.Office)
+                {
+                    security_camera.gameObject.transform.localScale = new Vector3(8f, 8f, 8f);
+                    if (leftChoice)
+                    {
+                        if (selectedx == -1)
+                        {
+                            if (selected == 1)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_L.transform.position + value_fixed * phase1End_L.transform.position)) + (selectedx * new Vector3(0.5f, selectedx * 2.1f, 0));
+                            else if (selected == 2)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 2.1f, 0));
+                            else if (selected == 3)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 2.1f, 0));
+
+                        }
+                        else
+                        {
+                            if (selected == 1)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_L.transform.position + value_fixed * phase1End_L.transform.position)) + (selectedx * new Vector3(0.5f, selectedx * 2.1f, 0));
+                            else if (selected == 2)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 2.1f, 0));
+                            else if (selected == 3)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 2.1f, 0));
+                        }
+                    }
+                    else
+                    {
+                        if (selectedx == -1)
+                        {
+                            if (selected == 1)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 1.9f, 0));
+                            else if (selected == 2)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 2.1f, 0));
+                            else if (selected == 3)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_R.transform.position + value_fixed * phase3End_R.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 1.9f, 0));
+                        }
+                        else
+                        {
+                            if (selected == 1)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 1.9f, 0));
+                            else if (selected == 2)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 2.1f, 0));
+                            else if (selected == 3)
+                                security_camera.gameObject.transform.position = (((1 - value_fixed) * phase3Start_R.transform.position + value_fixed * phase3End_R.transform.position)) + (selectedx * new Vector3(1.5f, selectedx * 1.9f, 0));
+                        }
+                    }
+                }
+                else if (ExperimentSettings.env == ExperimentSettings.Environment.MedievalDungeon)
+                {
+                    security_camera.gameObject.transform.position = new Vector3(0f, 0f, 0f);
+                    security_camera.gameObject.transform.localScale = new Vector3(16f, 16f, 16f);
+                    if (leftChoice)
+                    {
+                        if (selectedx == -1)
+                        {
+                            if (selected == 1)
+                                security_camera.gameObject.transform.position = (((1.0f - 0.8f) * phase1Start_L.transform.position + 0.8f * phase1End_L.transform.position)) + (selectedx * new Vector3(2.5f, selectedx * 4.5f, 0));
+                            else if (selected == 2)
+                                security_camera.gameObject.transform.position = (((1.0f - 0.8f) * phase2Start_L.transform.position + 0.8f * phase2End_L.transform.position)) + (selectedx * new Vector3(2.5f, selectedx * 3.5f, 0));
+                            else if (selected == 3)
+                                security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(2.5f, selectedx * 5f, 0));
+
+                        }
+                        else
+                        {
+                            if (selected == 1)
+                                security_camera.gameObject.transform.position = (((1.0f - 0.8f) * phase1Start_L.transform.position + 0.8f * phase1End_L.transform.position)) + (selectedx * new Vector3(2.5f, selectedx * 4.5f, 0));
+                            else if (selected == 2)
+                                security_camera.gameObject.transform.position = (((1.0f - 0.8f) * phase2Start_L.transform.position + 0.8f * phase2End_L.transform.position)) + (selectedx * new Vector3(2.5f, selectedx * 3.5f, 0));
+                            else if (selected == 3)
+                                security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(2.5f, selectedx * 5f, 0));
+                        }
+                    }
+                    else
+                    {
+                        if (selectedx == -1)
+                        {
+                            if (selected == 1)
+                            {
+                                security_camera.gameObject.transform.localScale = new Vector3(8f, 8f, 8f);
+                                security_camera.gameObject.transform.position = (((1.0f - 0.6f) * phase1Start_R.transform.position + 0.6f * phase1End_R.transform.position)) + (selectedx * new Vector3(2.5f, selectedx * 1.2f, 0f));
+                                UnityEngine.Debug.Log("[Debug L] phase1StartR-z: " + phase1Start_R.transform.position.z);
+                                UnityEngine.Debug.Log("[Debug L] phase1End_R-z: " + phase1End_R.transform.position.z);
+                                UnityEngine.Debug.Log("[Debug L] security_camera-z: " + security_camera.gameObject.transform.position.z);
+                            }
+                            else if (selected == 2)
+                                security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(0.5f, selectedx * 6.5f, 0));
+                            else if (selected == 3)
+                            {
+                                security_camera.gameObject.transform.localScale = new Vector3(12f, 12f, 12f);
+                                security_camera.gameObject.transform.position = (((1.0f - 0.8f) * phase3Start_R.transform.position + 0.8f * phase3End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 2.9f, 0));
+                            }
+                        }
+                        else
+                        {
+                            if (selected == 1)
+                            {
+                                security_camera.gameObject.transform.localScale = new Vector3(8f, 8f, 8f);
+                                security_camera.gameObject.transform.position = (((1.0f - 0.6f) * phase1Start_R.transform.position + 0.6f * phase1End_R.transform.position)) + (selectedx * new Vector3(2.5f, selectedx * 1.2f, 0f));
+                                UnityEngine.Debug.Log("[Debug L] phase1StartR-z: " + phase1Start_R.transform.position.z);
+                                UnityEngine.Debug.Log("[Debug L] phase1End_R-z: " + phase1End_R.transform.position.z);
+                                UnityEngine.Debug.Log("[Debug L] security_camera-z: " + security_camera.gameObject.transform.position.z);
+                            }
+                            else if (selected == 2)
+                                security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(0.5f, selectedx * 6.5f, 0));
+                            else if (selected == 3)
+                            {
+                                security_camera.gameObject.transform.localScale = new Vector3(12f, 12f, 12f);
+                                security_camera.gameObject.transform.position = (((1.0f - 0.8f) * phase3Start_R.transform.position + 0.8f * phase3End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 3.1f, 0));
+                            }
+                        }
+                    }
+                }
+                else if (ExperimentSettings.env == ExperimentSettings.Environment.LibraryDungeon)
+                {
+                    security_camera.gameObject.transform.position = new Vector3(0f, 0f, 0f);
+                    security_camera.gameObject.transform.localScale = new Vector3(16f, 16f, 16f);
+                    if (leftChoice)
+                    {
+                        if (selectedx == -1)
+                        {
+                            if (selected == 1)
+                                security_camera.gameObject.transform.position = (((1.0f - 0.7f) * phase1Start_L.transform.position + 0.7f * phase1End_L.transform.position)) + (selectedx * new Vector3(0.5f, selectedx * 6.5f, 0));
+                            else if (selected == 2)
+                                security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0));
+                            else if (selected == 3)
+                                security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0));
+
+                        }
+                        else
+                        {
+                            if (selected == 1)
+                                security_camera.gameObject.transform.position = (((1.0f - 0.7f) * phase1Start_L.transform.position + 0.7f * phase1End_L.transform.position)) + (selectedx * new Vector3(0.5f, selectedx * 6.5f, 0));
+                            else if (selected == 2)
+                                security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase2Start_L.transform.position + value_fixed * phase2End_L.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0));
+                            else if (selected == 3)
+                                security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase3Start_L.transform.position + value_fixed * phase3End_L.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0));
+                        }
+                    }
+                    else
+                    {
+                        if (selectedx == -1)
+                        {
+                            if (selected == 1)
+                            {
+                                security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0f));
+                            }
+                            else if (selected == 2)
+                                security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0));
+                            else if (selected == 3)
+                            {
+                                security_camera.gameObject.transform.position = (((1.0f - 0.7f) * phase3Start_R.transform.position + 0.7f * phase3End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0));
+                            }
+                        }
+                        else
+                        {
+                            if (selected == 1)
+                            {
+                                security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase1Start_R.transform.position + value_fixed * phase1End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0f));
+                            }
+                            else if (selected == 2)
+                                security_camera.gameObject.transform.position = (((1.0f - value_fixed) * phase2Start_R.transform.position + value_fixed * phase2End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0));
+                            else if (selected == 3)
+                            {
+                                security_camera.gameObject.transform.position = (((1.0f - 0.7f) * phase3Start_R.transform.position + 0.7f * phase3End_R.transform.position)) + (selectedx * new Vector3(3f, selectedx * 6.5f, 0));
+                            }
+                        }
                     }
                 }
 
                 security_camera.gameObject.transform.localEulerAngles = new Vector3(0, -selectedx * 45, 0);
 
-                Debug.Log("about to run phase 1");
-                yield return StartCoroutine(RunPhaseOne((leftChoice) ? 0 : 1, false, selected));
-                Experiment.Instance.shopLiftLog.LogDoorPosition(((leftChoice) ? phase1Door_L : phase1Door_R).transform.position.x, ((leftChoice) ? phase1Door_L : phase1Door_R).transform.position.y, ((leftChoice) ? phase1Door_L : phase1Door_R).transform.position.z);
+                //Debug.Log("about to run phase 1");
+                //yield return StartCoroutine(RunPhaseOne((leftChoice) ? 0 : 1, false, selected));
+                //Experiment.Instance.shopLiftLog.LogDoorPosition(((leftChoice) ? phase1Door_L : phase1Door_R).transform.position.x, ((leftChoice) ? phase1Door_L : phase1Door_R).transform.position.y, ((leftChoice) ? phase1Door_L : phase1Door_R).transform.position.z);
 
                 Debug.Log("about to run phase 2");
                 yield return StartCoroutine(RunPhaseTwo((leftChoice) ? 0 : 1, true, true, selected));
@@ -3111,7 +3876,7 @@ public class ShoplifterScript : MonoBehaviour
 
             if (reevalConditionIndex != 1)
             {
-                switch (questionpattern[Real_trail])
+                switch (questionpattern_reeval[Real_trail])
                 {
                     case 0:
                         //Q0
@@ -3244,7 +4009,7 @@ public class ShoplifterScript : MonoBehaviour
             }
             else
             {
-                switch (questionpattern[Real_trail])
+                switch (questionpattern_reeval[Real_trail])
                 {
                     case 0:
                         //Q0
@@ -3754,6 +4519,7 @@ public class ShoplifterScript : MonoBehaviour
         dotGroup.alpha = 0f;
         yield return null;
     }
+
     IEnumerator RunTestingPhase()
     {
 
@@ -4864,6 +5630,30 @@ public class ShoplifterScript : MonoBehaviour
             apartment_set = true;
 
             envManager.phase2Door_L.transform.localEulerAngles = new Vector3(0, 0, 0);
+
+        }
+        else if (environments[envIndex].name == "Cyberpunk")
+        { //office
+            //cam.clearFlags = CameraClearFlags.Skybox;
+            Debug.Log("chosen Cyberpunk");
+            ExperimentSettings.env = ExperimentSettings.Environment.Cyberpunk;
+            //
+
+        }
+        else if (environments[envIndex].name == "MedievalDungeon")
+        { //office
+            //cam.clearFlags = CameraClearFlags.Skybox;
+            Debug.Log("chosen MedievalDungeon");
+            ExperimentSettings.env = ExperimentSettings.Environment.MedievalDungeon;
+            //
+
+        }
+        else if (environments[envIndex].name == "LibraryDungeon")
+        { //office
+            //cam.clearFlags = CameraClearFlags.Skybox;
+            Debug.Log("chosen LibraryDungeon");
+            ExperimentSettings.env = ExperimentSettings.Environment.LibraryDungeon;
+            //
 
         }
         else
@@ -6299,9 +7089,21 @@ public class ShoplifterScript : MonoBehaviour
             {
                 line_no++;
                 string[] values = line.Split('\t');
-
-                for (int i = 0; i < 10; i++) {
-                    questionpattern[i] = Int32.Parse(values[i]);
+                switch (line_no)
+                {
+                    case 1:
+                        for (int i = 0; i < 10; i++) {
+                            questionpattern[i] = Int32.Parse(values[i]);
+                        }
+                        break;
+                    case 2:
+                        for (int i = 0; i < 10; i++)
+                        {
+                            questionpattern_reeval[i] = Int32.Parse(values[i]);
+                        }
+                        break;
+                    default:
+                        break;
                 }
 
             }

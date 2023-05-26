@@ -227,6 +227,8 @@ public class MultipleChoiceGroup : MonoBehaviour {
         }
         else if (questionType == 1) {
             PrefText.text = "Which room will lead you to more cash?";
+
+            /* "displayOptions" determines the INITIAL/INTERMEDIATE */
             if (displayOptions == 0)
             {
                 Experiment.Instance.shopLiftLog.LogExpQuesType(1, 1, 1, 0);
@@ -270,7 +272,9 @@ public class MultipleChoiceGroup : MonoBehaviour {
                     Experiment.Instance.shopLiftLog.LogExpQuesCorrectness(1, 1, 1, 0, 1);
                 displayOptions = 1;
             }
-            else {
+            /* "displayOptions" determines the INITIAL/INTERMEDIATE */
+            else
+            {
                 Experiment.Instance.shopLiftLog.LogExpQuesType(1, 2, 2, 0);
                 if (swap == 0)
                 {

@@ -34,7 +34,10 @@ public class ExperimentSettings : MonoBehaviour {
 		VikingVillage,
 		Office,
 		Apartment,
-	}
+        MedievalDungeon,
+        LibraryDungeon,
+        Cyberpunk,
+    }
 	public static Environment env;
 	public static int envDropdownIndex=0;
 
@@ -97,7 +100,8 @@ public class ExperimentSettings : MonoBehaviour {
     public enum EnvironmentType
     {
         WA,
-        SO
+        SO,
+        D3
     }
 
     public EnvironmentType currentEnvironmentType;
@@ -575,7 +579,7 @@ public class ExperimentSettings : MonoBehaviour {
                     ExperimentDropdown.captionText.text = "Exp 1 (RE)";
                 break;
             case 2:
-                currentEnvironmentType = EnvironmentType.SO;
+                currentEnvironmentType = EnvironmentType.D3;
                 ExperimentDropdown.options[0].text = "Exp 1 (TE)";
                 ExperimentDropdown.options[1].text = "Exp 2 (TC)";
 

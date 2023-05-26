@@ -57,6 +57,7 @@ public class SyncboxControl : MonoBehaviour {
 			StartCoroutine(ConnectSyncbox());
 		}
 	}
+
 	IEnumerator ConnectSyncbox(){
 
 		string connectionError = "";
